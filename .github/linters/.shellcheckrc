@@ -1,0 +1,2 @@
+# Don't suggest [ -n "$VAR" ] over [ ! -z "$VAR" ] 
+disable=SC2129
