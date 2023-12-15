@@ -46,7 +46,73 @@ Below are the allowed configuration options:
 
 ### Example workflows
 
-TBD
+#### Basic
+
+```yaml
+---
+name: Weekly dependabot checks
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '3 2 1 * *'
+
+permissions:
+  issues: write
+
+jobs:
+  evergreen:
+    name: evergreen
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run evergreen action
+        uses: github/evergreen@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORGANIZATION: <YOUR_ORGANIZATION_GOES_HERE>
+```
+
+#### Advanced
+
+```yaml
+---
+name: Weekly dependabot checks
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '3 2 1 * *'
+
+permissions:
+  issues: write
+
+jobs:
+  evergreen:
+    name: evergreen
+    runs-on: ubuntu-latest
+
+    steps:
+      - shell: bash
+      run: |
+        # Get the current date
+        current_date=$(date +'%Y-%m-%d')
+
+        # Calculate the previous month
+        previous_date=$(date -d "$current_date -7 day" +'%Y-%m-%d')
+
+        echo "$previous_date..$current_date"
+        echo "one_week_ago=$previous_date >> "$GITHUB_ENV"
+
+      - name: Run evergreen action
+        uses: github/evergreen@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORGANIZATION: <YOUR_ORGANIZATION_GOES_HERE>
+          EXEMPT_REPOS: "org_name/repo_name_1, org_name/repo_name_2"
+          TITLE: "Add dependabot configuration"
+          BODY: "Please add this dependabot configuration so that we can keep the dependencies in this repo up to date and secure. for help, contact XXX"
+          CREATED_AFTER_DATE: ${{ env.one_week_ago }}
+          
+```
 
 ## Local usage without Docker
 
