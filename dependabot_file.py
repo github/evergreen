@@ -4,6 +4,7 @@ from typing import List
 
 import github3
 
+
 def build_dependabot_file(repo) -> List[str | None]:
     """
     Build the dependabot.yml file for a repo based on the repo contents
