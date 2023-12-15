@@ -32,6 +32,7 @@ def main():
     repos = get_repos_iterator(organization, repository_list, github_connection)
 
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
+    count_eligible = 0
     for repo in repos:
         # Check all the things to see if repo is eligble for a pr/issue
         if repo.full_name in exempt_repositories_list:
@@ -62,19 +63,23 @@ def main():
         if dry_run:
             if follow_up_type == "issue":
                 print("\tEligible for configuring dependabot.")
+                count_eligible += 1
                 print("\tConfiguration:\n" + dependabot_file)
             if follow_up_type == "pull":
                 # Try to detect if the repo already has an open pull request for dependabot
                 skip = check_pending_pulls_for_duplicates(repo)
                 if not skip:
                     print("\tEligible for configuring dependabot.")
+                    count_eligible += 1
                     print("\tConfiguration:\n" + dependabot_file)
             continue
 
         if follow_up_type == "issue":
+            count_eligible += 1
             issue = repo.create_issue(title, body)
             print("\tCreated issue " + issue.html_url)
         else:
+            count_eligible += 1
             # Try to detect if the repo already has an open pull request for dependabot
             skip = check_pending_pulls_for_duplicates(repo)
 
@@ -82,7 +87,7 @@ def main():
             if not skip:
                 pull = commit_changes(title, body, repo, dependabot_file)
                 print("\tCreated pull request " + pull.html_url)
-    print("Done")
+    print("Done. " + str(count_eligible) + " repositories were eligible.")
 
 
 def get_repos_iterator(organization, repository_list, github_connection):
