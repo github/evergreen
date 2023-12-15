@@ -33,6 +33,7 @@ class TestEnv(unittest.TestCase):
             "Dependabot Alert custom title",
             "Dependabot custom body",
             "2023-01-01",
+            False,
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -47,6 +48,7 @@ class TestEnv(unittest.TestCase):
             "TITLE": "Dependabot Alert custom title",
             "BODY": "Dependabot custom body",
             "CREATED_AFTER_DATE": "2023-01-01",
+            "DRY_RUN": "true",
         },
         clear=True,
     )
@@ -62,6 +64,7 @@ class TestEnv(unittest.TestCase):
             "Dependabot Alert custom title",
             "Dependabot custom body",
             "2023-01-01",
+            True,
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -87,6 +90,7 @@ class TestEnv(unittest.TestCase):
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
             None,
+            False,
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)

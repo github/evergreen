@@ -22,6 +22,7 @@ def main():
         title,
         body,
         created_after_date,
+        dry_run,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -31,6 +32,7 @@ def main():
     repos = get_repos_iterator(organization, repository_list, github_connection)
 
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
+    count_eligible = 0
     for repo in repos:
         # Check all the things to see if repo is eligble for a pr/issue
         if repo.full_name in exempt_repositories_list:
@@ -50,24 +52,42 @@ def main():
         if created_after_date and repo.created_at < created_after_date:
             continue
 
+        print("Checking " + repo.full_name)
         # Try to detect package managers and build a dependabot file
         dependabot_file = build_dependabot_file(repo)
         if dependabot_file is None:
             print("\tNo compatible package manager found")
             continue
 
-        print("Opening a " + follow_up_type + " for " + repo.full_name)
+        # If dry_run is set, just print the dependabot file
+        if dry_run:
+            if follow_up_type == "issue":
+                print("\tEligible for configuring dependabot.")
+                count_eligible += 1
+                print("\tConfiguration:\n" + dependabot_file)
+            if follow_up_type == "pull":
+                # Try to detect if the repo already has an open pull request for dependabot
+                skip = check_pending_pulls_for_duplicates(repo)
+                if not skip:
+                    print("\tEligible for configuring dependabot.")
+                    count_eligible += 1
+                    print("\tConfiguration:\n" + dependabot_file)
+            continue
+
         if follow_up_type == "issue":
+            count_eligible += 1
             issue = repo.create_issue(title, body)
             print("\tCreated issue " + issue.html_url)
         else:
+            count_eligible += 1
             # Try to detect if the repo already has an open pull request for dependabot
             skip = check_pending_pulls_for_duplicates(repo)
 
             # Create a dependabot.yaml file, a branch, and a PR
             if not skip:
-                commit_changes(title, body, repo, dependabot_file)
-    print("Done")
+                pull = commit_changes(title, body, repo, dependabot_file)
+                print("\tCreated pull request " + pull.html_url)
+    print("Done. " + str(count_eligible) + " repositories were eligible.")
 
 
 def get_repos_iterator(organization, repository_list, github_connection):
@@ -85,20 +105,20 @@ def get_repos_iterator(organization, repository_list, github_connection):
     return repos
 
 
-def check_pending_pulls_for_duplicates(repo):
-    """Check if there are any open pull requests for dependabot"""
+def check_pending_pulls_for_duplicates(repo) -> bool:
+    """Check if there are any open pull requests for dependabot and return the bool skip"""
     pull_requests = repo.pull_requests(state="open")
     skip = False
     for pull_request in pull_requests:
         if pull_request.head.ref.startswith("dependabot-"):
-            print("\tPull request already exists")
+            print("\tPull request already exists: " + pull_request.html_url)
             skip = True
             break
     return skip
 
 
 def commit_changes(title, body, repo, dependabot_file):
-    """Commit the changes to the repo and open a pull request"""
+    """Commit the changes to the repo and open a pull reques and return the pull request object"""
     default_branch = repo.default_branch
     # Get latest commit sha from default branch
     default_branch_commit = repo.ref("heads/" + default_branch).object.sha
@@ -115,7 +135,7 @@ def commit_changes(title, body, repo, dependabot_file):
     pull = repo.create_pull(
         title=title, body=body, head=branch_name, base=repo.default_branch
     )
-    print("\tCreated pull request " + pull.html_url)
+    return pull
 
 
 if __name__ == "__main__":

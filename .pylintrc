@@ -12,3 +12,4 @@ disable=
 	duplicate-code,
 	too-many-branches,
 	too-many-statements,
+	too-many-locals,

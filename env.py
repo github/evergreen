@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 
 def get_env_vars() -> (
-    tuple[str | None, list[str], str, str, list[str], str, str, str, str | None]
+    tuple[str | None, list[str], str, str, list[str], str, str, str, str | None, bool]
 ):
     """
     Get the environment variables for use in the action.
@@ -27,6 +27,7 @@ def get_env_vars() -> (
         title (str): The title of the follow up
         body (str): The body of the follow up
         created_after_date (str): The date to filter repositories by
+        dry_run (bool): Whether or not to actually open issues/pull requests
 
     """
     # Load from .env file if it exists
@@ -98,6 +99,15 @@ so that we can keep our dependencies up to date and secure."
     if created_after_date and len(created_after_date) != 10:
         raise ValueError("CREATED_AFTER_DATE environment variable not in YYYY-MM-DD")
 
+    dry_run = os.getenv("DRY_RUN")
+    dry_run = dry_run.lower() if dry_run else None
+    if dry_run:
+        if dry_run not in ("true", "false"):
+            raise ValueError("DRY_RUN environment variable not 'true' or 'false'")
+        dry_run_bool = True
+    else:
+        dry_run_bool = False
+
     return (
         organization,
         repositories_list,
@@ -108,4 +118,5 @@ so that we can keep our dependencies up to date and secure."
         title,
         body,
         created_after_date,
+        dry_run_bool,
     )
