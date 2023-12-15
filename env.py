@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 
 def get_env_vars() -> (
-    tuple[str | None, list[str], str, str, list[str], str, str, str, int | None]
+    tuple[str | None, list[str], str, str, list[str], str, str, str, str | None]
 ):
     """
     Get the environment variables for use in the action.
@@ -18,13 +18,15 @@ def get_env_vars() -> (
         None
 
     Returns:
-        str: the organization to get contributor information for
-        List[str]: A list of the repositories to get contributor information for
-        str: the GitHub token to use for authentication
-        str: the GitHub Enterprise URL to use for authentication
-        str: the start date to get contributor information from
-        str: the end date to get contributor information to.
-        str: whether to get sponsor information on the contributor
+        organization (str): The organization to search for repositories in
+        repository_list (list[str]): A list of repositories to search for
+        token (str): The GitHub token to use for authentication
+        ghe (str): The GitHub Enterprise URL to use for authentication
+        exempt_repositories_list (list[str]): A list of repositories to exempt from the action
+        follow_up_type (str): The type of follow up to open (issue or pull)
+        title (str): The title of the follow up
+        body (str): The body of the follow up
+        created_after_date (str): The date to filter repositories by
 
     """
     # Load from .env file if it exists

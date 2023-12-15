@@ -1,7 +1,7 @@
 """Test the get_env_vars function"""
+import os
 import unittest
 from unittest.mock import patch
-import os
 
 from env import get_env_vars
 
