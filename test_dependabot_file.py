@@ -3,9 +3,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from dependabot_file import (
-    build_dependabot_file,
-)
+from dependabot_file import build_dependabot_file
 
 
 class TestDependabotFile(unittest.TestCase):
