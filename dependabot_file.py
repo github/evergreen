@@ -4,7 +4,7 @@
 import github3
 
 
-def build_dependabot_file(repo) -> str:
+def build_dependabot_file(repo) -> [str | None]:
     """
     Build the dependabot.yml file for a repo based on the repo contents
 
