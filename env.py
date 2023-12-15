@@ -104,9 +104,9 @@ so that we can keep our dependencies up to date and secure."
     if dry_run:
         if dry_run not in ("true", "false"):
             raise ValueError("DRY_RUN environment variable not 'true' or 'false'")
-        dry_run = True
+        dry_run_bool = True
     else:
-        dry_run = False
+        dry_run_bool = False
 
     return (
         organization,
@@ -118,5 +118,5 @@ so that we can keep our dependencies up to date and secure."
         title,
         body,
         created_after_date,
-        dry_run,
+        dry_run_bool,
     )

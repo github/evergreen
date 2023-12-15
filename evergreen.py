@@ -2,10 +2,9 @@
 
 import uuid
 
-import github3
-
 import auth
 import env
+import github3
 from dependabot_file import build_dependabot_file
 
 
@@ -101,7 +100,7 @@ def get_repos_iterator(organization, repository_list, github_connection):
     return repos
 
 
-def check_pending_pulls_for_duplicates(repo):
+def check_pending_pulls_for_duplicates(repo) -> bool:
     """Check if there are any open pull requests for dependabot and return the bool skip"""
     pull_requests = repo.pull_requests(state="open")
     skip = False
