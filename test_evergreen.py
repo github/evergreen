@@ -3,8 +3,8 @@ import unittest
 from unittest.mock import patch
 
 from evergreen import (
-    is_dependabot_security_updates_enabled,
     enable_dependabot_security_updates,
+    is_dependabot_security_updates_enabled,
 )
 
 
