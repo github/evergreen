@@ -2,6 +2,8 @@
 
 import uuid
 
+import requests
+
 import auth
 import env
 import github3
@@ -74,6 +76,10 @@ def main():
                     print("\tConfiguration:\n" + dependabot_file)
             continue
 
+        # Get dependabot security updates enabled if possible
+        if not is_dependabot_security_updates_enabled(repo.owner, repo.name, token):
+            enable_dependabot_security_updates(repo.owner, repo.name, token)
+
         if follow_up_type == "issue":
             count_eligible += 1
             issue = repo.create_issue(title, body)
@@ -87,7 +93,37 @@ def main():
             if not skip:
                 pull = commit_changes(title, body, repo, dependabot_file)
                 print("\tCreated pull request " + pull.html_url)
+
     print("Done. " + str(count_eligible) + " repositories were eligible.")
+
+
+def is_dependabot_security_updates_enabled(owner, repo, access_token):
+    """Check if Dependabot security updates are enabled at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library"""
+    url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/vnd.github.london-preview+json",
+    }
+
+    response = requests.get(url, headers=headers, timeout=20)
+    if response.status_code == 200:
+        return response.json()["enabled"]
+    return False
+
+
+def enable_dependabot_security_updates(owner, repo, access_token):
+    """Enable Dependabot security updates at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library"""
+    url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/vnd.github.london-preview+json",
+    }
+
+    response = requests.put(url, headers=headers, timeout=20)
+    if response.status_code == 204:
+        print("\tDependabot security updates enabled successfully.")
+    else:
+        print("\tFailed to enable Dependabot security updates.")
 
 
 def get_repos_iterator(organization, repository_list, github_connection):
