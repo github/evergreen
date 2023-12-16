@@ -2,7 +2,7 @@
 
 [![CodeQL](https://github.com/github/evergreen/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/github/evergreen/actions/workflows/github-code-scanning/codeql) [![Lint Code Base](https://github.com/github/evergreen/actions/workflows/super-linter.yaml/badge.svg)](https://github.com/github/evergreen/actions/workflows/super-linter.yaml) [![Python package](https://github.com/github/evergreen/actions/workflows/python-ci.yml/badge.svg)](https://github.com/github/evergreen/actions/workflows/python-ci.yml)
 
-This is a GitHub Action that given an organization or specified repositories, opens an issue/PR dependabot is not enabled but could be.
+This is a GitHub Action that given an organization or specified repositories, opens an issue/PR dependabot is not enabled but could be. It also enables [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) for the repository.
 
 This action was developed by the GitHub OSPO for our own use and developed in a way that we could open source it that it might be useful to you as well! If you want to know more about how we use it, reach out in an issue in this repository.
 
