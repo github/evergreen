@@ -90,8 +90,12 @@ def main():  # pragma: no cover
 
             # Create a dependabot.yaml file, a branch, and a PR
             if not skip:
-                pull = commit_changes(title, body, repo, dependabot_file)
-                print("\tCreated pull request " + pull.html_url)
+                try:
+                    pull = commit_changes(title, body, repo, dependabot_file)
+                    print("\tCreated pull request " + pull.html_url)
+                except github3.exceptions.NotFoundError:
+                    print("\tFailed to create pull request. Check write permissions.")
+                    continue
 
     print("Done. " + str(count_eligible) + " repositories were eligible.")
 
