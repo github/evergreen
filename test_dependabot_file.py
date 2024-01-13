@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import MagicMock
 
 import github3
-
 from dependabot_file import build_dependabot_file
 
 
