@@ -3,6 +3,7 @@
 import unittest
 from unittest.mock import MagicMock
 
+import github3
 from dependabot_file import build_dependabot_file
 
 
@@ -11,13 +12,24 @@ class TestDependabotFile(unittest.TestCase):
     Test the dependabot_file.py functions.
     """
 
+    def test_not_found_error(self):
+        """Test that the dependabot.yml file is built correctly with no package manager"""
+        repo = MagicMock()
+        response = MagicMock()
+        response.status_code = 404
+        repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
+
+        result = build_dependabot_file(repo)
+        self.assertEqual(result, None)
+
     def test_build_dependabot_file_with_bundler(self):
         """Test that the dependabot.yml file is built correctly with bundler"""
         repo = MagicMock()
+        filename_list = ["Gemfile", "Gemfile.lock"]
 
-        # return true for bundler only
-        repo.file_contents.side_effect = lambda filename: filename == "Gemfile.lock"
-        expected_result = """---
+        for filename in filename_list:
+            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
 version: 2
 updates:
   - package-ecosystem: 'bundler'
@@ -25,17 +37,17 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
-        self.assertEqual(result, expected_result)
+            result = build_dependabot_file(repo)
+            self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_npm(self):
         """Test that the dependabot.yml file is built correctly with npm"""
         repo = MagicMock()
-        repo.file_contents.side_effect = (
-            lambda filename: filename == "package-lock.json"
-        )
+        filename_list = ["package.json", "package-lock.json", "yarn.lock"]
 
-        expected_result = """---
+        for filename in filename_list:
+            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
 version: 2
 updates:
   - package-ecosystem: 'npm'
@@ -43,15 +55,23 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
-        self.assertEqual(result, expected_result)
+            result = build_dependabot_file(repo)
+            self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_pip(self):
         """Test that the dependabot.yml file is built correctly with pip"""
         repo = MagicMock()
-        repo.file_contents.side_effect = lambda filename: filename == "requirements.txt"
+        filename_list = [
+            "requirements.txt",
+            "Pipfile",
+            "Pipfile.lock",
+            "pyproject.toml",
+            "poetry.lock",
+        ]
 
-        expected_result = """---
+        for filename in filename_list:
+            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
 version: 2
 updates:
   - package-ecosystem: 'pip'
@@ -59,15 +79,20 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
-        self.assertEqual(result, expected_result)
+            result = build_dependabot_file(repo)
+            self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_cargo(self):
         """Test that the dependabot.yml file is built correctly with Cargo"""
         repo = MagicMock()
-        repo.file_contents.side_effect = lambda filename: filename == "Cargo.toml"
+        filename_list = [
+            "Cargo.toml",
+            "Cargo.lock",
+        ]
 
-        expected_result = """---
+        for filename in filename_list:
+            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
 version: 2
 updates:
   - package-ecosystem: 'cargo'
@@ -75,8 +100,8 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
-        self.assertEqual(result, expected_result)
+            result = build_dependabot_file(repo)
+            self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_gomod(self):
         """Test that the dependabot.yml file is built correctly with Go module"""
@@ -97,9 +122,14 @@ updates:
     def test_build_dependabot_file_with_composer(self):
         """Test that the dependabot.yml file is built correctly with Composer"""
         repo = MagicMock()
-        repo.file_contents.side_effect = lambda filename: filename == "composer.json"
+        filename_list = [
+            "composer.json",
+            "composer.lock",
+        ]
 
-        expected_result = """---
+        for filename in filename_list:
+            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
 version: 2
 updates:
   - package-ecosystem: 'composer'
@@ -107,15 +137,20 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
-        self.assertEqual(result, expected_result)
+            result = build_dependabot_file(repo)
+            self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_hex(self):
         """Test that the dependabot.yml file is built correctly with Hex"""
         repo = MagicMock()
-        repo.file_contents.side_effect = lambda filename: filename == "mix.exs"
+        filename_list = [
+            "mix.exs",
+            "mix.lock",
+        ]
 
-        expected_result = """---
+        for filename in filename_list:
+            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
 version: 2
 updates:
   - package-ecosystem: 'hex'
@@ -123,8 +158,8 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
-        self.assertEqual(result, expected_result)
+            result = build_dependabot_file(repo)
+            self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_nuget(self):
         """Test that the dependabot.yml file is built correctly with NuGet"""

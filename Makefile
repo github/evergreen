@@ -1,6 +1,6 @@
 .PHONY: test
 test:
-	pytest -v --cov=. --cov-config=.coveragerc --cov-fail-under=50 --cov-report term-missing
+	pytest -v --cov=. --cov-config=.coveragerc --cov-fail-under=80 --cov-report term-missing
 
 .PHONY: clean
 clean:

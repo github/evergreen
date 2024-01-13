@@ -9,7 +9,7 @@ import requests
 from dependabot_file import build_dependabot_file
 
 
-def main():
+def main():  # pragma: no cover
     """Run the main program"""
 
     # Get the environment variables
@@ -174,4 +174,4 @@ def commit_changes(title, body, repo, dependabot_file):
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover
