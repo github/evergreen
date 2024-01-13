@@ -1,7 +1,7 @@
 """ Test the evergreen.py module. """
 import unittest
-from unittest.mock import MagicMock, patch
 import uuid
+from unittest.mock import MagicMock, patch
 
 from evergreen import (
     check_pending_pulls_for_duplicates,
