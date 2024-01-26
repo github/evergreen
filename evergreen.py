@@ -2,10 +2,10 @@
 
 import uuid
 
-import auth
-import env
 import github3
 import requests
+import auth
+import env
 from dependabot_file import build_dependabot_file
 
 

@@ -251,12 +251,13 @@ class TestCheckPendingPullsForDuplicates(unittest.TestCase):
         # Assert that the function returned the expected result
         self.assertEqual(result, True)
 
+
 class TestCheckPendingIssuesForDuplicates(unittest.TestCase):
     """Test the check_pending_Issues_for_duplicates function."""
 
     def test_check_pending_issues_for_duplicates_no_duplicates(self):
         """Test the check_pending_Issues_for_duplicates function where there are no duplicates to be found."""
-        mock_issue = MagicMock() 
+        mock_issue = MagicMock()
         mock_issue.title = "Other Issue"
         mock_issue.issues.return_value = [mock_issue]
 
@@ -269,7 +270,7 @@ class TestCheckPendingIssuesForDuplicates(unittest.TestCase):
 
     def test_check_pending_issues_for_duplicates_with_duplicates(self):
         """Test the check_pending_issues_for_duplicates function where there are duplicates to be found."""
-        mock_issue = MagicMock() 
+        mock_issue = MagicMock()
         mock_issue.title = "Enable Dependabot"
         mock_issue.issues.return_value = [mock_issue]
 
@@ -279,6 +280,7 @@ class TestCheckPendingIssuesForDuplicates(unittest.TestCase):
 
         # Assert that the function returned the expected result
         self.assertEqual(result, True)
+
 
 class TestGetReposIterator(unittest.TestCase):
     """Test the get_repos_iterator function in evergreen.py"""
