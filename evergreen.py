@@ -63,12 +63,14 @@ def main():  # pragma: no cover
         # If dry_run is set, just print the dependabot file
         if dry_run:
             if follow_up_type == "issue":
-                print("\tEligible for configuring dependabot.")
-                count_eligible += 1
-                print("\tConfiguration:\n" + dependabot_file)
+                skip = check_pending_issues_for_duplicates(title, repo)
+                if not skip:
+                    print("\tEligible for configuring dependabot.")
+                    count_eligible += 1
+                    print("\tConfiguration:\n" + dependabot_file)
             if follow_up_type == "pull":
                 # Try to detect if the repo already has an open pull request for dependabot
-                skip = check_pending_pulls_for_duplicates(repo)
+                skip = check_pending_pulls_for_duplicates(title, repo)
                 if not skip:
                     print("\tEligible for configuring dependabot.")
                     count_eligible += 1
@@ -78,15 +80,16 @@ def main():  # pragma: no cover
         # Get dependabot security updates enabled if possible
         if not is_dependabot_security_updates_enabled(repo.owner, repo.name, token):
             enable_dependabot_security_updates(repo.owner, repo.name, token)
-
         if follow_up_type == "issue":
-            count_eligible += 1
-            issue = repo.create_issue(title, body)
-            print("\tCreated issue " + issue.html_url)
+            skip = check_pending_issues_for_duplicates(title, repo)
+            if not skip:
+                count_eligible += 1
+                issue = repo.create_issue(title, body)
+                print("\tCreated issue " + issue.html_url)
         else:
             count_eligible += 1
             # Try to detect if the repo already has an open pull request for dependabot
-            skip = check_pending_pulls_for_duplicates(repo)
+            skip = check_pending_pulls_for_duplicates(title, repo)
 
             # Create a dependabot.yaml file, a branch, and a PR
             if not skip:
@@ -144,13 +147,25 @@ def get_repos_iterator(organization, repository_list, github_connection):
     return repos
 
 
-def check_pending_pulls_for_duplicates(repo) -> bool:
+def check_pending_pulls_for_duplicates(title, repo) -> bool:
     """Check if there are any open pull requests for dependabot and return the bool skip"""
     pull_requests = repo.pull_requests(state="open")
     skip = False
     for pull_request in pull_requests:
-        if pull_request.head.ref.startswith("dependabot-"):
+        if pull_request.head.ref.startswith(title):
             print("\tPull request already exists: " + pull_request.html_url)
+            skip = True
+            break
+    return skip
+
+
+def check_pending_issues_for_duplicates(title, repo) -> bool:
+    """Check if there are any open issues for dependabot and return the bool skip"""
+    issues = repo.issues(state="open")
+    skip = False
+    for issue in issues:
+        if issue.title.startswith(title):
+            print("\tIssue already exists: " + issue.html_url)
             skip = True
             break
     return skip
