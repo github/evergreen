@@ -113,6 +113,34 @@ we can keep our dependencies up to date and secure.",
         with self.assertRaises(ValueError):
             get_env_vars()
 
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "DRY_RUN": "false",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_no_dry_run(self):
+        """Test that all environment variables are set correctly when DRY_RUN is false"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
 
 if __name__ == "__main__":
     unittest.main()

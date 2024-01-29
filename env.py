@@ -104,7 +104,7 @@ so that we can keep our dependencies up to date and secure."
     if dry_run:
         if dry_run not in ("true", "false"):
             raise ValueError("DRY_RUN environment variable not 'true' or 'false'")
-        dry_run_bool = True
+        dry_run_bool = dry_run == "true"
     else:
         dry_run_bool = False
 
