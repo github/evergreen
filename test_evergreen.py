@@ -246,7 +246,9 @@ class TestCheckPendingPullsForDuplicates(unittest.TestCase):
         mock_pull_request.head.ref = "dependabot-branch"
         mock_repo.pull_requests.return_value = [mock_pull_request]
 
-        result = check_pending_pulls_for_duplicates(mock_pull_request.head.ref, mock_repo)
+        result = check_pending_pulls_for_duplicates(
+            mock_pull_request.head.ref, mock_repo
+        )
 
         # Assert that the function returned the expected result
         self.assertEqual(result, True)
