@@ -19,6 +19,7 @@ class TestEnv(unittest.TestCase):
             "TITLE": "Dependabot Alert custom title",
             "BODY": "Dependabot custom body",
             "CREATED_AFTER_DATE": "2023-01-01",
+            "COMMIT_MESSAGE": "Create dependabot configuration",
         },
     )
     def test_get_env_vars_with_org(self):
@@ -34,6 +35,7 @@ class TestEnv(unittest.TestCase):
             "Dependabot custom body",
             "2023-01-01",
             False,
+            "Create dependabot configuration",
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -49,6 +51,7 @@ class TestEnv(unittest.TestCase):
             "BODY": "Dependabot custom body",
             "CREATED_AFTER_DATE": "2023-01-01",
             "DRY_RUN": "true",
+            "COMMIT_MESSAGE": "Create dependabot configuration",
         },
         clear=True,
     )
@@ -65,6 +68,7 @@ class TestEnv(unittest.TestCase):
             "Dependabot custom body",
             "2023-01-01",
             True,
+            "Create dependabot configuration",
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -91,6 +95,7 @@ Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
             None,
             False,
+            "Create dependabot.yaml",
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -137,6 +142,7 @@ Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
             None,
             False,
+            "Create dependabot.yaml",
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)

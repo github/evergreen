@@ -9,7 +9,9 @@ from dotenv import load_dotenv
 
 
 def get_env_vars() -> (
-    tuple[str | None, list[str], str, str, list[str], str, str, str, str | None, bool]
+    tuple[
+        str | None, list[str], str, str, list[str], str, str, str, str | None, bool, str
+    ]
 ):
     """
     Get the environment variables for use in the action.
@@ -28,6 +30,7 @@ def get_env_vars() -> (
         body (str): The body of the follow up
         created_after_date (str): The date to filter repositories by
         dry_run (bool): Whether or not to actually open issues/pull requests
+        commit_message (str): The commit message of the follow up
 
     """
     # Load from .env file if it exists
@@ -94,6 +97,13 @@ def get_env_vars() -> (
 Please enable it by merging this pull request \
 so that we can keep our dependencies up to date and secure."
 
+    commit_message = os.getenv("COMMIT_MESSAGE")
+    if commit_message:
+        if len(commit_message) > 65536:
+            raise ValueError("COMMIT_MESSAGE environment variable is too long")
+    else:
+        commit_message = "Create dependabot.yaml"
+
     created_after_date = os.getenv("CREATED_AFTER_DATE")
     # make sure that created_after_date is a date in the format YYYY-MM-DD
     if created_after_date and len(created_after_date) != 10:
@@ -119,4 +129,5 @@ so that we can keep our dependencies up to date and secure."
         body,
         created_after_date,
         dry_run_bool,
+        commit_message,
     )

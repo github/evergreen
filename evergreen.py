@@ -24,6 +24,7 @@ def main():  # pragma: no cover
         body,
         created_after_date,
         dry_run,
+        commit_message,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -94,7 +95,9 @@ def main():  # pragma: no cover
             # Create a dependabot.yaml file, a branch, and a PR
             if not skip:
                 try:
-                    pull = commit_changes(title, body, repo, dependabot_file)
+                    pull = commit_changes(
+                        title, body, repo, dependabot_file, commit_message
+                    )
                     print("\tCreated pull request " + pull.html_url)
                 except github3.exceptions.NotFoundError:
                     print("\tFailed to create pull request. Check write permissions.")
@@ -171,7 +174,7 @@ def check_pending_issues_for_duplicates(title, repo) -> bool:
     return skip
 
 
-def commit_changes(title, body, repo, dependabot_file):
+def commit_changes(title, body, repo, dependabot_file, message):
     """Commit the changes to the repo and open a pull reques and return the pull request object"""
     default_branch = repo.default_branch
     # Get latest commit sha from default branch
@@ -181,7 +184,7 @@ def commit_changes(title, body, repo, dependabot_file):
     repo.create_ref(front_matter + branch_name, default_branch_commit)
     repo.create_file(
         path=".github/dependabot.yaml",
-        message="Create dependabot.yaml",
+        message=message,
         content=dependabot_file.encode(),  # Convert to bytes object
         branch=branch_name,
     )

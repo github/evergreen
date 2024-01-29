@@ -201,7 +201,8 @@ class TestCommitChanges(unittest.TestCase):
         body = "Test Body"
         dependabot_file = 'dependencies:\n  - package_manager: "python"\n    directory: "/"\n    update_schedule: "live"'
         branch_name = "dependabot-12345678-1234-5678-1234-567812345678"
-        result = commit_changes(title, body, mock_repo, dependabot_file)
+        commit_message = "Create dependabot.yaml"
+        result = commit_changes(title, body, mock_repo, dependabot_file, commit_message)
 
         # Assert that the methods were called with the correct arguments
         mock_repo.create_ref.assert_called_once_with(
@@ -209,7 +210,7 @@ class TestCommitChanges(unittest.TestCase):
         )
         mock_repo.create_file.assert_called_once_with(
             path=".github/dependabot.yaml",
-            message="Create dependabot.yaml",
+            message=commit_message,
             content=dependabot_file.encode(),
             branch=branch_name,
         )
