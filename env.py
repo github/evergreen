@@ -10,7 +10,18 @@ from dotenv import load_dotenv
 
 def get_env_vars() -> (
     tuple[
-        str | None, list[str], str, str, list[str], str, str, str, str | None, bool, str
+        str | None,
+        list[str],
+        str,
+        str,
+        list[str],
+        str,
+        str,
+        str,
+        str | None,
+        bool,
+        str,
+        str | None,
     ]
 ):
     """
@@ -118,6 +129,9 @@ so that we can keep our dependencies up to date and secure."
     else:
         dry_run_bool = False
 
+    project_id = os.getenv("PROJECT_ID")
+    if project_id and not project_id.isnumeric():
+        raise ValueError("PROJECT_ID environment variable is not numeric")
     return (
         organization,
         repositories_list,
@@ -130,4 +144,5 @@ so that we can keep our dependencies up to date and secure."
         created_after_date,
         dry_run_bool,
         commit_message,
+        project_id,
     )

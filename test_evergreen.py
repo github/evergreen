@@ -3,13 +3,18 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, patch
 
+import requests
 from evergreen import (
     check_pending_issues_for_duplicates,
     check_pending_pulls_for_duplicates,
     commit_changes,
     enable_dependabot_security_updates,
+    get_global_issue_id,
+    get_global_pr_id,
+    get_global_project_id,
     get_repos_iterator,
     is_dependabot_security_updates_enabled,
+    link_item_to_project,
 )
 
 
@@ -333,6 +338,246 @@ class TestGetReposIterator(unittest.TestCase):
 
         # Assert that the function returned the expected result
         self.assertEqual(result, mock_repository_list)
+
+
+class TestGetGlobalProjectId(unittest.TestCase):
+    """Test the get_global_project_id function in evergreen.py"""
+
+    @patch("requests.post")
+    def test_get_global_project_id_success(self, mock_post):
+        """Test the get_global_project_id function when the request is successful."""
+        token = "my_token"
+        organization = "my_organization"
+        number = 123
+
+        expected_url = "https://api.github.com/graphql"
+        expected_headers = {"Authorization": f"Bearer {token}"}
+        expected_data = {
+            "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
+        }
+        expected_response = {
+            "data": {"organization": {"projectV2": {"id": "my_project_id"}}}
+        }
+
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = expected_response
+
+        result = get_global_project_id(token, organization, number)
+
+        mock_post.assert_called_once_with(
+            expected_url, headers=expected_headers, json=expected_data, timeout=20
+        )
+        self.assertEqual(result, "my_project_id")
+
+    @patch("requests.post")
+    def test_get_global_project_id_request_failed(self, mock_post):
+        """Test the get_global_project_id function when the request fails."""
+        token = "my_token"
+        organization = "my_organization"
+        number = 123
+
+        expected_url = "https://api.github.com/graphql"
+        expected_headers = {"Authorization": f"Bearer {token}"}
+        expected_data = {
+            "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
+        }
+
+        mock_post.side_effect = requests.exceptions.RequestException("Request failed")
+
+        with patch("builtins.print") as mock_print:
+            result = get_global_project_id(token, organization, number)
+
+            mock_post.assert_called_once_with(
+                expected_url, headers=expected_headers, json=expected_data, timeout=20
+            )
+            mock_print.assert_called_once_with("Request failed: Request failed")
+            self.assertIsNone(result)
+
+    @patch("requests.post")
+    def test_get_global_project_id_parse_response_failed(self, mock_post):
+        """Test the get_global_project_id function when parsing the response fails."""
+        token = "my_token"
+        organization = "my_organization"
+        number = 123
+
+        expected_url = "https://api.github.com/graphql"
+        expected_headers = {"Authorization": f"Bearer {token}"}
+        expected_data = {
+            "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
+        }
+        expected_response = {"data": {"organization": {"projectV2": {}}}}
+
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = expected_response
+
+        with patch("builtins.print") as mock_print:
+            result = get_global_project_id(token, organization, number)
+
+            mock_post.assert_called_once_with(
+                expected_url, headers=expected_headers, json=expected_data, timeout=20
+            )
+            mock_print.assert_called_once_with("Failed to parse response: 'id'")
+            self.assertIsNone(result)
+
+
+class TestGetGlobalIssueId(unittest.TestCase):
+    """Test the get_global_issue_id function in evergreen.py"""
+
+    @patch("requests.post")
+    def test_get_global_issue_id_success(self, mock_post):
+        """Test the get_global_issue_id function for a successful request"""
+        token = "my_token"
+        organization = "my_organization"
+        repository = "my_repository"
+        issue_number = 123
+
+        expected_response = {"data": {"repository": {"issue": {"id": "1234567890"}}}}
+
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = expected_response
+
+        result = get_global_issue_id(token, organization, repository, issue_number)
+
+        mock_post.assert_called_once()
+        self.assertEqual(result, "1234567890")
+
+    @patch("requests.post")
+    def test_get_global_issue_id_request_failed(self, mock_post):
+        """Test the get_global_issue_id function when the request fails"""
+        token = "my_token"
+        organization = "my_organization"
+        repository = "my_repository"
+        issue_number = 123
+
+        mock_post.side_effect = requests.exceptions.RequestException("Request failed")
+
+        result = get_global_issue_id(token, organization, repository, issue_number)
+
+        mock_post.assert_called_once()
+        self.assertIsNone(result)
+
+    @patch("requests.post")
+    def test_get_global_issue_id_parse_response_failed(self, mock_post):
+        """Test the get_global_issue_id function when parsing the response fails"""
+        token = "my_token"
+        organization = "my_organization"
+        repository = "my_repository"
+        issue_number = 123
+
+        expected_response = {"data": {"repository": {"issue": {}}}}
+
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = expected_response
+
+        result = get_global_issue_id(token, organization, repository, issue_number)
+
+        mock_post.assert_called_once()
+        self.assertIsNone(result)
+
+
+class TestGetGlobalPullRequestID(unittest.TestCase):
+    """Test the get_global_pr_id function in evergreen.py"""
+
+    @patch("requests.post")
+    def test_get_global_pr_id_success(self, mock_post):
+        """Test the get_global_pr_id function when the request is successful."""
+        # Mock the response from requests.post
+        mock_response = MagicMock()
+        mock_response.raise_for_status.return_value = None
+        mock_response.json.return_value = {
+            "data": {"repository": {"pullRequest": {"id": "test_id"}}}
+        }
+        mock_post.return_value = mock_response
+
+        # Call the function with test data
+        result = get_global_pr_id("test_token", "test_org", "test_repo", 1)
+
+        # Check that the result is as expected
+        self.assertEqual(result, "test_id")
+
+    @patch("requests.post")
+    def test_get_global_pr_id_request_exception(self, mock_post):
+        """Test the get_global_pr_id function when the request fails."""
+        # Mock requests.post to raise a RequestException
+        mock_post.side_effect = requests.exceptions.RequestException
+
+        # Call the function with test data
+        result = get_global_pr_id("test_token", "test_org", "test_repo", 1)
+
+        # Check that the result is None
+        self.assertIsNone(result)
+
+    @patch("requests.post")
+    def test_get_global_pr_id_key_error(self, mock_post):
+        """Test the get_global_pr_id function when the response cannot be parsed."""
+        # Mock the response from requests.post
+        mock_response = MagicMock()
+        mock_response.raise_for_status.return_value = None
+        mock_response.json.return_value = {}
+        mock_post.return_value = mock_response
+
+        # Call the function with test data
+        result = get_global_pr_id("test_token", "test_org", "test_repo", 1)
+
+        # Check that the result is None
+        self.assertIsNone(result)
+
+
+class TestLinkItemToProject(unittest.TestCase):
+    """Test the link_item_to_project function in evergreen.py"""
+
+    @patch("requests.post")
+    def test_link_item_to_project_success(self, mock_post):
+        """Test linking an item to a project successfully."""
+        token = "my_token"
+        project_id = "my_project_id"
+        item_id = "my_item_id"
+
+        expected_url = "https://api.github.com/graphql"
+        expected_headers = {"Authorization": f"Bearer {token}"}
+        expected_data = {
+            "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
+        }
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_post.return_value = mock_response
+
+        result = link_item_to_project(token, project_id, item_id)
+
+        mock_post.assert_called_once_with(
+            expected_url, headers=expected_headers, json=expected_data, timeout=20
+        )
+        mock_response.raise_for_status.assert_called_once()
+
+        # Assert that the function returned None
+        self.assertIsNotNone(result)
+
+    @patch("requests.post")
+    def test_link_item_to_project_request_exception(self, mock_post):
+        """Test handling a requests exception when linking an item to a project."""
+        token = "my_token"
+        project_id = "my_project_id"
+        item_id = "my_item_id"
+
+        expected_url = "https://api.github.com/graphql"
+        expected_headers = {"Authorization": f"Bearer {token}"}
+        expected_data = {
+            "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
+        }
+
+        mock_post.side_effect = requests.exceptions.RequestException("Request failed")
+
+        with patch("builtins.print") as mock_print:
+            result = link_item_to_project(token, project_id, item_id)
+
+            mock_post.assert_called_once_with(
+                expected_url, headers=expected_headers, json=expected_data, timeout=20
+            )
+            mock_print.assert_called_once_with("Request failed: Request failed")
+
+            # Assert that the function returned None
+            self.assertIsNone(result)
 
 
 if __name__ == "__main__":
