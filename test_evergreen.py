@@ -4,6 +4,7 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 from evergreen import (
+    check_pending_issues_for_duplicates,
     check_pending_pulls_for_duplicates,
     commit_changes,
     enable_dependabot_security_updates,
@@ -233,7 +234,7 @@ class TestCheckPendingPullsForDuplicates(unittest.TestCase):
         mock_pull_request.head.ref = "not-dependabot-branch"
         mock_repo.pull_requests.return_value = [mock_pull_request]
 
-        result = check_pending_pulls_for_duplicates(mock_repo)
+        result = check_pending_pulls_for_duplicates("dependabot-branch", mock_repo)
 
         # Assert that the function returned the expected result
         self.assertEqual(result, False)
@@ -245,7 +246,39 @@ class TestCheckPendingPullsForDuplicates(unittest.TestCase):
         mock_pull_request.head.ref = "dependabot-branch"
         mock_repo.pull_requests.return_value = [mock_pull_request]
 
-        result = check_pending_pulls_for_duplicates(mock_repo)
+        result = check_pending_pulls_for_duplicates(
+            mock_pull_request.head.ref, mock_repo
+        )
+
+        # Assert that the function returned the expected result
+        self.assertEqual(result, True)
+
+
+class TestCheckPendingIssuesForDuplicates(unittest.TestCase):
+    """Test the check_pending_Issues_for_duplicates function."""
+
+    def test_check_pending_issues_for_duplicates_no_duplicates(self):
+        """Test the check_pending_Issues_for_duplicates function where there are no duplicates to be found."""
+        mock_issue = MagicMock()
+        mock_issue.title = "Other Issue"
+        mock_issue.issues.return_value = [mock_issue]
+
+        result = check_pending_issues_for_duplicates("Enable Dependabot", mock_issue)
+
+        mock_issue.issues.assert_called_once_with(state="open")
+
+        # Assert that the function returned the expected result
+        self.assertEqual(result, False)
+
+    def test_check_pending_issues_for_duplicates_with_duplicates(self):
+        """Test the check_pending_issues_for_duplicates function where there are duplicates to be found."""
+        mock_issue = MagicMock()
+        mock_issue.title = "Enable Dependabot"
+        mock_issue.issues.return_value = [mock_issue]
+
+        result = check_pending_issues_for_duplicates("Enable Dependabot", mock_issue)
+
+        mock_issue.issues.assert_called_once_with(state="open")
 
         # Assert that the function returned the expected result
         self.assertEqual(result, True)
