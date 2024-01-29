@@ -122,7 +122,7 @@ we can keep our dependencies up to date and secure.",
         },
         clear=True,
     )
-    def test_get_env_vars_with_repos(self):
+    def test_get_env_vars_with_repos_no_dry_run(self):
         """Test that all environment variables are set correctly when DRY_RUN is false"""
         expected_result = (
             "my_organization",
