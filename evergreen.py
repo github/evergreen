@@ -120,7 +120,7 @@ def main():  # pragma: no cover
                             token, organization, repo.name, pull.number
                         )
                         response = link_item_to_project(token, project_id, pr_id)
-                        if(response):
+                        if response:
                             print("\tLinked pull request to project " + project_id)
                 except github3.exceptions.NotFoundError:
                     print("\tFailed to create pull request. Check write permissions.")
