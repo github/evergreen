@@ -119,8 +119,9 @@ def main():  # pragma: no cover
                         pr_id = get_global_pr_id(
                             token, organization, repo.name, pull.number
                         )
-                        link_item_to_project(token, project_id, pr_id)
-                        print("\tLinked pull request to project " + project_id)
+                        response = link_item_to_project(token, project_id, pr_id)
+                        if(response):
+                            print("\tLinked pull request to project " + project_id)
                 except github3.exceptions.NotFoundError:
                     print("\tFailed to create pull request. Check write permissions.")
                     continue
