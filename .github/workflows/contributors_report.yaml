@@ -33,7 +33,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           START_DATE: ${{ env.START_DATE }}
           END_DATE: ${{ env.END_DATE }}
-          REPOSITORY: github/contributors
+          REPOSITORY: github/evergreen
           SPONSOR_INFO: "true"
   
       - name: Create issue
