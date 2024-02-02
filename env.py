@@ -99,14 +99,23 @@ def get_env_vars() -> (
         title = "Enable Dependabot"
 
     body = os.getenv("BODY")
-    # make sure that body is a string with less than 65536 characters
-    if body:
-        if len(body) > 65536:
-            raise ValueError("BODY environment variable is too long")
-    else:
-        body = "Dependabot could be enabled for this repository. \
-Please enable it by merging this pull request \
-so that we can keep our dependencies up to date and secure."
+    if body and len(body) > 65536:
+        raise ValueError("BODY environment variable is too long")
+
+    if not body:
+        default_bodies = {
+            "pull": "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that we can keep our dependencies up to date and secure.",
+            "issue": (
+                "Please update the repository to include a Dependabot configuration file.\n"
+                "This will ensure our dependencies remain updated and secure.\n"
+                "Follow the guidelines in [creating Dependabot configuration files]"
+                "(https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file) "
+                "to set it up properly.\n\n"
+                "Here's an example of the code:"
+            ),
+        }
+        body = body = default_bodies[follow_up_type]
 
     commit_message = os.getenv("COMMIT_MESSAGE")
     if commit_message:

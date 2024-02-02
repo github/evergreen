@@ -95,7 +95,14 @@ def main():  # pragma: no cover
             skip = check_pending_issues_for_duplicates(title, repo)
             if not skip:
                 count_eligible += 1
-                issue = repo.create_issue(title, body)
+                body_issue = (
+                    body
+                    + "\n\n```yaml\n"
+                    + "# .github/dependabot.yml\n"
+                    + dependabot_file
+                    + "\n```"
+                )
+                issue = repo.create_issue(title, body_issue)
                 print("\tCreated issue " + issue.html_url)
                 if project_id:
                     issue_id = get_global_issue_id(
