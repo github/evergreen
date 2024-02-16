@@ -57,7 +57,7 @@ name: Weekly dependabot checks
 on:
   workflow_dispatch:
   schedule:
-    - cron: '3 2 1 * *'
+    - cron: '30 1 * * 6'
 
 permissions:
   issues: write
@@ -83,7 +83,7 @@ name: Weekly dependabot checks
 on:
   workflow_dispatch:
   schedule:
-    - cron: '3 2 1 * *'
+    - cron: '30 1 * * 6'
 
 permissions:
   issues: write
