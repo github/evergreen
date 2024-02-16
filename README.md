@@ -103,7 +103,7 @@ jobs:
           previous_date=$(date -d "$current_date -7 day" +'%Y-%m-%d')
 
           echo "$previous_date..$current_date"
-          echo "one_week_ago=$previous_date >> "$GITHUB_ENV"
+          echo "one_week_ago=$previous_date" >> "$GITHUB_ENV"
 
       - name: Run evergreen action
         uses: github/evergreen@v1
