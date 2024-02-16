@@ -2,10 +2,11 @@
 
 import uuid
 
+from datetime import datetime
+import requests
+import github3
 import auth
 import env
-import github3
-import requests
 from dependabot_file import build_dependabot_file
 
 
@@ -61,7 +62,9 @@ def main():  # pragma: no cover
                 continue
         except github3.exceptions.NotFoundError:
             pass
-        if created_after_date and repo.created_at < created_after_date:
+        if created_after_date and repo.created_at < datetime.strptime(
+            created_after_date, "%Y-%m-%d"
+        ):
             continue
 
         print("Checking " + repo.full_name)
