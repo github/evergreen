@@ -62,6 +62,9 @@ def main():  # pragma: no cover
                 continue
         except github3.exceptions.NotFoundError:
             pass
+        print(type(repo.created_at))
+        print(type(created_after_date))
+
         if created_after_date and repo.created_at < datetime.strptime(
             created_after_date, "%Y-%m-%d"
         ):
