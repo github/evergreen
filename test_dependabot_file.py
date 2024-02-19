@@ -19,7 +19,7 @@ class TestDependabotFile(unittest.TestCase):
         response.status_code = 404
         repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
 
-        result = build_dependabot_file(repo)
+        result = build_dependabot_file(repo, False)
         self.assertEqual(result, None)
 
     def test_build_dependabot_file_with_bundler(self):
@@ -37,7 +37,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-            result = build_dependabot_file(repo)
+            result = build_dependabot_file(repo, False)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_npm(self):
@@ -55,7 +55,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-            result = build_dependabot_file(repo)
+            result = build_dependabot_file(repo, False)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_pip(self):
@@ -79,7 +79,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-            result = build_dependabot_file(repo)
+            result = build_dependabot_file(repo, False)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_cargo(self):
@@ -100,7 +100,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-            result = build_dependabot_file(repo)
+            result = build_dependabot_file(repo, False)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_gomod(self):
@@ -116,7 +116,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
+        result = build_dependabot_file(repo, False)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_composer(self):
@@ -137,7 +137,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-            result = build_dependabot_file(repo)
+            result = build_dependabot_file(repo, False)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_hex(self):
@@ -158,7 +158,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-            result = build_dependabot_file(repo)
+            result = build_dependabot_file(repo, False)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_nuget(self):
@@ -174,7 +174,7 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
+        result = build_dependabot_file(repo, False)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_docker(self):
@@ -190,7 +190,28 @@ updates:
     schedule:
         interval: 'weekly'
 """
-        result = build_dependabot_file(repo)
+        result = build_dependabot_file(repo, False)
+        self.assertEqual(result, expected_result)
+
+    def test_build_dependabot_file_with_groups(self):
+        """Test that the dependabot.yml file is built correctly with grouped dependencies"""
+        repo = MagicMock()
+        repo.file_contents.side_effect = lambda filename: filename == "Dockerfile"
+
+        expected_result = """---
+version: 2
+updates:
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+        interval: 'weekly'
+    groups:
+        production-dependencies:
+            dependency-type: 'production'
+        development-dependencies:
+            dependency-type: 'development'
+"""
+        result = build_dependabot_file(repo, True)
         self.assertEqual(result, expected_result)
 
 

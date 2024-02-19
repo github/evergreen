@@ -22,6 +22,7 @@ def get_env_vars() -> (
         bool,
         str,
         str | None,
+        bool | None,
     ]
 ):
     """
@@ -42,7 +43,7 @@ def get_env_vars() -> (
         created_after_date (str): The date to filter repositories by
         dry_run (bool): Whether or not to actually open issues/pull requests
         commit_message (str): The commit message of the follow up
-
+        group_dependencies (bool): Whether to group dependencies in the dependabot.yml file
     """
     # Load from .env file if it exists
     dotenv_path = join(dirname(__file__), ".env")
@@ -129,6 +130,17 @@ Please enable it by merging this pull request so that we can keep our dependenci
     if created_after_date and len(created_after_date) != 10:
         raise ValueError("CREATED_AFTER_DATE environment variable not in YYYY-MM-DD")
 
+    group_dependencies = os.getenv("GROUP_DEPENDENCIES")
+    group_dependencies = group_dependencies.lower() if group_dependencies else None
+    if group_dependencies:
+        if group_dependencies not in ("true", "false"):
+            raise ValueError(
+                "GROUP_DEPENDENCIES environment variable not 'true' or 'false'"
+            )
+        group_dependencies_bool = group_dependencies == "true"
+    else:
+        group_dependencies_bool = False
+
     dry_run = os.getenv("DRY_RUN")
     dry_run = dry_run.lower() if dry_run else None
     if dry_run:
@@ -154,4 +166,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         dry_run_bool,
         commit_message,
         project_id,
+        group_dependencies_bool,
     )

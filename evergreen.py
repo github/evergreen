@@ -26,6 +26,7 @@ def main():  # pragma: no cover
         dry_run,
         commit_message,
         project_id,
+        group_dependencies,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -66,7 +67,7 @@ def main():  # pragma: no cover
 
         print("Checking " + repo.full_name)
         # Try to detect package managers and build a dependabot file
-        dependabot_file = build_dependabot_file(repo)
+        dependabot_file = build_dependabot_file(repo, group_dependencies)
         if dependabot_file is None:
             print("\tNo compatible package manager found")
             continue
