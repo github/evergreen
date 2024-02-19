@@ -1,4 +1,4 @@
 github3.py==4.0.1
 python-dotenv==1.0.1
-pytest==8.0.0
+pytest==8.0.1
 pytest-cov==4.1.0
