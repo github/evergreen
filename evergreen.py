@@ -1,6 +1,7 @@
 """This file contains the main() and other functions needed to open an issue/PR dependabot is not enabled but could be"""
 
 import uuid
+from datetime import datetime
 
 import auth
 import env
@@ -62,7 +63,10 @@ def main():  # pragma: no cover
                 continue
         except github3.exceptions.NotFoundError:
             pass
-        if created_after_date and repo.created_at < created_after_date:
+
+        if created_after_date and repo.created_at.replace(
+            tzinfo=None
+        ) < datetime.strptime(created_after_date, "%Y-%m-%d"):
             continue
 
         print("Checking " + repo.full_name)
