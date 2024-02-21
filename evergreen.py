@@ -1,12 +1,12 @@
 """This file contains the main() and other functions needed to open an issue/PR dependabot is not enabled but could be"""
 
 import uuid
-
 from datetime import datetime
-import requests
-import github3
+
 import auth
 import env
+import github3
+import requests
 from dependabot_file import build_dependabot_file
 
 
