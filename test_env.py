@@ -40,6 +40,7 @@ class TestEnv(unittest.TestCase):
             "Create dependabot configuration",
             "123",
             False,
+            ["public", "private", "internal"],
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -77,6 +78,7 @@ class TestEnv(unittest.TestCase):
             "Create dependabot configuration",
             "123",
             False,
+            ["public", "private", "internal"],
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -106,6 +108,7 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
+            ["public", "private", "internal"],
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -155,6 +158,168 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
+            ["public", "private", "internal"],
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_disabled_security_updates(self):
+        """Test that all environment variables are set correctly when DRY_RUN is false"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["public", "private", "internal"],
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "private,internal",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_filter_visibility_multiple_values(self):
+        """Test that filter_visibility is set correctly when multiple values are provided"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["private", "internal"],
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "public",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_filter_visibility_single_value(self):
+        """Test that filter_visibility is set correctly when a single value is provided"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["public"],
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "foobar",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_filter_visibility_invalid_single_value(self):
+        """Test that filter_visibility throws an error when an invalid value is provided"""
+        with self.assertRaises(ValueError):
+            get_env_vars()
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "public, foobar, private",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_filter_visibility_invalid_multiple_value(self):
+        """Test that filter_visibility throws an error when an invalid value is provided"""
+        with self.assertRaises(ValueError):
+            get_env_vars()
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "private,private,public",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_filter_visibility_no_duplicates(self):
+        """Test that filter_visibility is set correctly when there are duplicate values"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["private", "public"],
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
