@@ -193,7 +193,7 @@ def check_pending_pulls_for_duplicates(title, repo) -> bool:
     pull_requests = repo.pull_requests(state="open")
     skip = False
     for pull_request in pull_requests:
-        if pull_request.head.ref.startswith(title):
+        if pull_request.title.startswith(title):
             print("\tPull request already exists: " + pull_request.html_url)
             skip = True
             break
