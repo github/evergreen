@@ -47,6 +47,7 @@ Below are the allowed configuration options:
 | `PROJECT_ID`          | False    | ""     | If set, this will assign the issue or pull request to the project with the given ID. ( The project ID on GitHub can be located by navigating to the respective project and observing the URL's end.) **The `ORGANIZATION` variable is required** |
 | `DRY_RUN`             | False    | false   | If set to true, this action will not create any issues or pull requests. It will only log the repositories that could have dependabot enabled. This is useful for testing. |
 | `GROUP_DEPENDENCIES`             | False    | false   | If set to true, dependabot configuration will group dependencies updates based on [dependency type](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) (production or development, where supported) |
+| `ENABLE_SECURITY_UPDATES`             | False    | true   | If set to true, Evergreen will enable [Dependabot security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates) on target repositories. Note that the Github token need to have the `administration:right` permission on every repository in scope to successfully enable security updates.  |
 
 ### Example workflows
 
