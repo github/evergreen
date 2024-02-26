@@ -56,11 +56,6 @@ def main():  # pragma: no cover
                 continue
         except github3.exceptions.NotFoundError:
             pass
-        try:
-            if repo.file_contents(".github/dependabot.yaml").size > 0:
-                continue
-        except github3.exceptions.NotFoundError:
-            pass
         if created_after_date and repo.created_at < created_after_date:
             continue
 
