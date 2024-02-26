@@ -28,6 +28,7 @@ def main():  # pragma: no cover
         commit_message,
         project_id,
         group_dependencies,
+        enable_security_updates,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -94,8 +95,10 @@ def main():  # pragma: no cover
             continue
 
         # Get dependabot security updates enabled if possible
-        if not is_dependabot_security_updates_enabled(repo.owner, repo.name, token):
-            enable_dependabot_security_updates(repo.owner, repo.name, token)
+        if enable_security_updates:
+            if not is_dependabot_security_updates_enabled(repo.owner, repo.name, token):
+                enable_dependabot_security_updates(repo.owner, repo.name, token)
+
         if follow_up_type == "issue":
             skip = check_pending_issues_for_duplicates(title, repo)
             if not skip:

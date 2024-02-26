@@ -40,6 +40,7 @@ class TestEnv(unittest.TestCase):
             "Create dependabot configuration",
             "123",
             False,
+            True,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -77,6 +78,7 @@ class TestEnv(unittest.TestCase):
             "Create dependabot configuration",
             "123",
             False,
+            True,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -106,6 +108,7 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
+            True,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -155,6 +158,39 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
+            True,  # enable_security_updates
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_disabled_security_updates(self):
+        """Test that all environment variables are set correctly when DRY_RUN is false"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            False,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
