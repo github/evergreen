@@ -24,6 +24,7 @@ def get_env_vars() -> (
         str | None,
         bool | None,
         list[str] | None,
+        bool | None,
     ]
 ):
     """
@@ -46,6 +47,7 @@ def get_env_vars() -> (
         commit_message (str): The commit message of the follow up
         group_dependencies (bool): Whether to group dependencies in the dependabot.yml file
         filter_visibility (list[str]): Run the action only on repositories with the specified listed visibility
+        enable_security_updates (bool): Whether to enable security updates in target repositories
     """
     # Load from .env file if it exists
     dotenv_path = join(dirname(__file__), ".env")
@@ -143,6 +145,20 @@ Please enable it by merging this pull request so that we can keep our dependenci
     else:
         group_dependencies_bool = False
 
+    # enable_security_updates is optional but true by default to maintain backward compatibility
+    enable_security_updates = os.getenv("ENABLE_SECURITY_UPDATES")
+    enable_security_updates = (
+        enable_security_updates.lower() if enable_security_updates else "true"
+    )
+    if enable_security_updates:
+        if enable_security_updates not in ("true", "false"):
+            raise ValueError(
+                "ENABLE_SECURITY_UPDATES environment variable not 'true' or 'false'"
+            )
+        enable_security_updates_bool = enable_security_updates == "true"
+    else:
+        enable_security_updates_bool = False
+
     dry_run = os.getenv("DRY_RUN")
     dry_run = dry_run.lower() if dry_run else None
     if dry_run:
@@ -189,4 +205,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         project_id,
         group_dependencies_bool,
         filter_visibility_list,
+        enable_security_updates_bool,
     )

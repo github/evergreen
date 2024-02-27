@@ -29,6 +29,7 @@ def main():  # pragma: no cover
         project_id,
         group_dependencies,
         filter_visibility,
+        enable_security_updates,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -97,8 +98,10 @@ def main():  # pragma: no cover
             continue
 
         # Get dependabot security updates enabled if possible
-        if not is_dependabot_security_updates_enabled(repo.owner, repo.name, token):
-            enable_dependabot_security_updates(repo.owner, repo.name, token)
+        if enable_security_updates:
+            if not is_dependabot_security_updates_enabled(repo.owner, repo.name, token):
+                enable_dependabot_security_updates(repo.owner, repo.name, token)
+
         if follow_up_type == "issue":
             skip = check_pending_issues_for_duplicates(title, repo)
             if not skip:
@@ -193,7 +196,7 @@ def check_pending_pulls_for_duplicates(title, repo) -> bool:
     pull_requests = repo.pull_requests(state="open")
     skip = False
     for pull_request in pull_requests:
-        if pull_request.head.ref.startswith(title):
+        if pull_request.title.startswith(title):
             print("\tPull request already exists: " + pull_request.html_url)
             skip = True
             break

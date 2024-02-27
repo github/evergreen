@@ -41,6 +41,7 @@ class TestEnv(unittest.TestCase):
             "123",
             False,
             ["public", "private", "internal"],
+            True,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -79,6 +80,7 @@ class TestEnv(unittest.TestCase):
             "123",
             False,
             ["public", "private", "internal"],
+            True,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -109,6 +111,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["public", "private", "internal"],
+            True,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -159,6 +162,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["public", "private", "internal"],
+            True,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -191,6 +195,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["public", "private", "internal"],
+            False,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -224,6 +229,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["private", "internal"],
+            False,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -257,6 +263,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["public"],
+            False,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -320,6 +327,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["private", "public"],
+            False,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
