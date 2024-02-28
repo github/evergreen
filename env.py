@@ -171,21 +171,14 @@ Please enable it by merging this pull request so that we can keep our dependenci
     filter_visibility = os.getenv("FILTER_VISIBILITY")
     filter_visibility_list = []
     if filter_visibility:
-        filter_visibility_list = sorted(
-            list(
-                set(
-                    [
-                        visibility.strip().lower()
-                        for visibility in filter_visibility.split(",")
-                    ]
-                )
-            )
-        )
-        for visibility in filter_visibility_list:
-            if visibility not in ["public", "private", "internal"]:
+        filter_visibility_set = set()
+        for visibility in filter_visibility.split(","):
+            if visibility.strip().lower() not in ["public", "private", "internal"]:
                 raise ValueError(
                     "FILTER_VISIBILITY environment variable not 'public', 'private', or 'internal'"
                 )
+            filter_visibility_set.add(visibility.strip().lower())
+        filter_visibility_list = sorted(list(filter_visibility_set))
     else:
         filter_visibility_list = sorted(["public", "private", "internal"])  # all
 
