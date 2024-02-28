@@ -40,7 +40,7 @@ class TestEnv(unittest.TestCase):
             "Create dependabot configuration",
             "123",
             False,
-            ["public", "private", "internal"],
+            ["internal", "private", "public"],
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -79,7 +79,7 @@ class TestEnv(unittest.TestCase):
             "Create dependabot configuration",
             "123",
             False,
-            ["public", "private", "internal"],
+            ["internal", "private", "public"],
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -110,7 +110,7 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
-            ["public", "private", "internal"],
+            ["internal", "private", "public"],
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -161,7 +161,7 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
-            ["public", "private", "internal"],
+            ["internal", "private", "public"],
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -194,7 +194,7 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
-            ["public", "private", "internal"],
+            ["internal", "private", "public"],
             False,  # enable_security_updates
         )
         result = get_env_vars()
@@ -228,7 +228,7 @@ we can keep our dependencies up to date and secure.",
             "Create dependabot.yaml",
             None,
             False,
-            ["private", "internal"],
+            ["internal", "private"],
             False,  # enable_security_updates
         )
         result = get_env_vars()
