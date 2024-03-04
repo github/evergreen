@@ -23,6 +23,7 @@ def get_env_vars() -> (
         str,
         str | None,
         bool | None,
+        list[str] | None,
         bool | None,
     ]
 ):
@@ -45,6 +46,7 @@ def get_env_vars() -> (
         dry_run (bool): Whether or not to actually open issues/pull requests
         commit_message (str): The commit message of the follow up
         group_dependencies (bool): Whether to group dependencies in the dependabot.yml file
+        filter_visibility (list[str]): Run the action only on repositories with the specified listed visibility
         enable_security_updates (bool): Whether to enable security updates in target repositories
     """
     # Load from .env file if it exists
@@ -166,6 +168,20 @@ Please enable it by merging this pull request so that we can keep our dependenci
     else:
         dry_run_bool = False
 
+    filter_visibility = os.getenv("FILTER_VISIBILITY")
+    filter_visibility_list = []
+    if filter_visibility:
+        filter_visibility_set = set()
+        for visibility in filter_visibility.split(","):
+            if visibility.strip().lower() not in ["public", "private", "internal"]:
+                raise ValueError(
+                    "FILTER_VISIBILITY environment variable not 'public', 'private', or 'internal'"
+                )
+            filter_visibility_set.add(visibility.strip().lower())
+        filter_visibility_list = sorted(list(filter_visibility_set))
+    else:
+        filter_visibility_list = sorted(["public", "private", "internal"])  # all
+
     project_id = os.getenv("PROJECT_ID")
     if project_id and not project_id.isnumeric():
         raise ValueError("PROJECT_ID environment variable is not numeric")
@@ -183,5 +199,6 @@ Please enable it by merging this pull request so that we can keep our dependenci
         commit_message,
         project_id,
         group_dependencies_bool,
+        filter_visibility_list,
         enable_security_updates_bool,
     )

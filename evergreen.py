@@ -28,6 +28,7 @@ def main():  # pragma: no cover
         commit_message,
         project_id,
         group_dependencies,
+        filter_visibility,
         enable_security_updates,
     ) = env.get_env_vars()
 
@@ -53,6 +54,8 @@ def main():  # pragma: no cover
         if repo.full_name in exempt_repositories_list:
             continue
         if repo.archived:
+            continue
+        if repo.visibility.lower() not in filter_visibility:
             continue
         try:
             if repo.file_contents(".github/dependabot.yml").size > 0:
