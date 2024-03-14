@@ -25,6 +25,7 @@ def get_env_vars() -> (
         bool | None,
         list[str] | None,
         bool | None,
+        list[str],
     ]
 ):
     """
