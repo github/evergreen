@@ -53,7 +53,7 @@ def main():  # pragma: no cover
     for repo in repos:
         # if batch_size is defined, ensure we break if we exceed the number of eligible repos
         if batch_size:
-            if count_eligible == batch_size:
+            if count_eligible >= batch_size:
                 print("Batch size met at {batch_size} eligible repositories.")
                 break
 
