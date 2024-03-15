@@ -24,6 +24,7 @@ def get_env_vars() -> (
         str | None,
         bool | None,
         list[str] | None,
+        int | None,
         bool | None,
     ]
 ):
@@ -47,6 +48,7 @@ def get_env_vars() -> (
         commit_message (str): The commit message of the follow up
         group_dependencies (bool): Whether to group dependencies in the dependabot.yml file
         filter_visibility (list[str]): Run the action only on repositories with the specified listed visibility
+        batch_size (int): The max number of repositories in scope
         enable_security_updates (bool): Whether to enable security updates in target repositories
     """
     # Load from .env file if it exists
@@ -168,6 +170,11 @@ Please enable it by merging this pull request so that we can keep our dependenci
     else:
         dry_run_bool = False
 
+    batch_size = os.getenv("BATCH_SIZE")
+    batch_size = int(batch_size) if batch_size else None
+    if batch_size and batch_size <= 0:
+        raise ValueError("BATCH_SIZE environment variable is 0 or lower")
+
     filter_visibility = os.getenv("FILTER_VISIBILITY")
     filter_visibility_list = []
     if filter_visibility:
@@ -200,5 +207,6 @@ Please enable it by merging this pull request so that we can keep our dependenci
         project_id,
         group_dependencies_bool,
         filter_visibility_list,
+        batch_size,
         enable_security_updates_bool,
     )

@@ -41,6 +41,7 @@ class TestEnv(unittest.TestCase):
             "123",
             False,
             ["internal", "private", "public"],
+            None,  # batch_size
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -80,6 +81,7 @@ class TestEnv(unittest.TestCase):
             "123",
             False,
             ["internal", "private", "public"],
+            None,  # batch_size
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -111,6 +113,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["internal", "private", "public"],
+            None,  # batch_size
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -162,6 +165,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["internal", "private", "public"],
+            None,  # batch_size
             True,  # enable_security_updates
         )
         result = get_env_vars()
@@ -195,6 +199,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["internal", "private", "public"],
+            None,  # batch_size
             False,  # enable_security_updates
         )
         result = get_env_vars()
@@ -229,6 +234,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["internal", "private"],
+            None,  # batch_size
             False,  # enable_security_updates
         )
         result = get_env_vars()
@@ -263,6 +269,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["public"],
+            None,  # batch_size
             False,  # enable_security_updates
         )
         result = get_env_vars()
@@ -327,10 +334,114 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["private", "public"],
+            None,  # batch_size
             False,  # enable_security_updates
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "private,private,public",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_no_batch_size(self):
+        """Test that filter_visibility is set correctly when there are duplicate values"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["private", "public"],
+            None,  # batch_size
+            False,  # enable_security_updates
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "private,private,public",
+            "BATCH_SIZE": str(5),  # os.environ expect str as values
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_batch_size(self):
+        """Test that filter_visibility is set correctly when there are duplicate values"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["private", "public"],
+            5,  # batch_size
+            False,  # enable_security_updates
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "private,private,public",
+            "BATCH_SIZE": str(-1),  # os.environ expect str as values
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_invalid_batch_size_int(self):
+        """Test that filter_visibility is set correctly when there are duplicate values"""
+        with self.assertRaises(ValueError):
+            get_env_vars()
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "private,private,public",
+            "BATCH_SIZE": "whatever",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_invalid_batch_size_str(self):
+        """Test that filter_visibility is set correctly when there are duplicate values"""
+        with self.assertRaises(ValueError):
+            get_env_vars()
 
 
 if __name__ == "__main__":

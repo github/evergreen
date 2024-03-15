@@ -29,6 +29,7 @@ def main():  # pragma: no cover
         project_id,
         group_dependencies,
         filter_visibility,
+        batch_size,
         enable_security_updates,
     ) = env.get_env_vars()
 
@@ -50,6 +51,11 @@ def main():  # pragma: no cover
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
     count_eligible = 0
     for repo in repos:
+        # if batch_size is defined, ensure we break if we exceed the number of eligible repos
+        if batch_size:
+            if count_eligible == batch_size:
+                break
+
         # Check all the things to see if repo is eligble for a pr/issue
         if repo.full_name in exempt_repositories_list:
             continue
@@ -122,12 +128,12 @@ def main():  # pragma: no cover
                     link_item_to_project(token, project_id, issue_id)
                     print("\tLinked issue to project " + project_id)
         else:
-            count_eligible += 1
             # Try to detect if the repo already has an open pull request for dependabot
             skip = check_pending_pulls_for_duplicates(title, repo)
 
             # Create a dependabot.yaml file, a branch, and a PR
             if not skip:
+                count_eligible += 1
                 try:
                     pull = commit_changes(
                         title, body, repo, dependabot_file, commit_message
