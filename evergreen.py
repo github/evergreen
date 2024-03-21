@@ -31,6 +31,7 @@ def main():  # pragma: no cover
         filter_visibility,
         batch_size,
         enable_security_updates,
+        exempt_ecosystems,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -82,7 +83,9 @@ def main():  # pragma: no cover
 
         print("Checking " + repo.full_name)
         # Try to detect package managers and build a dependabot file
-        dependabot_file = build_dependabot_file(repo, group_dependencies)
+        dependabot_file = build_dependabot_file(
+            repo, group_dependencies, exempt_ecosystems
+        )
         if dependabot_file is None:
             print("\tNo compatible package manager found")
             continue

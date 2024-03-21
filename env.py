@@ -26,6 +26,7 @@ def get_env_vars() -> (
         list[str] | None,
         int | None,
         bool | None,
+        list[str],
     ]
 ):
     """
@@ -50,6 +51,7 @@ def get_env_vars() -> (
         filter_visibility (list[str]): Run the action only on repositories with the specified listed visibility
         batch_size (int): The max number of repositories in scope
         enable_security_updates (bool): Whether to enable security updates in target repositories
+        exempt_ecosystems_list (list[str]): A list of package ecosystems to exempt from the action
     """
     # Load from .env file if it exists
     dotenv_path = join(dirname(__file__), ".env")
@@ -189,6 +191,13 @@ Please enable it by merging this pull request so that we can keep our dependenci
     else:
         filter_visibility_list = sorted(["public", "private", "internal"])  # all
 
+    exempt_ecosystems = os.getenv("EXEMPT_ECOSYSTEMS")
+    exempt_ecosystems_list = []
+    if exempt_ecosystems:
+        exempt_ecosystems_list = [
+            ecosystem.lower().strip() for ecosystem in exempt_ecosystems.split(",")
+        ]
+
     project_id = os.getenv("PROJECT_ID")
     if project_id and not project_id.isnumeric():
         raise ValueError("PROJECT_ID environment variable is not numeric")
@@ -209,4 +218,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         filter_visibility_list,
         batch_size,
         enable_security_updates_bool,
+        exempt_ecosystems_list,
     )

@@ -43,6 +43,7 @@ class TestEnv(unittest.TestCase):
             ["internal", "private", "public"],
             None,  # batch_size
             True,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -83,6 +84,7 @@ class TestEnv(unittest.TestCase):
             ["internal", "private", "public"],
             None,  # batch_size
             True,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -115,6 +117,7 @@ we can keep our dependencies up to date and secure.",
             ["internal", "private", "public"],
             None,  # batch_size
             True,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -167,6 +170,7 @@ we can keep our dependencies up to date and secure.",
             ["internal", "private", "public"],
             None,  # batch_size
             True,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -201,6 +205,7 @@ we can keep our dependencies up to date and secure.",
             ["internal", "private", "public"],
             None,  # batch_size
             False,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -236,6 +241,7 @@ we can keep our dependencies up to date and secure.",
             ["internal", "private"],
             None,  # batch_size
             False,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -271,6 +277,7 @@ we can keep our dependencies up to date and secure.",
             ["public"],
             None,  # batch_size
             False,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -336,6 +343,43 @@ we can keep our dependencies up to date and secure.",
             ["private", "public"],
             None,  # batch_size
             False,  # enable_security_updates
+            [],  # exempt_ecosystems
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "ENABLE_SECURITY_UPDATES": "false",
+            "FILTER_VISIBILITY": "private,private,public",
+            "EXEMPT_ECOSYSTEMS": "gomod,DOCKER",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_repos_exempt_ecosystems(self):
+        """Test that filter_visibility is set correctly when there are duplicate values"""
+        expected_result = (
+            "my_organization",
+            [],
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["private", "public"],
+            False,  # enable_security_updates
+            ["gomod", "docker"],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
