@@ -25,6 +25,7 @@ def get_env_vars() -> (
         bool | None,
         list[str] | None,
         bool | None,
+        list[str],
     ]
 ):
     """
@@ -48,6 +49,7 @@ def get_env_vars() -> (
         group_dependencies (bool): Whether to group dependencies in the dependabot.yml file
         filter_visibility (list[str]): Run the action only on repositories with the specified listed visibility
         enable_security_updates (bool): Whether to enable security updates in target repositories
+        exempt_ecosystems_list (list[str]): A list of package ecosystems to exempt from the action
     """
     # Load from .env file if it exists
     dotenv_path = join(dirname(__file__), ".env")
@@ -182,6 +184,13 @@ Please enable it by merging this pull request so that we can keep our dependenci
     else:
         filter_visibility_list = sorted(["public", "private", "internal"])  # all
 
+    exempt_ecosystems = os.getenv("EXEMPT_ECOSYSTEMS")
+    exempt_ecosystems_list = []
+    if exempt_ecosystems:
+        exempt_ecosystems_list = [
+            ecosystem.lower().strip() for ecosystem in exempt_ecosystems.split(",")
+        ]
+
     project_id = os.getenv("PROJECT_ID")
     if project_id and not project_id.isnumeric():
         raise ValueError("PROJECT_ID environment variable is not numeric")
@@ -201,4 +210,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         group_dependencies_bool,
         filter_visibility_list,
         enable_security_updates_bool,
+        exempt_ecosystems_list,
     )
