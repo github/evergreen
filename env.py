@@ -8,25 +8,27 @@ from os.path import dirname, join
 from dotenv import load_dotenv
 
 
-def get_env_vars() -> tuple[
-    str | None,
-    list[str],
-    str,
-    str,
-    list[str],
-    str,
-    str,
-    str,
-    str | None,
-    bool,
-    str,
-    str | None,
-    bool | None,
-    list[str] | None,
-    int | None,
-    bool | None,
-    list[str],
-]:
+def get_env_vars() -> (
+    tuple[
+        str | None,
+        list[str],
+        str,
+        str,
+        list[str],
+        str,
+        str,
+        str,
+        str | None,
+        bool,
+        str,
+        str | None,
+        bool | None,
+        list[str] | None,
+        int | None,
+        bool | None,
+        list[str],
+    ]
+):
     """
     Get the environment variables for use in the action.
 
