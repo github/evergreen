@@ -8,27 +8,25 @@ from os.path import dirname, join
 from dotenv import load_dotenv
 
 
-def get_env_vars() -> (
-    tuple[
-        str | None,
-        list[str],
-        str,
-        str,
-        list[str],
-        str,
-        str,
-        str,
-        str | None,
-        bool,
-        str,
-        str | None,
-        bool | None,
-        list[str] | None,
-        int | None,
-        bool | None,
-        list[str],
-    ]
-):
+def get_env_vars() -> tuple[
+    str | None,
+    list[str],
+    str,
+    str,
+    list[str],
+    str,
+    str,
+    str,
+    str | None,
+    bool,
+    str,
+    str | None,
+    bool | None,
+    list[str] | None,
+    int | None,
+    bool | None,
+    list[str],
+]:
     """
     Get the environment variables for use in the action.
 
@@ -172,8 +170,8 @@ Please enable it by merging this pull request so that we can keep our dependenci
     else:
         dry_run_bool = False
 
-    batch_size = os.getenv("BATCH_SIZE")
-    batch_size = int(batch_size) if batch_size else None
+    batch_size_str = os.getenv("BATCH_SIZE")
+    batch_size = int(batch_size_str) if batch_size_str else None
     if batch_size and batch_size <= 0:
         raise ValueError("BATCH_SIZE environment variable is 0 or lower")
 
