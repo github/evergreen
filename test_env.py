@@ -1,4 +1,5 @@
 """Test the get_env_vars function"""
+
 import os
 import unittest
 from unittest.mock import patch
@@ -378,6 +379,7 @@ we can keep our dependencies up to date and secure.",
             None,
             False,
             ["private", "public"],
+            None,  # batch_size
             False,  # enable_security_updates
             ["gomod", "docker"],  # exempt_ecosystems
         )
@@ -415,6 +417,7 @@ we can keep our dependencies up to date and secure.",
             ["private", "public"],
             None,  # batch_size
             False,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
@@ -451,6 +454,7 @@ we can keep our dependencies up to date and secure.",
             ["private", "public"],
             5,  # batch_size
             False,  # enable_security_updates
+            [],  # exempt_ecosystems
         )
         result = get_env_vars()
         self.assertEqual(result, expected_result)
