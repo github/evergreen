@@ -1,6 +1,8 @@
 # Evergreen action
 
-[![CodeQL](https://github.com/github/evergreen/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/github/evergreen/actions/workflows/github-code-scanning/codeql) [![Lint Code Base](https://github.com/github/evergreen/actions/workflows/super-linter.yaml/badge.svg)](https://github.com/github/evergreen/actions/workflows/super-linter.yaml) [![Python package](https://github.com/github/evergreen/actions/workflows/python-ci.yml/badge.svg)](https://github.com/github/evergreen/actions/workflows/python-ci.yml)
+[![CodeQL](https://github.com/github/evergreen/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/github/evergreen/actions/workflows/github-code-scanning/codeql)
+[![Lint Code Base](https://github.com/github/evergreen/actions/workflows/super-linter.yaml/badge.svg)](https://github.com/github/evergreen/actions/workflows/super-linter.yaml)
+[![Python package](https://github.com/github/evergreen/actions/workflows/python-ci.yml/badge.svg)](https://github.com/github/evergreen/actions/workflows/python-ci.yml)
 
 This is a GitHub Action that given an organization or specified repositories, opens an issue/PR dependabot is not enabled but could be. It also enables [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) for the repository.
 
@@ -32,9 +34,28 @@ If you need support using this project or have questions about it, please [open 
 
 Below are the allowed configuration options:
 
+#### Authentication
+
+This action can be configured to authenticate with GitHub App Installation or Personal Access Token (PAT). If all configuration options are provided, the GitHub App Installation configuration has precedence. You can choose one of the following methods to authenticate:
+
+##### GitHub App Installation
+
+| field                         | required | default | description |
+|-------------------------------|----------|---------|-------------|
+| `GH_APP_ID`                   | True     | `""`    | GitHub Application ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
+| `GH_APP_INSTALLATION_ID`      | True     | `""`    | GitHub Application Installation ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
+| `GH_APP_PRIVATE_KEY`          | True     | `""`    | GitHub Application Private Key. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
+
+##### Personal Access Token (PAT)
+
+| field                         | required | default | description |
+|-------------------------------|----------|---------|-------------|
+| `GH_TOKEN`                    | True     | `""`    | The GitHub Token used to scan the repository. Must have read access to all repository you are interested in scanning. |
+
+#### Other Configuration Options
+
 | field                 | required | default | description |
 |-----------------------|----------|---------|-------------|
-| `GH_TOKEN`            | True     |   ""    | The GitHub Token used to scan the repository or organization. Must have write access to all repository you are interested in scanning so that an issue or pull request can be created. |
 | `GH_ENTERPRISE_URL`   | False    |   ""    | The `GH_ENTERPRISE_URL` is used to connect to an enterprise server instance of GitHub. github.com users should not enter anything here. |
 | `ORGANIZATION`        | Required to have `ORGANIZATION` or `REPOSITORY` |         | The name of the GitHub organization which you want this action to work from. ie. github.com/github would be `github` |
 | `REPOSITORY`          | Required to have `ORGANIZATION` or `REPOSITORY` |         | The name of the repository and organization which you want this action to work from. ie. `github/evergreen` or a comma separated list of multiple repositories `github/evergreen,super-linter/super-linter` |
@@ -65,12 +86,14 @@ on:
     - cron: '3 2 * * 6'
 
 permissions:
-  issues: write
+  contents: read
 
 jobs:
   evergreen:
     name: evergreen
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
 
     steps:
       - name: Run evergreen action
@@ -91,12 +114,14 @@ on:
     - cron: '3 2 * * 6'
 
 permissions:
-  issues: write
+  contents: read
 
 jobs:
   evergreen:
     name: evergreen
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
 
     steps:
       - shell: bash

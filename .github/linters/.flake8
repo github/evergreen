@@ -1,3 +1,5 @@
 [flake8]
 max-line-length = 150
+exclude = venv,.venv,.git,__pycache__
 extend-ignore = C901
+statistics = True

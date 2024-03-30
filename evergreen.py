@@ -17,6 +17,9 @@ def main():  # pragma: no cover
     (
         organization,
         repository_list,
+        gh_app_id,
+        gh_app_installation_id,
+        gh_app_private_key,
         token,
         ghe,
         exempt_repositories_list,
@@ -35,7 +38,9 @@ def main():  # pragma: no cover
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
-    github_connection = auth.auth_to_github(token, ghe)
+    github_connection = auth.auth_to_github(
+        token, gh_app_id, gh_app_installation_id, gh_app_private_key, ghe
+    )
 
     # If Project ID is set lookup the global project ID
     if project_id:
@@ -53,10 +58,9 @@ def main():  # pragma: no cover
     count_eligible = 0
     for repo in repos:
         # if batch_size is defined, ensure we break if we exceed the number of eligible repos
-        if batch_size:
-            if count_eligible >= batch_size:
-                print(f"Batch size met at {batch_size} eligible repositories.")
-                break
+        if batch_size and count_eligible >= batch_size:
+            print(f"Batch size met at {batch_size} eligible repositories.")
+            break
 
         # Check all the things to see if repo is eligble for a pr/issue
         if repo.full_name in exempt_repositories_list:
