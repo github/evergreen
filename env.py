@@ -8,27 +8,62 @@ from os.path import dirname, join
 from dotenv import load_dotenv
 
 
-def get_env_vars() -> (
-    tuple[
-        str | None,
-        list[str],
-        str,
-        str,
-        list[str],
-        str,
-        str,
-        str,
-        str | None,
-        bool,
-        str,
-        str | None,
-        bool | None,
-        list[str] | None,
-        int | None,
-        bool | None,
-        list[str],
-    ]
-):
+def get_bool_env_var(env_var_name: str, default: bool = False) -> bool:
+    """Get a boolean environment variable.
+
+    Args:
+        env_var_name: The name of the environment variable to retrieve.
+        default: The default value to return if the environment variable is not set.
+
+    Returns:
+        The value of the environment variable as a boolean.
+    """
+    ev = os.environ.get(env_var_name, "")
+    if ev == "" and default:
+        return True
+    return ev.strip().lower() == "true"
+
+
+def get_int_env_var(env_var_name: str) -> int | None:
+    """Get an integer environment variable.
+
+    Args:
+        env_var_name: The name of the environment variable to retrieve.
+
+    Returns:
+        The value of the environment variable as an integer or None.
+    """
+    env_var = os.environ.get(env_var_name)
+    if env_var is None or not env_var.strip():
+        return None
+    try:
+        return int(env_var)
+    except ValueError:
+        return None
+
+
+def get_env_vars() -> tuple[
+    str | None,
+    list[str],
+    int | None,
+    int | None,
+    bytes,
+    str,
+    str,
+    list[str],
+    str,
+    str,
+    str,
+    str | None,
+    bool,
+    str,
+    str | None,
+    bool | None,
+    list[str] | None,
+    int | None,
+    bool | None,
+    list[str],
+]:
     """
     Get the environment variables for use in the action.
 
@@ -38,6 +73,9 @@ def get_env_vars() -> (
     Returns:
         organization (str): The organization to search for repositories in
         repository_list (list[str]): A list of repositories to search for
+        gh_app_id (int | None): The GitHub App ID to use for authentication
+        gh_app_installation_id (int | None): The GitHub App Installation ID to use for authentication
+        gh_app_private_key_bytes (bytes): The GitHub App Private Key as bytes to use for authentication
         token (str): The GitHub token to use for authentication
         ghe (str): The GitHub Enterprise URL to use for authentication
         exempt_repositories_list (list[str]): A list of repositories to exempt from the action
@@ -77,9 +115,22 @@ def get_env_vars() -> (
             repository.strip() for repository in repositories_str.split(",")
         ]
 
-    token = os.getenv("GH_TOKEN")
-    # required env variable
-    if not token:
+    gh_app_id = get_int_env_var("GH_APP_ID")
+    gh_app_private_key_bytes = os.environ.get("GH_APP_PRIVATE_KEY", "").encode("utf8")
+    gh_app_installation_id = get_int_env_var("GH_APP_INSTALLATION_ID")
+
+    if gh_app_id and (not gh_app_private_key_bytes or not gh_app_installation_id):
+        raise ValueError(
+            "GH_APP_ID set and GH_APP_INSTALLATION_ID or GH_APP_PRIVATE_KEY variable not set"
+        )
+
+    token = os.getenv("GH_TOKEN", "")
+    if (
+        not gh_app_id
+        and not gh_app_private_key_bytes
+        and not gh_app_installation_id
+        and not token
+    ):
         raise ValueError("GH_TOKEN environment variable not set")
 
     ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
@@ -138,39 +189,11 @@ Please enable it by merging this pull request so that we can keep our dependenci
     if created_after_date and len(created_after_date) != 10:
         raise ValueError("CREATED_AFTER_DATE environment variable not in YYYY-MM-DD")
 
-    group_dependencies = os.getenv("GROUP_DEPENDENCIES")
-    group_dependencies = group_dependencies.lower() if group_dependencies else None
-    if group_dependencies:
-        if group_dependencies not in ("true", "false"):
-            raise ValueError(
-                "GROUP_DEPENDENCIES environment variable not 'true' or 'false'"
-            )
-        group_dependencies_bool = group_dependencies == "true"
-    else:
-        group_dependencies_bool = False
-
-    # enable_security_updates is optional but true by default to maintain backward compatibility
-    enable_security_updates = os.getenv("ENABLE_SECURITY_UPDATES")
-    enable_security_updates = (
-        enable_security_updates.lower() if enable_security_updates else "true"
+    group_dependencies_bool = get_bool_env_var("GROUP_DEPENDENCIES")
+    enable_security_updates_bool = get_bool_env_var(
+        "ENABLE_SECURITY_UPDATES", default=True
     )
-    if enable_security_updates:
-        if enable_security_updates not in ("true", "false"):
-            raise ValueError(
-                "ENABLE_SECURITY_UPDATES environment variable not 'true' or 'false'"
-            )
-        enable_security_updates_bool = enable_security_updates == "true"
-    else:
-        enable_security_updates_bool = False
-
-    dry_run = os.getenv("DRY_RUN")
-    dry_run = dry_run.lower() if dry_run else None
-    if dry_run:
-        if dry_run not in ("true", "false"):
-            raise ValueError("DRY_RUN environment variable not 'true' or 'false'")
-        dry_run_bool = dry_run == "true"
-    else:
-        dry_run_bool = False
+    dry_run_bool = get_bool_env_var("DRY_RUN")
 
     batch_size_str = os.getenv("BATCH_SIZE")
     batch_size = int(batch_size_str) if batch_size_str else None
@@ -204,6 +227,9 @@ Please enable it by merging this pull request so that we can keep our dependenci
     return (
         organization,
         repositories_list,
+        gh_app_id,
+        gh_app_installation_id,
+        gh_app_private_key_bytes,
         token,
         ghe,
         exempt_repositories_list,

@@ -10,12 +10,33 @@ from env import get_env_vars
 class TestEnv(unittest.TestCase):
     """Test the get_env_vars function"""
 
+    def setUp(self):
+        env_keys = [
+            "ORGANIZATION",
+            "EXEMPT_REPOS",
+            "GH_APP_ID",
+            "GH_APP_INSTALLATION_ID",
+            "GH_APP_PRIVATE_KEY",
+            "GH_TOKEN",
+            "GH_ENTERPRISE_URL",
+            "TYPE",
+            "TITLE",
+            "BODY",
+            "CREATED_AFTER_DATE",
+            "COMMIT_MESSAGE",
+            "PROJECT_ID",
+            "GROUP_DEPENDENCIES",
+        ]
+        for key in env_keys:
+            if key in os.environ:
+                del os.environ[key]
+
     @patch.dict(
         os.environ,
         {
             "ORGANIZATION": "my_organization",
-            "GH_TOKEN": "my_token",
             "EXEMPT_REPOS": "repo4,repo5",
+            "GH_TOKEN": "my_token",
             "TYPE": "issue",
             "TITLE": "Dependabot Alert custom title",
             "BODY": "Dependabot custom body",
@@ -30,6 +51,9 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             ["repo4", "repo5"],
@@ -71,6 +95,9 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             None,
             ["org/repo1", "org2/repo2"],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             ["repo4", "repo5"],
@@ -102,6 +129,9 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -126,20 +156,76 @@ we can keep our dependencies up to date and secure.",
     @patch.dict(os.environ, {})
     def test_get_env_vars_missing_org_or_repo(self):
         """Test that an error is raised if required environment variables are not set"""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as cm:
             get_env_vars()
+        the_exception = cm.exception
+        self.assertEqual(
+            str(the_exception),
+            "ORGANIZATION and REPOSITORY environment variables were not set. Please set one",
+        )
 
     @patch.dict(
         os.environ,
         {
             "ORGANIZATION": "my_organization",
+            "GH_APP_ID": "12345",
+            "GH_APP_INSTALLATION_ID": "678910",
+            "GH_APP_PRIVATE_KEY": "hello",
+            "GH_TOKEN": "",
         },
         clear=True,
     )
-    def test_get_env_vars_missing_token(self):
-        """Test that an error is raised if required environment variables are not set"""
-        with self.assertRaises(ValueError):
+    def test_get_env_vars_auth_with_github_app_installation(self):
+        """Test that an error is raised if at least one type of authentication
+        required environment variables are not set"""
+        expected_result = (
+            "my_organization",
+            [],
+            12345,
+            678910,
+            b"hello",
+            "",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. Please enable it by merging "
+            "this pull request so that we can keep our dependencies up to date and "
+            "secure.",
+            None,
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["internal", "private", "public"],
+            None,  # batch_size
+            True,  # enable_security_updates
+            [],  # exempt_ecosystems
+        )
+        result = get_env_vars()
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_APP_ID": "",
+            "GH_APP_INSTALLATION_ID": "",
+            "GH_APP_PRIVATE_KEY": "",
+            "GH_TOKEN": "",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_missing_at_least_one_auth(self):
+        """Test that an error is raised if at least one type of authentication
+        required environment variables are not set"""
+        with self.assertRaises(ValueError) as cm:
             get_env_vars()
+        the_exception = cm.exception
+        self.assertEqual(
+            str(the_exception),
+            "GH_TOKEN environment variable not set",
+        )
 
     @patch.dict(
         os.environ,
@@ -155,6 +241,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -190,6 +279,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -226,6 +318,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -262,6 +357,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -328,6 +426,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -365,6 +466,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -401,6 +505,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],
@@ -438,6 +545,9 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            None,
+            None,
+            b"",
             "my_token",
             "",
             [],

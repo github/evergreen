@@ -6,27 +6,28 @@ on:
     - cron: '3 2 1 * *'
 
 permissions:
-  issues: write
+  issues: read
 
 jobs:
   contributor_report:
     name: contributor report
     runs-on: ubuntu-latest
-
+    permissions:
+      issues: write
     steps:
       - name: Get dates for last month
         shell: bash
         run: |
           # Calculate the first day of the previous month
           start_date=$(date -d "last month" +%Y-%m-01)
-  
+
           # Calculate the last day of the previous month
           end_date=$(date -d "$start_date +1 month -1 day" +%Y-%m-%d)
-  
+
           #Set an environment variable with the date range
           echo "START_DATE=$start_date" >> "$GITHUB_ENV"
           echo "END_DATE=$end_date" >> "$GITHUB_ENV"
-  
+
       - name: Run contributor action
         uses: github/contributors@v1
         env:
@@ -35,7 +36,7 @@ jobs:
           END_DATE: ${{ env.END_DATE }}
           REPOSITORY: github/evergreen
           SPONSOR_INFO: "true"
-  
+
       - name: Create issue
         uses: peter-evans/create-issue-from-file@v5
         with:

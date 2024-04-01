@@ -5,9 +5,14 @@ on:
   release:
     types: published
 
+permissions:
+  contents: read
+
 jobs:
   update-major-version-tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
