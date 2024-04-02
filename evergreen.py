@@ -80,12 +80,7 @@ def main():  # pragma: no cover
         except github3.exceptions.NotFoundError:
             pass
 
-        repo_createdat_date_object = datetime.strptime(
-            repo.created_at.split("T")[0], "%Y-%m-%d"
-        )
-        if created_after_date and repo_createdat_date_object.replace(
-            tzinfo=None
-        ) < datetime.strptime(created_after_date, "%Y-%m-%d"):
+        if is_repo_created_date_before(repo.created_at, created_after_date):
             continue
 
         print("Checking " + repo.full_name)
@@ -164,8 +159,23 @@ def main():  # pragma: no cover
     print("Done. " + str(count_eligible) + " repositories were eligible.")
 
 
+def is_repo_created_date_before(repo_created_at, created_after_date):
+    """Check if the repository was created before the created_after_date"""
+    repo_created_at_date = repo_created_at
+    if isinstance(repo_created_at, str):
+        repo_created_at_date = datetime.fromisoformat(repo_created_at)
+    repo_created_at_date = repo_created_at_date.replace(tzinfo=None)
+    if created_after_date and repo_created_at_date < datetime.strptime(
+        created_after_date, "%Y-%m-%d"
+    ):
+        return True
+    return False
+
+
 def is_dependabot_security_updates_enabled(owner, repo, access_token):
-    """Check if Dependabot security updates are enabled at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library"""
+    """Check if Dependabot security updates are enabled at the
+    /repos/:owner/:repo/automated-security-fixes endpoint using the requests library
+    """
     url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
     headers = {
         "Authorization": f"Bearer {access_token}",
