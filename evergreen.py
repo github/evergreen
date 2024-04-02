@@ -159,12 +159,9 @@ def main():  # pragma: no cover
     print("Done. " + str(count_eligible) + " repositories were eligible.")
 
 
-def is_repo_created_date_before(repo_created_at, created_after_date):
+def is_repo_created_date_before(repo_created_at: str, created_after_date: str):
     """Check if the repository was created before the created_after_date"""
-    repo_created_at_date = repo_created_at
-    if isinstance(repo_created_at, str):
-        repo_created_at_date = datetime.fromisoformat(repo_created_at)
-    repo_created_at_date = repo_created_at_date.replace(tzinfo=None)
+    repo_created_at_date = datetime.fromisoformat(repo_created_at).replace(tzinfo=None)
     if created_after_date and repo_created_at_date < datetime.strptime(
         created_after_date, "%Y-%m-%d"
     ):

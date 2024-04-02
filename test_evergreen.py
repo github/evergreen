@@ -2,7 +2,6 @@
 
 import unittest
 import uuid
-from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import requests
@@ -584,34 +583,7 @@ class TestLinkItemToProject(unittest.TestCase):
 class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
     """Test the is_repo_create_date_before_created_after_date function in evergreen.py"""
 
-    def test_is_repo_create_date_is_date_and_before_created_after_date(self):
-        """Test the repo.created_at date is before created_after_date."""
-        repo_created_at = datetime(2020, 1, 1, 5, 0, tzinfo=timezone.utc)
-        created_after_date = "2021-01-01"
-
-        result = is_repo_created_date_before(repo_created_at, created_after_date)
-
-        self.assertTrue(result)
-
-    def test_is_repo_create_date_is_date_and_after_created_after_date(self):
-        """Test the repo.created_at date is after created_after_date."""
-        repo_created_at = datetime(2022, 1, 1, 5, 0, tzinfo=timezone.utc)
-        created_after_date = "2021-01-01"
-
-        result = is_repo_created_date_before(repo_created_at, created_after_date)
-
-        self.assertFalse(result)
-
-    def test_is_repo_created_date_is_date_and_no_time_zone(self):
-        """Test the repo.created_at date is after created_after_date."""
-        repo_created_at = datetime(2020, 1, 1, 5)
-        created_after_date = "2021-01-01"
-
-        result = is_repo_created_date_before(repo_created_at, created_after_date)
-
-        self.assertTrue(result)
-
-    def test_is_repo_create_date_is_string_and_before_created_after_date(self):
+    def test_is_repo_create_date_before_created_after_date(self):
         """Test the repo.created_at date is before created_after_date."""
         repo_created_at = "2020-01-01T05:00:00Z"
         created_after_date = "2021-01-01"
@@ -620,7 +592,7 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
 
         self.assertTrue(result)
 
-    def test_is_repo_create_date_is_string_and_after_created_after_date(self):
+    def test_is_repo_create_date_is_after_created_after_date(self):
         """Test the repo.created_at date is after created_after_date."""
         repo_created_at = "2022-01-01T05:00:00Z"
         created_after_date = "2021-01-01"
@@ -629,9 +601,9 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
 
         self.assertFalse(result)
 
-    def test_is_repo_created_date_is_string_and_no_time_zone(self):
+    def test_is_repo_created_date_has_no_time_zone(self):
         """Test the repo.created_at date is after created_after_date."""
-        repo_created_at = "2020-01-01T05:00:00Z"
+        repo_created_at = "2020-01-01"
         created_after_date = "2021-01-01"
 
         result = is_repo_created_date_before(repo_created_at, created_after_date)
