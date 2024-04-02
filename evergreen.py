@@ -162,11 +162,9 @@ def main():  # pragma: no cover
 def is_repo_created_date_before(repo_created_at: str, created_after_date: str):
     """Check if the repository was created before the created_after_date"""
     repo_created_at_date = datetime.fromisoformat(repo_created_at).replace(tzinfo=None)
-    if created_after_date and repo_created_at_date < datetime.strptime(
+    return created_after_date and repo_created_at_date < datetime.strptime(
         created_after_date, "%Y-%m-%d"
-    ):
-        return True
-    return False
+    )
 
 
 def is_dependabot_security_updates_enabled(owner, repo, access_token):

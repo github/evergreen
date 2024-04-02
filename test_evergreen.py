@@ -610,6 +610,15 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
 
         self.assertTrue(result)
 
+    def test_is_created_after_date_is_empty_string(self):
+        """Test the repo.created_at date is after created_after_date."""
+        repo_created_at = "2020-01-01"
+        created_after_date = ""
+
+        result = is_repo_created_date_before(repo_created_at, created_after_date)
+
+        self.assertFalse(result)
+
 
 if __name__ == "__main__":
     unittest.main()
