@@ -80,7 +80,10 @@ def main():  # pragma: no cover
         except github3.exceptions.NotFoundError:
             pass
 
-        if created_after_date and repo.created_at.replace(
+        repo_createdat_date_object = datetime.strptime(
+            repo.created_at.split("T")[0], "%Y-%m-%d"
+        )
+        if created_after_date and repo_createdat_date_object.replace(
             tzinfo=None
         ) < datetime.strptime(created_after_date, "%Y-%m-%d"):
             continue
