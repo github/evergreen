@@ -3,6 +3,7 @@ Sets up the environment variables for the action.
 """
 
 import os
+import re
 from os.path import dirname, join
 
 from dotenv import load_dotenv
@@ -54,7 +55,7 @@ def get_env_vars() -> tuple[
     str,
     str,
     str,
-    str | None,
+    str,
     bool,
     str,
     str | None,
@@ -184,10 +185,12 @@ Please enable it by merging this pull request so that we can keep our dependenci
     else:
         commit_message = "Create dependabot.yaml"
 
-    created_after_date = os.getenv("CREATED_AFTER_DATE")
-    # make sure that created_after_date is a date in the format YYYY-MM-DD
-    if created_after_date and len(created_after_date) != 10:
-        raise ValueError("CREATED_AFTER_DATE environment variable not in YYYY-MM-DD")
+    created_after_date = os.getenv("CREATED_AFTER_DATE", "")
+    is_match = re.match(r"\d{4}-\d{2}-\d{2}", created_after_date)
+    if created_after_date and not is_match:
+        raise ValueError(
+            f"CREATED_AFTER_DATE '{created_after_date}' environment variable not in YYYY-MM-DD"
+        )
 
     group_dependencies_bool = get_bool_env_var("GROUP_DEPENDENCIES")
     enable_security_updates_bool = get_bool_env_var(
