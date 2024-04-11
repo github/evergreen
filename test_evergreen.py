@@ -584,7 +584,7 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
     """Test the is_repo_create_date_before_created_after_date function in evergreen.py"""
 
     def test_is_repo_create_date_before_created_after_date(self):
-        """Test the repo.created_at date is before created_after_date."""
+        """Test the repo.created_at date is before created_after_date and has timezone."""
         repo_created_at = "2020-01-01T05:00:00Z"
         created_after_date = "2021-01-01"
 
@@ -593,7 +593,7 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
         self.assertTrue(result)
 
     def test_is_repo_create_date_is_after_created_after_date(self):
-        """Test the repo.created_at date is after created_after_date."""
+        """Test the repo.created_at date is after created_after_date and has timezone."""
         repo_created_at = "2022-01-01T05:00:00Z"
         created_after_date = "2021-01-01"
 
@@ -602,7 +602,7 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
         self.assertFalse(result)
 
     def test_is_repo_created_date_has_no_time_zone(self):
-        """Test the repo.created_at date is after created_after_date."""
+        """Test the repo.created_at date is before created_after_date with no timezone."""
         repo_created_at = "2020-01-01"
         created_after_date = "2021-01-01"
 
@@ -618,6 +618,25 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
         result = is_repo_created_date_before(repo_created_at, created_after_date)
 
         self.assertFalse(result)
+
+    def test_is_repo_created_date_is_before_created_after_date_without_timezene_again(
+        self,
+    ):
+        """Test the repo.created_at date is before created_after_date without timezone again."""
+        repo_created_at = "2018-01-01"
+        created_after_date = "2020-01-01"
+
+        result = is_repo_created_date_before(repo_created_at, created_after_date)
+
+        self.assertTrue(result)
+
+    def test_is_repo_created_date_and_created_after_date_is_not_a_date(self):
+        """Test the repo.created_at date and the created_after_date argument is not a date."""
+        repo_created_at = "2018-01-01"
+        created_after_date = "Not a date"
+
+        with self.assertRaises(ValueError):
+            is_repo_created_date_before(repo_created_at, created_after_date)
 
 
 if __name__ == "__main__":

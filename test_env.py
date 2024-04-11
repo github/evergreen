@@ -40,7 +40,7 @@ class TestEnv(unittest.TestCase):
             "TYPE": "issue",
             "TITLE": "Dependabot Alert custom title",
             "BODY": "Dependabot custom body",
-            "CREATED_AFTER_DATE": "2023-01-01",
+            "CREATED_AFTER_DATE": "2020-01-01",
             "COMMIT_MESSAGE": "Create dependabot configuration",
             "PROJECT_ID": "123",
             "GROUP_DEPENDENCIES": "false",
@@ -60,7 +60,7 @@ class TestEnv(unittest.TestCase):
             "issue",
             "Dependabot Alert custom title",
             "Dependabot custom body",
-            "2023-01-01",
+            "2020-01-01",
             False,
             "Create dependabot configuration",
             "123",
@@ -140,7 +140,7 @@ class TestEnv(unittest.TestCase):
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -192,7 +192,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. Please enable it by merging "
             "this pull request so that we can keep our dependencies up to date and "
             "secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -252,7 +252,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -290,7 +290,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -329,7 +329,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -368,7 +368,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -437,7 +437,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -477,7 +477,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -516,7 +516,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -556,7 +556,7 @@ we can keep our dependencies up to date and secure.",
             "Dependabot could be enabled for this repository. \
 Please enable it by merging this pull request so that \
 we can keep our dependencies up to date and secure.",
-            None,
+            "",
             False,
             "Create dependabot.yaml",
             None,
@@ -581,7 +581,7 @@ we can keep our dependencies up to date and secure.",
         clear=True,
     )
     def test_get_env_vars_with_invalid_batch_size_int(self):
-        """Test that filter_visibility is set correctly when there are duplicate values"""
+        """Test that invalid batch size with negative 1 throws exception"""
         with self.assertRaises(ValueError):
             get_env_vars()
 
@@ -597,9 +597,28 @@ we can keep our dependencies up to date and secure.",
         clear=True,
     )
     def test_get_env_vars_with_invalid_batch_size_str(self):
-        """Test that filter_visibility is set correctly when there are duplicate values"""
+        """Test that invalid batch size of string throws exception"""
         with self.assertRaises(ValueError):
             get_env_vars()
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "CREATED_AFTER_DATE": "20200101",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_badly_formatted_created_after_date(self):
+        """Test that"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars()
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "CREATED_AFTER_DATE environment variable not in YYYY-MM-DD",
+        )
 
 
 if __name__ == "__main__":
