@@ -617,7 +617,7 @@ we can keep our dependencies up to date and secure.",
         the_exception = context_manager.exception
         self.assertEqual(
             str(the_exception),
-            "CREATED_AFTER_DATE environment variable not in YYYY-MM-DD",
+            "CREATED_AFTER_DATE '20200101' environment variable not in YYYY-MM-DD",
         )
 
 

@@ -188,7 +188,9 @@ Please enable it by merging this pull request so that we can keep our dependenci
     created_after_date = os.getenv("CREATED_AFTER_DATE", "")
     is_match = re.match(r"\d{4}-\d{2}-\d{2}", created_after_date)
     if created_after_date and not is_match:
-        raise ValueError("CREATED_AFTER_DATE environment variable not in YYYY-MM-DD")
+        raise ValueError(
+            f"CREATED_AFTER_DATE '{created_after_date}' environment variable not in YYYY-MM-DD"
+        )
 
     group_dependencies_bool = get_bool_env_var("GROUP_DEPENDENCIES")
     enable_security_updates_bool = get_bool_env_var(
