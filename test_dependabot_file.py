@@ -153,7 +153,7 @@ updates:
             expected_result = """---
 version: 2
 updates:
-  - package-ecosystem: 'hex'
+  - package-ecosystem: 'mix'
     directory: '/'
     schedule:
         interval: 'weekly'
