@@ -234,7 +234,7 @@ updates:
         ):
             compatible_package_manager_found = True
             hex_found = True
-            dependabot_file += make_dependabot_config("hex", group_dependencies)
+            dependabot_file += make_dependabot_config("mix", group_dependencies)
     except github3.exceptions.NotFoundError:
         pass
     try:
@@ -245,7 +245,7 @@ updates:
         ):
             compatible_package_manager_found = True
             hex_found = True
-            dependabot_file += make_dependabot_config("hex", group_dependencies)
+            dependabot_file += make_dependabot_config("mix", group_dependencies)
     except github3.exceptions.NotFoundError:
         pass
 
