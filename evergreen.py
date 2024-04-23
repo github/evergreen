@@ -64,26 +64,36 @@ def main():  # pragma: no cover
 
         # Check all the things to see if repo is eligble for a pr/issue
         if repo.full_name in exempt_repositories_list:
+            print("Skipping " + repo.full_name + " (exempted)")
             continue
         if repo.archived:
+            print("Skipping " + repo.full_name + " (archived)")
             continue
         if repo.visibility.lower() not in filter_visibility:
+            print("Skipping " + repo.full_name + " (visibility-filtered)")
             continue
         try:
             if repo.file_contents(".github/dependabot.yml").size > 0:
+                print(
+                    "Skipping " + repo.full_name + " (dependabot file already exists)"
+                )
                 continue
         except github3.exceptions.NotFoundError:
             pass
         try:
             if repo.file_contents(".github/dependabot.yaml").size > 0:
+                print(
+                    "Skipping " + repo.full_name + " (dependabot file already exists)"
+                )
                 continue
         except github3.exceptions.NotFoundError:
             pass
 
         if is_repo_created_date_before(repo.created_at, created_after_date):
+            print("Skipping " + repo.full_name + " (created after filter)")
             continue
 
-        print("Checking " + repo.full_name)
+        print("Checking " + repo.full_name + "for compatible package managers")
         # Try to detect package managers and build a dependabot file
         dependabot_file = build_dependabot_file(
             repo, group_dependencies, exempt_ecosystems
