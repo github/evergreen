@@ -43,9 +43,7 @@ def get_int_env_var(env_var_name: str) -> int | None:
         return None
 
 
-def get_env_vars(
-    test: bool = False,
-) -> tuple[
+def get_env_vars(test: bool = False) -> tuple[
     str | None,
     list[str],
     int | None,
@@ -95,7 +93,7 @@ def get_env_vars(
         exempt_ecosystems_list (list[str]): A list of package ecosystems to exempt from the action
     """
     if not test:
-        # Load from .env file if it exists
+        # Load from .env file if it exists and not tests
         dotenv_path = join(dirname(__file__), ".env")
         load_dotenv(dotenv_path)
 
