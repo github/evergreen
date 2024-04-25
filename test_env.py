@@ -12,20 +12,21 @@ class TestEnv(unittest.TestCase):
 
     def setUp(self):
         env_keys = [
-            "ORGANIZATION",
+            "BATCH_SIZE",
+            "BODY",
+            "COMMIT_MESSAGE",
+            "CREATED_AFTER_DATE",
             "EXEMPT_REPOS",
             "GH_APP_ID",
             "GH_APP_INSTALLATION_ID",
             "GH_APP_PRIVATE_KEY",
             "GH_TOKEN",
             "GH_ENTERPRISE_URL",
-            "TYPE",
-            "TITLE",
-            "BODY",
-            "CREATED_AFTER_DATE",
-            "COMMIT_MESSAGE",
-            "PROJECT_ID",
             "GROUP_DEPENDENCIES",
+            "ORGANIZATION",
+            "PROJECT_ID",
+            "TITLE",
+            "TYPE",
         ]
         for key in env_keys:
             if key in os.environ:
@@ -70,7 +71,7 @@ class TestEnv(unittest.TestCase):
             True,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -114,7 +115,7 @@ class TestEnv(unittest.TestCase):
             True,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -150,14 +151,14 @@ we can keep our dependencies up to date and secure.",
             True,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(os.environ, {})
     def test_get_env_vars_missing_org_or_repo(self):
         """Test that an error is raised if required environment variables are not set"""
         with self.assertRaises(ValueError) as cm:
-            get_env_vars()
+            get_env_vars(True)
         the_exception = cm.exception
         self.assertEqual(
             str(the_exception),
@@ -202,7 +203,7 @@ we can keep our dependencies up to date and secure.",
             True,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -220,7 +221,7 @@ we can keep our dependencies up to date and secure.",
         """Test that an error is raised if at least one type of authentication
         required environment variables are not set"""
         with self.assertRaises(ValueError) as cm:
-            get_env_vars()
+            get_env_vars(True)
         the_exception = cm.exception
         self.assertEqual(
             str(the_exception),
@@ -262,7 +263,7 @@ we can keep our dependencies up to date and secure.",
             True,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -300,7 +301,7 @@ we can keep our dependencies up to date and secure.",
             False,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -339,7 +340,7 @@ we can keep our dependencies up to date and secure.",
             False,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -378,7 +379,7 @@ we can keep our dependencies up to date and secure.",
             False,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -394,7 +395,7 @@ we can keep our dependencies up to date and secure.",
     def test_get_env_vars_with_repos_filter_visibility_invalid_single_value(self):
         """Test that filter_visibility throws an error when an invalid value is provided"""
         with self.assertRaises(ValueError):
-            get_env_vars()
+            get_env_vars(True)
 
     @patch.dict(
         os.environ,
@@ -409,7 +410,7 @@ we can keep our dependencies up to date and secure.",
     def test_get_env_vars_with_repos_filter_visibility_invalid_multiple_value(self):
         """Test that filter_visibility throws an error when an invalid value is provided"""
         with self.assertRaises(ValueError):
-            get_env_vars()
+            get_env_vars(True)
 
     @patch.dict(
         os.environ,
@@ -447,7 +448,7 @@ we can keep our dependencies up to date and secure.",
             False,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -487,7 +488,7 @@ we can keep our dependencies up to date and secure.",
             False,  # enable_security_updates
             ["gomod", "docker"],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -526,7 +527,7 @@ we can keep our dependencies up to date and secure.",
             False,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -566,7 +567,7 @@ we can keep our dependencies up to date and secure.",
             False,  # enable_security_updates
             [],  # exempt_ecosystems
         )
-        result = get_env_vars()
+        result = get_env_vars(True)
         self.assertEqual(result, expected_result)
 
     @patch.dict(
@@ -583,7 +584,7 @@ we can keep our dependencies up to date and secure.",
     def test_get_env_vars_with_invalid_batch_size_int(self):
         """Test that invalid batch size with negative 1 throws exception"""
         with self.assertRaises(ValueError):
-            get_env_vars()
+            get_env_vars(True)
 
     @patch.dict(
         os.environ,
@@ -599,7 +600,7 @@ we can keep our dependencies up to date and secure.",
     def test_get_env_vars_with_invalid_batch_size_str(self):
         """Test that invalid batch size of string throws exception"""
         with self.assertRaises(ValueError):
-            get_env_vars()
+            get_env_vars(True)
 
     @patch.dict(
         os.environ,
@@ -613,7 +614,7 @@ we can keep our dependencies up to date and secure.",
     def test_get_env_vars_with_badly_formatted_created_after_date(self):
         """Test that"""
         with self.assertRaises(ValueError) as context_manager:
-            get_env_vars()
+            get_env_vars(True)
         the_exception = context_manager.exception
         self.assertEqual(
             str(the_exception),
