@@ -89,11 +89,13 @@ def main():  # pragma: no cover
         except github3.exceptions.NotFoundError:
             pass
 
-        if is_repo_created_date_before(repo.created_at, created_after_date):
+        if created_after_date and is_repo_created_date_before(
+            repo.created_at, created_after_date
+        ):
             print("Skipping " + repo.full_name + " (created after filter)")
             continue
 
-        print("Checking " + repo.full_name + "for compatible package managers")
+        print("Checking " + repo.full_name + " for compatible package managers")
         # Try to detect package managers and build a dependabot file
         dependabot_file = build_dependabot_file(
             repo, group_dependencies, exempt_ecosystems
