@@ -42,6 +42,11 @@ def main():  # pragma: no cover
         token, gh_app_id, gh_app_installation_id, gh_app_private_key, ghe
     )
 
+    if not token and gh_app_id and gh_app_installation_id and gh_app_private_key:
+        token = auth.get_github_app_installation_token(
+            gh_app_id, gh_app_private_key, gh_app_installation_id
+        )
+
     # If Project ID is set lookup the global project ID
     if project_id:
         # Check Organization is set as it is required for linking to a project

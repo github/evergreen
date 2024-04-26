@@ -1,6 +1,7 @@
 """This is the module that contains functions related to authenticating to GitHub with a personal access token."""
 
 import github3
+import requests
 
 
 def auth_to_github(
@@ -41,3 +42,29 @@ def auth_to_github(
     if not github_connection:
         raise ValueError("Unable to authenticate to GitHub")
     return github_connection  # type: ignore
+
+
+def get_github_app_installation_token(
+    gh_app_id: str, gh_app_private_key_bytes: bytes, gh_app_installation_id: str
+) -> str | None:
+    """
+    Get a GitHub App Installation token.
+
+    Args:
+        gh_app_id (str): the GitHub App ID
+        gh_app_private_key_bytes (bytes): the GitHub App Private Key
+        gh_app_installation_id (str): the GitHub App Installation ID
+
+    Returns:
+        str: the GitHub App token
+    """
+    jwt_headers = github3.apps.create_jwt_headers(gh_app_private_key_bytes, gh_app_id)
+    url = f"https://api.github.com/app/installations/{gh_app_installation_id}/access_tokens"
+
+    try:
+        response = requests.post(url, headers=jwt_headers, json=None, timeout=5)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
+    return response.json().get("token")
