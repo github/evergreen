@@ -93,7 +93,7 @@ def get_env_vars(test: bool = False) -> tuple[
         exempt_ecosystems_list (list[str]): A list of package ecosystems to exempt from the action
     """
     if not test:
-        # Load from .env file if it exists and not tests
+        # Load from .env file if it exists and not testing
         dotenv_path = join(dirname(__file__), ".env")
         load_dotenv(dotenv_path)
 
