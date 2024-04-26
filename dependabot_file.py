@@ -17,14 +17,14 @@ def make_dependabot_config(ecosystem, group_dependencies) -> str:
     dependabot_config = f"""  - package-ecosystem: '{ecosystem}'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
     if group_dependencies:
         dependabot_config += """    groups:
-        production-dependencies:
-            dependency-type: 'production'
-        development-dependencies:
-            dependency-type: 'development'
+      production-dependencies:
+        dependency-type: 'production'
+      development-dependencies:
+        dependency-type: 'development'
 """
     return dependabot_config
 
