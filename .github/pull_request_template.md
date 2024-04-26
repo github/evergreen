@@ -21,4 +21,4 @@ examples: "feat: add new logger" or "fix: remove unused imports"
 
 ### Reviewer
 
-- [ ] Label as either `bug`, `documentation`, `enhancement`, `infrastructure`, `maintenance` or `breaking`
+- [ ] Label as either `fix`, `documentation`, `enhancement`, `infrastructure`, `maintenance` or `breaking`
