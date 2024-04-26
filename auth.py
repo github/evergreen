@@ -62,7 +62,7 @@ def get_github_app_installation_token(
     url = f"https://api.github.com/app/installations/{gh_app_installation_id}/access_tokens"
 
     try:
-        response = requests.post(url, headers=jwt_headers, json=None, timeout=20)
+        response = requests.post(url, headers=jwt_headers, json=None, timeout=5)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
