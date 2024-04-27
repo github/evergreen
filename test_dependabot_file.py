@@ -35,7 +35,7 @@ updates:
   - package-ecosystem: 'bundler'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [])
             self.assertEqual(result, expected_result)
@@ -53,7 +53,7 @@ updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [])
             self.assertEqual(result, expected_result)
@@ -77,7 +77,7 @@ updates:
   - package-ecosystem: 'pip'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [])
             self.assertEqual(result, expected_result)
@@ -98,7 +98,7 @@ updates:
   - package-ecosystem: 'cargo'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [])
             self.assertEqual(result, expected_result)
@@ -114,7 +114,7 @@ updates:
   - package-ecosystem: 'gomod'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
         result = build_dependabot_file(repo, False, [])
         self.assertEqual(result, expected_result)
@@ -135,7 +135,7 @@ updates:
   - package-ecosystem: 'composer'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [])
             self.assertEqual(result, expected_result)
@@ -156,7 +156,7 @@ updates:
   - package-ecosystem: 'mix'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [])
             self.assertEqual(result, expected_result)
@@ -172,7 +172,7 @@ updates:
   - package-ecosystem: 'nuget'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
         result = build_dependabot_file(repo, False, [])
         self.assertEqual(result, expected_result)
@@ -188,7 +188,7 @@ updates:
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
         result = build_dependabot_file(repo, False, [])
         self.assertEqual(result, expected_result)
@@ -204,12 +204,12 @@ updates:
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
     groups:
-        production-dependencies:
-            dependency-type: 'production'
-        development-dependencies:
-            dependency-type: 'development'
+      production-dependencies:
+        dependency-type: 'production'
+      development-dependencies:
+        dependency-type: 'development'
 """
         result = build_dependabot_file(repo, True, [])
         self.assertEqual(result, expected_result)
