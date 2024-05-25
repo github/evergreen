@@ -35,6 +35,7 @@ def main():  # pragma: no cover
         batch_size,
         enable_security_updates,
         exempt_ecosystems,
+        update_existing,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -47,7 +48,7 @@ def main():  # pragma: no cover
             gh_app_id, gh_app_private_key, gh_app_installation_id
         )
 
-    # If Project ID is set lookup the global project ID
+    # If Project ID is set, lookup the global project ID
     if project_id:
         # Check Organization is set as it is required for linking to a project
         if not organization:
@@ -61,6 +62,7 @@ def main():  # pragma: no cover
 
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
     count_eligible = 0
+    existing_config = None
     for repo in repos:
         # if batch_size is defined, ensure we break if we exceed the number of eligible repos
         if batch_size and count_eligible >= batch_size:
@@ -78,19 +80,27 @@ def main():  # pragma: no cover
             print("Skipping " + repo.full_name + " (visibility-filtered)")
             continue
         try:
-            if repo.file_contents(".github/dependabot.yml").size > 0:
-                print(
-                    "Skipping " + repo.full_name + " (dependabot file already exists)"
-                )
-                continue
+            existing_config = repo.file_contents(".github/dependabot.yml")
+            if existing_config.size > 0:
+                if not update_existing:
+                    print(
+                        "Skipping "
+                        + repo.full_name
+                        + " (dependabot file already exists)"
+                    )
+                    continue
         except github3.exceptions.NotFoundError:
             pass
         try:
-            if repo.file_contents(".github/dependabot.yaml").size > 0:
-                print(
-                    "Skipping " + repo.full_name + " (dependabot file already exists)"
-                )
-                continue
+            existing_config = repo.file_contents(".github/dependabot.yaml")
+            if existing_config.size > 0:
+                if not update_existing:
+                    print(
+                        "Skipping "
+                        + repo.full_name
+                        + " (dependabot file already exists)"
+                    )
+                    continue
         except github3.exceptions.NotFoundError:
             pass
 
@@ -103,10 +113,11 @@ def main():  # pragma: no cover
         print("Checking " + repo.full_name + " for compatible package managers")
         # Try to detect package managers and build a dependabot file
         dependabot_file = build_dependabot_file(
-            repo, group_dependencies, exempt_ecosystems
+            repo, group_dependencies, exempt_ecosystems, existing_config
         )
+
         if dependabot_file is None:
-            print("\tNo compatible package manager found")
+            print("\tNo (new) compatible package manager found")
             continue
 
         # If dry_run is set, just print the dependabot file

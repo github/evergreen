@@ -1,6 +1,7 @@
 """This module contains the function to build the dependabot.yml file for a repo"""
 
 import github3
+import yaml
 
 
 def make_dependabot_config(ecosystem, group_dependencies) -> str:
@@ -29,7 +30,9 @@ def make_dependabot_config(ecosystem, group_dependencies) -> str:
     return dependabot_config
 
 
-def build_dependabot_file(repo, group_dependencies, exempt_ecosystems) -> str | None:
+def build_dependabot_file(
+    repo, group_dependencies, exempt_ecosystems, existing_config
+) -> str | None:
     """
     Build the dependabot.yml file for a repo based on the repo contents
 
@@ -37,6 +40,7 @@ def build_dependabot_file(repo, group_dependencies, exempt_ecosystems) -> str | 
         repo: the repository to build the dependabot.yml file for
         group_dependencies: whether to group dependencies in the dependabot.yml file
         exempt_ecosystems: the list of ecosystems to ignore
+        existing_config: the existing dependabot configuration file or None if it doesn't exist
 
     Returns:
         str: the dependabot.yml file for the repo
@@ -51,10 +55,16 @@ def build_dependabot_file(repo, group_dependencies, exempt_ecosystems) -> str | 
     hex_found = False
     nuget_found = False
     docker_found = False
-    dependabot_file = """---
+    if existing_config:
+        dependabot_file = existing_config.decoded.decode("utf-8")
+    else:
+        dependabot_file = """---
 version: 2
 updates:
 """
+
+    add_existing_ecosystem_to_exempt_list(exempt_ecosystems, existing_config)
+
     try:
         if (
             repo.file_contents("Gemfile")
@@ -305,3 +315,15 @@ updates:
     if compatible_package_manager_found:
         return dependabot_file
     return None
+
+
+def add_existing_ecosystem_to_exempt_list(exempt_ecosystems, existing_config):
+    """
+    Add the existing package ecosystems found in the dependabot.yml
+    to the exempt list so we don't get duplicate entries and maintain configuration settings
+    """
+    if existing_config:
+        existing_config_obj = yaml.safe_load(existing_config.decoded)
+        if existing_config_obj:
+            for entry in existing_config_obj.get("updates", []):
+                exempt_ecosystems.append(entry["package-ecosystem"])
