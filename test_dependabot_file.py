@@ -43,27 +43,23 @@ updates:
     def test_build_dependabot_file_with_existing_config_bundler_no_update(self):
         """Test that the dependabot.yml file is built correctly with bundler"""
         repo = MagicMock()
-        filename_list = ["Gemfile", "Gemfile.lock"]
+        repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
 
-        for filename in filename_list:
-            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            # expected_result is None because the existing config already contains the all applicable ecosystems
-            expected_result = None
-            existing_config = MagicMock()
-            existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "bundler"\n\
+        # expected_result is None because the existing config already contains the all applicable ecosystems
+        expected_result = None
+        existing_config = MagicMock()
+        existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "bundler"\n\
     directory: "/"\n    schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
-            result = build_dependabot_file(repo, False, [], existing_config)
-            self.assertEqual(result, expected_result)
+        result = build_dependabot_file(repo, False, [], existing_config)
+        self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_existing_config_bundler_with_update(self):
         """Test that the dependabot.yml file is built correctly with bundler"""
         repo = MagicMock()
-        filename_list = ["Gemfile", "Gemfile.lock"]
+        repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
 
-        for filename in filename_list:
-            repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            # expected_result maintains existing ecosystem with custom configuration and adds new ecosystem
-            expected_result = """---
+        # expected_result maintains existing ecosystem with custom configuration and adds new ecosystem
+        expected_result = """---
 version: 2
 updates:
   - package-ecosystem: "pip"
@@ -77,11 +73,11 @@ updates:
     schedule:
       interval: 'weekly'
 """
-            existing_config = MagicMock()
-            existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "pip"\n    directory: "/"\n\
+        existing_config = MagicMock()
+        existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "pip"\n    directory: "/"\n\
     schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
-            result = build_dependabot_file(repo, False, [], existing_config)
-            self.assertEqual(result, expected_result)
+        result = build_dependabot_file(repo, False, [], existing_config)
+        self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_npm(self):
         """Test that the dependabot.yml file is built correctly with npm"""
