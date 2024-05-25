@@ -62,7 +62,6 @@ def main():  # pragma: no cover
 
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
     count_eligible = 0
-    existing_config = None
     for repo in repos:
         # if batch_size is defined, ensure we break if we exceed the number of eligible repos
         if batch_size and count_eligible >= batch_size:
@@ -79,6 +78,7 @@ def main():  # pragma: no cover
         if repo.visibility.lower() not in filter_visibility:
             print("Skipping " + repo.full_name + " (visibility-filtered)")
             continue
+        existing_config = None
         try:
             existing_config = repo.file_contents(".github/dependabot.yml")
             if existing_config.size > 0:
