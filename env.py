@@ -64,6 +64,7 @@ def get_env_vars(test: bool = False) -> tuple[
     int | None,
     bool | None,
     list[str],
+    bool | None,
 ]:
     """
     Get the environment variables for use in the action.
@@ -91,7 +92,9 @@ def get_env_vars(test: bool = False) -> tuple[
         batch_size (int): The max number of repositories in scope
         enable_security_updates (bool): Whether to enable security updates in target repositories
         exempt_ecosystems_list (list[str]): A list of package ecosystems to exempt from the action
+        update_existing (bool): Whether to update existing dependabot configuration files
     """
+
     if not test:
         # Load from .env file if it exists and not testing
         dotenv_path = join(dirname(__file__), ".env")
@@ -228,6 +231,9 @@ Please enable it by merging this pull request so that we can keep our dependenci
     project_id = os.getenv("PROJECT_ID")
     if project_id and not project_id.isnumeric():
         raise ValueError("PROJECT_ID environment variable is not numeric")
+
+    update_existing = get_bool_env_var("UPDATE_EXISTING")
+
     return (
         organization,
         repositories_list,
@@ -249,4 +255,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         batch_size,
         enable_security_updates_bool,
         exempt_ecosystems_list,
+        update_existing,
     )

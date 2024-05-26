@@ -1,2 +1,4 @@
 github3.py==4.0.1
+requests==2.31.0
 python-dotenv==1.0.1
+PyYAML==6.0.1

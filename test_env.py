@@ -27,6 +27,7 @@ class TestEnv(unittest.TestCase):
             "PROJECT_ID",
             "TITLE",
             "TYPE",
+            "UPDATE_EXISTING",
         ]
         for key in env_keys:
             if key in os.environ:
@@ -46,6 +47,7 @@ class TestEnv(unittest.TestCase):
             "PROJECT_ID": "123",
             "GROUP_DEPENDENCIES": "false",
         },
+        clear=True,
     )
     def test_get_env_vars_with_org(self):
         """Test that all environment variables are set correctly using an organization"""
@@ -70,6 +72,7 @@ class TestEnv(unittest.TestCase):
             None,  # batch_size
             True,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -114,6 +117,7 @@ class TestEnv(unittest.TestCase):
             None,  # batch_size
             True,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -124,6 +128,7 @@ class TestEnv(unittest.TestCase):
             "ORGANIZATION": "my_organization",
             "GH_TOKEN": "my_token",
         },
+        clear=True,
     )
     def test_get_env_vars_optional_values(self):
         """Test that optional values are set to their default values if not provided"""
@@ -150,6 +155,46 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             True,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
+        )
+        result = get_env_vars(True)
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "UPDATE_EXISTING": "true",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_update_existing(self):
+        """Test that optional values are set to their default values if not provided"""
+        expected_result = (
+            "my_organization",
+            [],
+            None,
+            None,
+            b"",
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            "",
+            False,
+            "Create dependabot.yaml",
+            None,
+            False,
+            ["internal", "private", "public"],
+            None,  # batch_size
+            True,  # enable_security_updates
+            [],  # exempt_ecosystems
+            True,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -202,6 +247,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             True,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -262,6 +308,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             True,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -300,6 +347,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             False,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -339,6 +387,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             False,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -378,6 +427,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             False,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -447,6 +497,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             False,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -487,6 +538,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             False,  # enable_security_updates
             ["gomod", "docker"],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -526,6 +578,7 @@ we can keep our dependencies up to date and secure.",
             None,  # batch_size
             False,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -566,6 +619,7 @@ we can keep our dependencies up to date and secure.",
             5,  # batch_size
             False,  # enable_security_updates
             [],  # exempt_ecosystems
+            False,  # update_existing
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
