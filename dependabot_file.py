@@ -45,16 +45,20 @@ def build_dependabot_file(
     Returns:
         str: the dependabot.yml file for the repo
     """
-    compatible_package_manager_found = False
-    bundler_found = False
-    npm_found = False
-    pip_found = False
-    cargo_found = False
-    gomod_found = False
-    composer_found = False
-    hex_found = False
-    nuget_found = False
-    docker_found = False
+    package_managers_found = {
+        "bundler": False,
+        "npm": False,
+        "pip": False,
+        "cargo": False,
+        "gomod": False,
+        "composer": False,
+        "mix": False,
+        "nuget": False,
+        "docker": False,
+        "terraform": False,
+        "github-actions": False,
+    }
+
     if existing_config:
         dependabot_file = existing_config.decoded.decode("utf-8")
     else:
@@ -65,205 +69,59 @@ updates:
 
     add_existing_ecosystem_to_exempt_list(exempt_ecosystems, existing_config)
 
-    try:
-        if (
-            repo.file_contents("Gemfile")
-            and not bundler_found
-            and "bundler" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            bundler_found = True
-            dependabot_file += make_dependabot_config("bundler", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("Gemfile.lock")
-            and not bundler_found
-            and "bundler" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            bundler_found = True
-            dependabot_file += make_dependabot_config("bundler", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
+    package_managers = {
+        "bundler": ["Gemfile", "Gemfile.lock"],
+        "npm": ["package.json", "package-lock.json", "yarn.lock"],
+        "pip": [
+            "requirements.txt",
+            "Pipfile",
+            "Pipfile.lock",
+            "pyproject.toml",
+            "poetry.lock",
+        ],
+        "cargo": ["Cargo.toml", "Cargo.lock"],
+        "gomod": ["go.mod"],
+        "composer": ["composer.json", "composer.lock"],
+        "mix": ["mix.exs", "mix.lock"],
+        "nuget": [
+            ".nuspec",
+            ".csproj",
+        ],
+        "docker": ["Dockerfile"],
+    }
 
-    try:
-        if (
-            repo.file_contents("package.json")
-            and not npm_found
-            and "npm" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            npm_found = True
-            dependabot_file += make_dependabot_config("npm", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("package-lock.json")
-            and not npm_found
-            and "npm" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            npm_found = True
-            dependabot_file += make_dependabot_config("npm", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("yarn.lock")
-            and not npm_found
-            and "npm" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            npm_found = True
-            dependabot_file += make_dependabot_config("npm", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
+    # Detect package managers where manifest files have known names
+    for manager, manifest_files in package_managers.items():
+        if manager in exempt_ecosystems:
+            continue
+        for file in manifest_files:
+            try:
+                if repo.file_contents(file):
+                    package_managers_found[manager] = True
+                    dependabot_file += make_dependabot_config(
+                        manager, group_dependencies
+                    )
+                    break
+            except github3.exceptions.NotFoundError:
+                pass
 
-    try:
-        if (
-            repo.file_contents("requirements.txt")
-            and not pip_found
-            and "pip" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            pip_found = True
-            dependabot_file += make_dependabot_config("pip", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("Pipfile")
-            and not pip_found
-            and "pip" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            pip_found = True
-            dependabot_file += make_dependabot_config("pip", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("Pipfile.lock")
-            and not pip_found
-            and "pip" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            pip_found = True
-            dependabot_file += make_dependabot_config("pip", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("pyproject.toml")
-            and not pip_found
-            and "pip" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            pip_found = True
-            dependabot_file += make_dependabot_config("pip", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("poetry.lock")
-            and not pip_found
-            and "pip" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            pip_found = True
-            dependabot_file += make_dependabot_config("pip", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-
-    try:
-        if (
-            repo.file_contents("Cargo.toml")
-            and not cargo_found
-            and "cargo" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            cargo_found = True
-            dependabot_file += make_dependabot_config("cargo", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("Cargo.lock")
-            and not cargo_found
-            and "cargo" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            cargo_found = True
-            dependabot_file += make_dependabot_config("cargo", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-
-    try:
-        if (
-            repo.file_contents("go.mod")
-            and not gomod_found
-            and "gomod" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            gomod_found = True
-            dependabot_file += make_dependabot_config("gomod", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-
-    try:
-        if (
-            repo.file_contents("composer.json")
-            and not composer_found
-            and "composer" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            composer_found = True
-            dependabot_file += make_dependabot_config("composer", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("composer.lock")
-            and not composer_found
-            and "composer" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            composer_found = True
-            dependabot_file += make_dependabot_config("composer", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-
-    try:
-        if (
-            repo.file_contents("mix.exs")
-            and not hex_found
-            and "hex" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            hex_found = True
-            dependabot_file += make_dependabot_config("mix", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-    try:
-        if (
-            repo.file_contents("mix.lock")
-            and not hex_found
-            and "hex" not in exempt_ecosystems
-        ):
-            compatible_package_manager_found = True
-            hex_found = True
-            dependabot_file += make_dependabot_config("mix", group_dependencies)
-    except github3.exceptions.NotFoundError:
-        pass
-
+    # detect package managers with variable file names
+    if "terraform" not in exempt_ecosystems:
+        try:
+            for file in repo.directory_contents("/"):
+                if file[0].endswith(".tf"):
+                    package_managers_found["terraform"] = True
+                    dependabot_file += make_dependabot_config(
+                        "terraform", group_dependencies
+                    )
+                    break
+        except github3.exceptions.NotFoundError:
+            pass
     if "github-actions" not in exempt_ecosystems:
         try:
             for file in repo.directory_contents(".github/workflows"):
                 if file[0].endswith(".yml") or file[0].endswith(".yaml"):
-                    compatible_package_manager_found = True
+                    package_managers_found["github-actions"] = True
                     dependabot_file += make_dependabot_config(
                         "github-actions", group_dependencies
                     )
@@ -271,48 +129,7 @@ updates:
         except github3.exceptions.NotFoundError:
             pass
 
-    if "docker" not in exempt_ecosystems:
-        try:
-            if repo.file_contents("Dockerfile") and not docker_found:
-                compatible_package_manager_found = True
-                docker_found = True
-                dependabot_file += make_dependabot_config("docker", group_dependencies)
-        except github3.exceptions.NotFoundError:
-            pass
-
-    if "nuget" not in exempt_ecosystems:
-        try:
-            if repo.file_contents(".nuspec") and not nuget_found:
-                compatible_package_manager_found = True
-                nuget_found = True
-                dependabot_file += make_dependabot_config("nuget", group_dependencies)
-        except github3.exceptions.NotFoundError:
-            pass
-        try:
-            if repo.file_contents(".csproj") and not nuget_found:
-                compatible_package_manager_found = True
-                nuget_found = True
-                dependabot_file += make_dependabot_config("nuget", group_dependencies)
-        except github3.exceptions.NotFoundError:
-            pass
-
-    if "terraform" not in exempt_ecosystems:
-        try:
-            # detect if the repo has a any terraform files
-            terraform_files = False
-            for file in repo.directory_contents("/"):
-                if file[0].endswith(".tf"):
-                    terraform_files = True
-                    break
-            if terraform_files:
-                compatible_package_manager_found = True
-                dependabot_file += make_dependabot_config(
-                    "terraform", group_dependencies
-                )
-        except github3.exceptions.NotFoundError:
-            pass
-
-    if compatible_package_manager_found:
+    if any(package_managers_found.values()):
         return dependabot_file
     return None
 
