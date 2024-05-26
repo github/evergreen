@@ -4,8 +4,10 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, patch
 
+import github3
 import requests
 from evergreen import (
+    check_existing_config,
     check_pending_issues_for_duplicates,
     check_pending_pulls_for_duplicates,
     commit_changes,
@@ -637,6 +639,52 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             is_repo_created_date_before(repo_created_at, created_after_date)
+
+
+class TestCheckExistingConfig(unittest.TestCase):
+    """
+    Test cases for the check_existing_config function
+    """
+
+    def test_check_existing_config_with_existing_config(self):
+        """
+        Test the case where there is an existing configuration
+        """
+        mock_repo = MagicMock()
+        filename = "dependabot.yaml"
+        mock_repo.file_contents.return_value.size = 5
+
+        result = check_existing_config(mock_repo, filename, True)
+
+        self.assertIsNotNone(result)
+
+    def test_check_existing_config_without_existing_config(self):
+        """
+        Test the case where there is no existing configuration
+        """
+        mock_repo = MagicMock()
+        mock_response = MagicMock()
+        mock_repo.file_contents.side_effect = github3.exceptions.NotFoundError(
+            mock_response
+        )
+
+        result = check_existing_config(mock_repo, "dependabot.yml", True)
+
+        self.assertIsNone(result)
+
+    def test_check_existing_config_with_existing_config_without_update_existing_set(
+        self,
+    ):
+        """
+        Test the case where there is an existing configuration but UPDATE_EXISTING is False
+        """
+        mock_repo = MagicMock()
+        filename = "dependabot.yaml"
+        mock_repo.file_contents.return_value.size = 5
+
+        result = check_existing_config(mock_repo, filename, False)
+
+        self.assertIsNone(result)
 
 
 if __name__ == "__main__":

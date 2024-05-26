@@ -4,7 +4,8 @@ import unittest
 from unittest.mock import MagicMock
 
 import github3
-from dependabot_file import build_dependabot_file
+import yaml
+from dependabot_file import add_existing_ecosystem_to_exempt_list, build_dependabot_file
 
 
 class TestDependabotFile(unittest.TestCase):
@@ -260,6 +261,28 @@ updates:
 
         result = build_dependabot_file(repo, False, ["docker"], None)
         self.assertEqual(result, None)
+
+    def test_add_existing_ecosystem_to_exempt_list(self):
+        """Test that existing ecosystems are added to the exempt list"""
+        exempt_ecosystems = ["npm", "pip", "github-actions"]
+        existing_config = MagicMock()
+        existing_config.decoded = yaml.dump(
+            {
+                "updates": [
+                    {"package-ecosystem": "npm"},
+                    {"package-ecosystem": "pip"},
+                    {"package-ecosystem": "bundler"},
+                ]
+            }
+        ).encode()
+
+        add_existing_ecosystem_to_exempt_list(exempt_ecosystems, existing_config)
+
+        # Check new ecosystem is added to exempt list
+        self.assertIn("bundler", exempt_ecosystems)
+        # Keep existing ecosystems in exempt list
+        for ecosystem in exempt_ecosystems:
+            self.assertIn(ecosystem, exempt_ecosystems)
 
 
 if __name__ == "__main__":
