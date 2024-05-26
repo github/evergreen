@@ -79,30 +79,11 @@ def main():  # pragma: no cover
             print("Skipping " + repo.full_name + " (visibility-filtered)")
             continue
         existing_config = None
-        try:
-            existing_config = repo.file_contents(".github/dependabot.yml")
-            if existing_config.size > 0:
-                if not update_existing:
-                    print(
-                        "Skipping "
-                        + repo.full_name
-                        + " (dependabot file already exists)"
-                    )
-                    continue
-        except github3.exceptions.NotFoundError:
-            pass
-        try:
-            existing_config = repo.file_contents(".github/dependabot.yaml")
-            if existing_config.size > 0:
-                if not update_existing:
-                    print(
-                        "Skipping "
-                        + repo.full_name
-                        + " (dependabot file already exists)"
-                    )
-                    continue
-        except github3.exceptions.NotFoundError:
-            pass
+        filename_list = [".github/dependabot.yml", ".github/dependabot.yaml"]
+        for filename in filename_list:
+            existing_config = check_existing_config(repo, filename, update_existing)
+            if existing_config:
+                break
 
         if created_after_date and is_repo_created_date_before(
             repo.created_at, created_after_date
@@ -209,6 +190,24 @@ def is_dependabot_security_updates_enabled(owner, repo, access_token):
     if response.status_code == 200:
         return response.json()["enabled"]
     return False
+
+
+def check_existing_config(repo, filename, update_existing):
+    """
+    Check if the dependabot file already exists in the
+    repository and return the existing config if it does
+    """
+    try:
+        existing_config = repo.file_contents(filename)
+        if existing_config.size > 0:
+            if not update_existing:
+                print(
+                    "Skipping " + repo.full_name + " (dependabot file already exists)"
+                )
+                return None
+    except github3.exceptions.NotFoundError:
+        pass
+    return existing_config
 
 
 def enable_dependabot_security_updates(owner, repo, access_token):
