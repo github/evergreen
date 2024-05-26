@@ -196,7 +196,16 @@ def check_existing_config(repo, filename, update_existing):
     """
     Check if the dependabot file already exists in the
     repository and return the existing config if it does
+
+    Args:
+        repo (github3.repos.repo.Repository): The repository to check
+        filename (str): The dependabot configuration filename to check
+        update_existing (bool): Whether to update existing dependabot configuration files
+
+    Returns:
+        github3.repos.contents.Contents | None: The existing config if it exists, otherwise None
     """
+    existing_config = None
     try:
         existing_config = repo.file_contents(filename)
         if existing_config.size > 0:
