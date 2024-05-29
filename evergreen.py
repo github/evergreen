@@ -80,9 +80,11 @@ def main():  # pragma: no cover
             continue
         existing_config = None
         filename_list = [".github/dependabot.yml", ".github/dependabot.yaml"]
+        dependabot_filename_to_use = None
         for filename in filename_list:
             existing_config = check_existing_config(repo, filename, update_existing)
             if existing_config:
+                dependabot_filename_to_use = filename
                 break
 
         if created_after_date and is_repo_created_date_before(
@@ -130,7 +132,9 @@ def main():  # pragma: no cover
                 body_issue = (
                     body
                     + "\n\n```yaml\n"
-                    + "# .github/dependabot.yml\n"
+                    + "# "
+                    + dependabot_filename_to_use
+                    + "\n"
                     + dependabot_file
                     + "\n```"
                 )
@@ -151,7 +155,12 @@ def main():  # pragma: no cover
                 count_eligible += 1
                 try:
                     pull = commit_changes(
-                        title, body, repo, dependabot_file, commit_message
+                        title,
+                        body,
+                        repo,
+                        dependabot_file,
+                        commit_message,
+                        dependabot_filename_to_use,
                     )
                     print("\tCreated pull request " + pull.html_url)
                     if project_id:
@@ -273,7 +282,9 @@ def check_pending_issues_for_duplicates(title, repo) -> bool:
     return skip
 
 
-def commit_changes(title, body, repo, dependabot_file, message):
+def commit_changes(
+    title, body, repo, dependabot_file, message, dependabot_filename="dependabot.yml"
+):
     """Commit the changes to the repo and open a pull reques and return the pull request object"""
     default_branch = repo.default_branch
     # Get latest commit sha from default branch
@@ -282,7 +293,7 @@ def commit_changes(title, body, repo, dependabot_file, message):
     branch_name = "dependabot-" + str(uuid.uuid4())
     repo.create_ref(front_matter + branch_name, default_branch_commit)
     repo.create_file(
-        path=".github/dependabot.yaml",
+        path=".github/" + dependabot_filename,
         message=message,
         content=dependabot_file.encode(),  # Convert to bytes object
         branch=branch_name,
