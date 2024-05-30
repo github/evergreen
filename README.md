@@ -56,7 +56,7 @@ This action can be configured to authenticate with GitHub App Installation or Pe
 
 | field                         | required | default | description |
 |-------------------------------|----------|---------|-------------|
-| `GH_TOKEN`                    | True     | `""`    | The GitHub Token used to scan the repository. Must have read access to all repository you are interested in scanning and repo:write and workflow privelages to create a pull request. |
+| `GH_TOKEN`                    | True     | `""`    | The GitHub Token used to scan the repository. Must have read access to all repository you are interested in scanning, `repo:write`, and `workflow` privileges to create a pull request. |
 
 #### Other Configuration Options
 
