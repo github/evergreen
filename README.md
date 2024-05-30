@@ -5,7 +5,7 @@
 [![Python package](https://github.com/github/evergreen/actions/workflows/python-ci.yml/badge.svg)](https://github.com/github/evergreen/actions/workflows/python-ci.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/github/evergreen/badge)](https://scorecard.dev/viewer/?uri=github.com/github/evergreen)
 
-This is a GitHub Action that given an organization or specified repositories, opens an issue/PR dependabot is not enabled or there are more package ecosystems that could be. It also enables [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) for the repository.
+This is a GitHub Action that given an organization or specified repositories, opens an issue/PR if dependabot is not enabled, or there are more package ecosystems that could be. It also enables [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) for the repository.
 
 This action was developed by the GitHub OSPO for our own use and developed in a way that we could open source it that it might be useful to you as well! If you want to know more about how we use it, reach out in an issue in this repository.
 
