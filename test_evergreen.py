@@ -205,7 +205,7 @@ class TestCommitChanges(unittest.TestCase):
         mock_repo.create_ref.return_value = True
         mock_repo.create_file.return_value = True
         mock_repo.create_pull.return_value = "MockPullRequest"
-        dependabot_file_name = "dependabot.yml"
+        dependabot_file_name = ".github/dependabot.yml"
 
         title = "Test Title"
         body = "Test Body"
@@ -226,7 +226,7 @@ class TestCommitChanges(unittest.TestCase):
             f"refs/heads/{branch_name}", "abc123"
         )
         mock_repo.create_file.assert_called_once_with(
-            path=".github/" + dependabot_file_name,
+            path=dependabot_file_name,
             message=commit_message,
             content=dependabot_file.encode(),
             branch=branch_name,
