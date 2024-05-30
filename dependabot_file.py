@@ -71,7 +71,7 @@ def build_dependabot_file(
         indent = " " * (len(ecosystem_line) - len(ecosystem_line.lstrip()))
         if len(indent) < DEFAULT_INDENT:
             print(
-                "Invalid dependabot.yml file. No indentation found. Skipping {repo.full_name}"
+                f"Invalid dependabot.yml file. No indentation found. Skipping {repo.full_name}"
             )
             return None
     else:
