@@ -4,28 +4,29 @@ import github3
 import yaml
 
 
-def make_dependabot_config(ecosystem, group_dependencies) -> str:
+def make_dependabot_config(ecosystem, group_dependencies, indent) -> str:
     """
     Make the dependabot configuration for a specific package ecosystem
 
     Args:
         ecosystem: the package ecosystem to make the dependabot configuration for
         group_dependencies: whether to group dependencies in the dependabot.yml file
+        indent: the number of spaces to indent the dependabot configuration ex: "  "
 
     Returns:
         str: the dependabot configuration for the package ecosystem
     """
-    dependabot_config = f"""  - package-ecosystem: '{ecosystem}'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
+    dependabot_config = f"""{indent}- package-ecosystem: '{ecosystem}'
+{indent}{indent}directory: '/'
+{indent}{indent}schedule:
+{indent}{indent}{indent}interval: 'weekly'
 """
     if group_dependencies:
-        dependabot_config += """    groups:
-      production-dependencies:
-        dependency-type: 'production'
-      development-dependencies:
-        dependency-type: 'development'
+        dependabot_config += f"""{indent}{indent}groups:
+{indent}{indent}{indent}production-dependencies:
+{indent}{indent}{indent}{indent}dependency-type: 'production'
+{indent}{indent}{indent}development-dependencies:
+{indent}{indent}{indent}{indent}dependency-type: 'development'
 """
     return dependabot_config
 
@@ -58,10 +59,23 @@ def build_dependabot_file(
         "terraform": False,
         "github-actions": False,
     }
+    DEFAULT_INDENT = 2  # pylint: disable=invalid-name
 
     if existing_config:
         dependabot_file = existing_config.decoded.decode("utf-8")
+        ecosystem_line = next(
+            line
+            for line in dependabot_file.splitlines()
+            if "- package-ecosystem:" in line
+        )
+        indent = " " * (len(ecosystem_line) - len(ecosystem_line.lstrip()))
+        if len(indent) < DEFAULT_INDENT:
+            print(
+                f"Invalid dependabot.yml file. No indentation found. Skipping {repo.full_name}"
+            )
+            return None
     else:
+        indent = " " * DEFAULT_INDENT
         dependabot_file = """---
 version: 2
 updates:
@@ -99,7 +113,7 @@ updates:
                 if repo.file_contents(file):
                     package_managers_found[manager] = True
                     dependabot_file += make_dependabot_config(
-                        manager, group_dependencies
+                        manager, group_dependencies, indent
                     )
                     break
             except github3.exceptions.NotFoundError:
@@ -112,7 +126,7 @@ updates:
                 if file[0].endswith(".tf"):
                     package_managers_found["terraform"] = True
                     dependabot_file += make_dependabot_config(
-                        "terraform", group_dependencies
+                        "terraform", group_dependencies, indent
                     )
                     break
         except github3.exceptions.NotFoundError:
@@ -123,7 +137,7 @@ updates:
                 if file[0].endswith(".yml") or file[0].endswith(".yaml"):
                     package_managers_found["github-actions"] = True
                     dependabot_file += make_dependabot_config(
-                        "github-actions", group_dependencies
+                        "github-actions", group_dependencies, indent
                     )
                     break
         except github3.exceptions.NotFoundError:
