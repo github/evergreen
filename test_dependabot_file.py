@@ -33,10 +33,10 @@ class TestDependabotFile(unittest.TestCase):
             expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'bundler'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'bundler'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [], None)
             self.assertEqual(result, expected_result)
@@ -61,54 +61,42 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
 
-        # expected_result maintains existing ecosystem with custom configuration and adds new ecosystem
-        expected_result = """---
-version: 2
-updates:
-- package-ecosystem: "pip"
-  directory: "/"
-  schedule:
-    interval: "weekly"
-  commit-message:
-    prefix: "chore(deps)"
-- package-ecosystem: 'bundler'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
-"""
-        existing_config = MagicMock()
-        existing_config.decoded = b'---\nversion: 2\nupdates:\n- package-ecosystem: "pip"\n  directory: "/"\n\
-  schedule:\n    interval: "weekly"\n  commit-message:\n    prefix: "chore(deps)"\n'
-        result = build_dependabot_file(repo, False, [], existing_config)
-        self.assertEqual(result, expected_result)
-
-    def test_build_dependabot_file_with_4_space_indent_existing_config_bundler_with_update(
-        self,
-    ):
-        """Test that the dependabot.yml file is built correctly with bundler"""
-        repo = MagicMock()
-        repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
-
-        # expected_result maintains existing ecosystem with custom configuration and adds new ecosystem
+        # expected_result maintains existing ecosystem with custom configuration
+        # and adds new ecosystem
         expected_result = """---
 version: 2
 updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-        interval: "weekly"
+      interval: "weekly"
     commit-message:
-        prefix: "chore(deps)"
+      prefix: "chore(deps)"
   - package-ecosystem: 'bundler'
     directory: '/'
     schedule:
-        interval: 'weekly'
+      interval: 'weekly'
 """
         existing_config = MagicMock()
         existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "pip"\n    directory: "/"\n\
-    schedule:\n        interval: "weekly"\n    commit-message:\n        prefix: "chore(deps)"\n'
+    schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
         result = build_dependabot_file(repo, False, [], existing_config)
         self.assertEqual(result, expected_result)
+
+    def test_build_dependabot_file_with_weird_space_indent_existing_config_bundler_with_update(
+        self,
+    ):
+        """Test that the dependabot.yml file is built correctly with bundler"""
+        repo = MagicMock()
+        repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
+
+        # expected_result maintains existing ecosystem with custom configuration
+        # and adds new ecosystem
+        existing_config = MagicMock()
+        existing_config.decoded = b'---\nversion: 2\nupdates:\n- package-ecosystem: "pip"\n  directory: "/"\n\
+  schedule:\n    interval: "weekly"\n  commit-message:\n    prefix: "chore(deps)"\n'
+        result = build_dependabot_file(repo, False, [], existing_config)
+        self.assertEqual(result, None)
 
     def test_build_dependabot_file_with_npm(self):
         """Test that the dependabot.yml file is built correctly with npm"""
@@ -120,10 +108,10 @@ updates:
             expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'npm'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [], None)
             self.assertEqual(result, expected_result)
@@ -144,10 +132,10 @@ updates:
             expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'pip'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'pip'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [], None)
             self.assertEqual(result, expected_result)
@@ -165,10 +153,10 @@ updates:
             expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'cargo'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'cargo'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [], None)
             self.assertEqual(result, expected_result)
@@ -181,10 +169,10 @@ updates:
         expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'gomod'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'gomod'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
         result = build_dependabot_file(repo, False, [], None)
         self.assertEqual(result, expected_result)
@@ -202,10 +190,10 @@ updates:
             expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'composer'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'composer'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [], None)
             self.assertEqual(result, expected_result)
@@ -223,10 +211,10 @@ updates:
             expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'mix'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'mix'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
             result = build_dependabot_file(repo, False, [], None)
             self.assertEqual(result, expected_result)
@@ -239,10 +227,10 @@ updates:
         expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'nuget'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'nuget'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
         result = build_dependabot_file(repo, False, [], None)
         self.assertEqual(result, expected_result)
@@ -255,10 +243,10 @@ updates:
         expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'docker'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
 """
         result = build_dependabot_file(repo, False, [], None)
         self.assertEqual(result, expected_result)
@@ -271,15 +259,15 @@ updates:
         expected_result = """---
 version: 2
 updates:
-- package-ecosystem: 'docker'
-  directory: '/'
-  schedule:
-    interval: 'weekly'
-  groups:
-    production-dependencies:
-      dependency-type: 'production'
-    development-dependencies:
-      dependency-type: 'development'
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    groups:
+      production-dependencies:
+        dependency-type: 'production'
+      development-dependencies:
+        dependency-type: 'development'
 """
         result = build_dependabot_file(repo, True, [], None)
         self.assertEqual(result, expected_result)

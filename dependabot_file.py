@@ -16,17 +16,17 @@ def make_dependabot_config(ecosystem, group_dependencies, indent) -> str:
     Returns:
         str: the dependabot configuration for the package ecosystem
     """
-    dependabot_config = f"""{indent[:-2]}- package-ecosystem: '{ecosystem}'
-{indent}directory: '/'
-{indent}schedule:
-{indent}{indent}interval: 'weekly'
+    dependabot_config = f"""{indent}- package-ecosystem: '{ecosystem}'
+{indent}{indent}directory: '/'
+{indent}{indent}schedule:
+{indent}{indent}{indent}interval: 'weekly'
 """
     if group_dependencies:
-        dependabot_config += f"""{indent}groups:
-{indent}{indent}production-dependencies:
-{indent}{indent}{indent}dependency-type: 'production'
-{indent}{indent}development-dependencies:
-{indent}{indent}{indent}dependency-type: 'development'
+        dependabot_config += f"""{indent}{indent}groups:
+{indent}{indent}{indent}production-dependencies:
+{indent}{indent}{indent}{indent}dependency-type: 'production'
+{indent}{indent}{indent}development-dependencies:
+{indent}{indent}{indent}{indent}dependency-type: 'development'
 """
     return dependabot_config
 
@@ -59,14 +59,16 @@ def build_dependabot_file(
         "terraform": False,
         "github-actions": False,
     }
-    DEFAULT_INDENT = 2
+    DEFAULT_INDENT = 2  # pylint: disable=invalid-name
 
     if existing_config:
         dependabot_file = existing_config.decoded.decode("utf-8")
-        directory_line = next(
-            line for line in dependabot_file.splitlines() if "directory:" in line
+        ecosystem_line = next(
+            line
+            for line in dependabot_file.splitlines()
+            if "- package-ecosystem:" in line
         )
-        indent = " " * (len(directory_line) - len(directory_line.lstrip()))
+        indent = " " * (len(ecosystem_line) - len(ecosystem_line.lstrip()))
         if len(indent) < DEFAULT_INDENT:
             print(
                 "Invalid dependabot.yml file. No indentation found. Skipping {repo.full_name}"
