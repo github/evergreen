@@ -59,6 +59,7 @@ def build_dependabot_file(
         "terraform": False,
         "github-actions": False,
     }
+    DEFAULT_INDENT = 2
 
     if existing_config:
         dependabot_file = existing_config.decoded.decode("utf-8")
@@ -66,13 +67,13 @@ def build_dependabot_file(
             line for line in dependabot_file.splitlines() if "directory:" in line
         )
         indent = " " * (len(directory_line) - len(directory_line.lstrip()))
-        if len(indent) < 2:
+        if len(indent) < DEFAULT_INDENT:
             print(
                 "Invalid dependabot.yml file. No indentation found. Skipping {repo.full_name}"
             )
             return None
     else:
-        indent = " " * 2
+        indent = " " * DEFAULT_INDENT
         dependabot_file = """---
 version: 2
 updates:
