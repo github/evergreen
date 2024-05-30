@@ -187,7 +187,7 @@ Please enable it by merging this pull request so that we can keep our dependenci
         if len(commit_message) > 65536:
             raise ValueError("COMMIT_MESSAGE environment variable is too long")
     else:
-        commit_message = "Create dependabot.yaml"
+        commit_message = "Create/Update dependabot.yaml"
 
     created_after_date = os.getenv("CREATED_AFTER_DATE", "")
     is_match = re.match(r"\d{4}-\d{2}-\d{2}", created_after_date)

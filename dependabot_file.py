@@ -4,28 +4,29 @@ import github3
 import yaml
 
 
-def make_dependabot_config(ecosystem, group_dependencies) -> str:
+def make_dependabot_config(ecosystem, group_dependencies, indent) -> str:
     """
     Make the dependabot configuration for a specific package ecosystem
 
     Args:
         ecosystem: the package ecosystem to make the dependabot configuration for
         group_dependencies: whether to group dependencies in the dependabot.yml file
+        indent: the number of spaces to indent the dependabot configuration ex: "  "
 
     Returns:
         str: the dependabot configuration for the package ecosystem
     """
-    dependabot_config = f"""  - package-ecosystem: '{ecosystem}'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
+    dependabot_config = f"""{indent[:-2]}- package-ecosystem: '{ecosystem}'
+{indent}directory: '/'
+{indent}schedule:
+{indent}{indent}interval: 'weekly'
 """
     if group_dependencies:
-        dependabot_config += """    groups:
-      production-dependencies:
-        dependency-type: 'production'
-      development-dependencies:
-        dependency-type: 'development'
+        dependabot_config += f"""{indent}groups:
+{indent}{indent}production-dependencies:
+{indent}{indent}{indent}dependency-type: 'production'
+{indent}{indent}development-dependencies:
+{indent}{indent}{indent}dependency-type: 'development'
 """
     return dependabot_config
 
@@ -61,7 +62,17 @@ def build_dependabot_file(
 
     if existing_config:
         dependabot_file = existing_config.decoded.decode("utf-8")
+        directory_line = next(
+            line for line in dependabot_file.splitlines() if "directory:" in line
+        )
+        indent = " " * (len(directory_line) - len(directory_line.lstrip()))
+        if len(indent) < 2:
+            print(
+                "Invalid dependabot.yml file. No indentation found. Skipping {repo.full_name}"
+            )
+            return None
     else:
+        indent = " " * 2
         dependabot_file = """---
 version: 2
 updates:
@@ -99,7 +110,7 @@ updates:
                 if repo.file_contents(file):
                     package_managers_found[manager] = True
                     dependabot_file += make_dependabot_config(
-                        manager, group_dependencies
+                        manager, group_dependencies, indent
                     )
                     break
             except github3.exceptions.NotFoundError:
@@ -112,7 +123,7 @@ updates:
                 if file[0].endswith(".tf"):
                     package_managers_found["terraform"] = True
                     dependabot_file += make_dependabot_config(
-                        "terraform", group_dependencies
+                        "terraform", group_dependencies, indent
                     )
                     break
         except github3.exceptions.NotFoundError:
@@ -123,7 +134,7 @@ updates:
                 if file[0].endswith(".yml") or file[0].endswith(".yaml"):
                     package_managers_found["github-actions"] = True
                     dependabot_file += make_dependabot_config(
-                        "github-actions", group_dependencies
+                        "github-actions", group_dependencies, indent
                     )
                     break
         except github3.exceptions.NotFoundError:
