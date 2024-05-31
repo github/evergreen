@@ -43,6 +43,30 @@ def get_int_env_var(env_var_name: str) -> int | None:
         return None
 
 
+def parse_repo_specific_exemptions(repo_specific_exemptions_str: str) -> dict:
+    """Parse the REPO_SPECIFIC_EXEMPTIONS environment variable into a dictionary.
+
+    Args:
+        repo_specific_exemptions_str: The REPO_SPECIFIC_EXEMPTIONS environment variable as a string.
+
+    Returns:
+        A dictionary where keys are repository names and values are lists of exempt ecosystems.
+    """
+    exemptions_dict = {}
+    if repo_specific_exemptions_str:
+        exemptions_list = repo_specific_exemptions_str.split(";")
+        for exemption in exemptions_list:
+            if (
+                exemption == ""
+            ):  # Account for final ; in the repo_specific_exemptions_str
+                continue
+            repo, ecosystems = exemption.split(":")
+            exemptions_dict[repo.strip()] = [
+                ecosystem.strip() for ecosystem in ecosystems.split(",")
+            ]
+    return exemptions_dict
+
+
 def get_env_vars(test: bool = False) -> tuple[
     str | None,
     list[str],
@@ -65,6 +89,7 @@ def get_env_vars(test: bool = False) -> tuple[
     bool | None,
     list[str],
     bool | None,
+    dict,
 ]:
     """
     Get the environment variables for use in the action.
@@ -93,6 +118,7 @@ def get_env_vars(test: bool = False) -> tuple[
         enable_security_updates (bool): Whether to enable security updates in target repositories
         exempt_ecosystems_list (list[str]): A list of package ecosystems to exempt from the action
         update_existing (bool): Whether to update existing dependabot configuration files
+        repo_specific_exemptions (dict): A dictionary of per repository ecosystem exemptions
     """
 
     if not test:
@@ -234,6 +260,11 @@ Please enable it by merging this pull request so that we can keep our dependenci
 
     update_existing = get_bool_env_var("UPDATE_EXISTING")
 
+    repo_specific_exemptions_str = os.getenv("REPO_SPECIFIC_EXEMPTIONS", "")
+    repo_specific_exemptions = parse_repo_specific_exemptions(
+        repo_specific_exemptions_str
+    )
+
     return (
         organization,
         repositories_list,
@@ -256,4 +287,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         enable_security_updates_bool,
         exempt_ecosystems_list,
         update_existing,
+        repo_specific_exemptions,
     )

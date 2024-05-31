@@ -36,6 +36,7 @@ def main():  # pragma: no cover
         enable_security_updates,
         exempt_ecosystems,
         update_existing,
+        repo_specfic_exemptions,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -96,7 +97,11 @@ def main():  # pragma: no cover
         print("Checking " + repo.full_name + " for compatible package managers")
         # Try to detect package managers and build a dependabot file
         dependabot_file = build_dependabot_file(
-            repo, group_dependencies, exempt_ecosystems, existing_config
+            repo,
+            group_dependencies,
+            exempt_ecosystems,
+            repo_specfic_exemptions,
+            existing_config,
         )
 
         if dependabot_file is None:
