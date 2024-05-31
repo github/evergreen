@@ -251,6 +251,41 @@ updates:
         result = build_dependabot_file(repo, False, [], None)
         self.assertEqual(result, expected_result)
 
+    def test_build_dependabot_file_with_terraform(self):
+        """Test that the dependabot.yml file is built correctly with Terraform"""
+        repo = MagicMock()
+        response = MagicMock()
+        response.status_code = 404
+        repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
+        repo.directory_contents.side_effect = lambda path: (
+            [("main.tf", None)] if path == "/" else []
+        )
+
+        expected_result = """---
+version: 2
+updates:
+  - package-ecosystem: 'terraform'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        result = build_dependabot_file(repo, False, [], None)
+        self.assertEqual(result, expected_result)
+
+        # Test absence of Terraform files
+        repo.directory_contents.side_effect = lambda path: [] if path == "/" else []
+        result = build_dependabot_file(repo, False, [], None)
+        self.assertIsNone(result)
+
+        # Test empty repository
+        response = MagicMock()
+        response.status_code = 404
+        repo.directory_contents.side_effect = github3.exceptions.NotFoundError(
+            resp=response
+        )
+        result = build_dependabot_file(repo, False, [], None)
+        self.assertIsNone(result)
+
     def test_build_dependabot_file_with_groups(self):
         """Test that the dependabot.yml file is built correctly with grouped dependencies"""
         repo = MagicMock()
