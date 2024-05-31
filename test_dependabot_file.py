@@ -322,6 +322,15 @@ updates:
         result = build_dependabot_file(repo, False, ["docker"], {}, None)
         self.assertEqual(result, None)
 
+    def test_build_dependabot_file_with_repo_specific_exempt_ecosystems(self):
+        """Test that the dependabot.yml file is built correctly with exempted ecosystems"""
+        repo = MagicMock()
+        repo.full_name = "test/test"
+        repo.file_contents.side_effect = lambda filename: filename == "Dockerfile"
+
+        result = build_dependabot_file(repo, False, [], {"test/test": ["docker"]}, None)
+        self.assertEqual(result, None)
+
     def test_add_existing_ecosystem_to_exempt_list(self):
         """Test that existing ecosystems are added to the exempt list"""
         exempt_ecosystems = ["npm", "pip", "github-actions"]
