@@ -251,7 +251,7 @@ updates:
         result = build_dependabot_file(repo, False, [], None)
         self.assertEqual(result, expected_result)
 
-    def test_build_dependabot_file_with_terraform(self):
+    def test_build_dependabot_file_with_terraform_with_files(self):
         """Test that the dependabot.yml file is built correctly with Terraform"""
         repo = MagicMock()
         response = MagicMock()
@@ -271,6 +271,13 @@ updates:
 """
         result = build_dependabot_file(repo, False, [], None)
         self.assertEqual(result, expected_result)
+
+    def test_build_dependabot_file_with_terraform_without_files(self):
+        """Test that the dependabot.yml file is built correctly with Terraform"""
+        repo = MagicMock()
+        response = MagicMock()
+        response.status_code = 404
+        repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
 
         # Test absence of Terraform files
         repo.directory_contents.side_effect = lambda path: [] if path == "/" else []
