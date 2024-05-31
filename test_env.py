@@ -170,6 +170,34 @@ class TestEnv(unittest.TestCase):
             "COMMIT_MESSAGE": "Create dependabot configuration",
             "PROJECT_ID": "123",
             "GROUP_DEPENDENCIES": "false",
+            "REPO_SPECIFIC_EXEMPTIONS": "org1/repo1:snap;org2/repo2:docker",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_repo_specific_exemptions_unsupported_ecosystem(self):
+        """Test that REPO_SPECIFIC_EXEMPTIONS is handled correctly when unsupported ecosystem is provided"""
+        with self.assertRaises(ValueError) as cm:
+            get_env_vars(True)
+        the_exception = cm.exception
+        self.assertEqual(
+            str(the_exception),
+            "REPO_SPECIFIC_EXEMPTIONS environment variable not formatted correctly. Unrecognized package-ecosystem.",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "REPOSITORY": "org/repo1,org2/repo2",
+            "GH_TOKEN": "my_token",
+            "EXEMPT_REPOS": "repo4,repo5",
+            "TYPE": "pull",
+            "TITLE": "Dependabot Alert custom title",
+            "BODY": "Dependabot custom body",
+            "CREATED_AFTER_DATE": "2023-01-01",
+            "DRY_RUN": "true",
+            "COMMIT_MESSAGE": "Create dependabot configuration",
+            "PROJECT_ID": "123",
+            "GROUP_DEPENDENCIES": "false",
             "REPO_SPECIFIC_EXEMPTIONS": "org1/repo1:docker;org2/repo2:gomod",
         },
         clear=True,

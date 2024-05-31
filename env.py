@@ -69,6 +69,23 @@ def parse_repo_specific_exemptions(repo_specific_exemptions_str: str) -> dict:
             ):  # Account for final ; in the repo_specific_exemptions_str
                 continue
             repo, ecosystems = exemption.split(":")
+            for ecosystem in ecosystems.split(","):
+                if ecosystem not in [
+                    "bundler",
+                    "npm",
+                    "pip",
+                    "cargo",
+                    "docker",
+                    "gomod",
+                    "composer",
+                    "mix",
+                    "github-actions",
+                    "nuget",
+                    "terraform",
+                ]:
+                    raise ValueError(
+                        "REPO_SPECIFIC_EXEMPTIONS environment variable not formatted correctly. Unrecognized package-ecosystem."
+                    )
             exemptions_dict[repo.strip()] = [
                 ecosystem.strip() for ecosystem in ecosystems.split(",")
             ]
