@@ -153,7 +153,7 @@ class TestEnv(unittest.TestCase):
         the_exception = cm.exception
         self.assertEqual(
             str(the_exception),
-            "not enough values to unpack (expected 2, got 1)",
+            "REPO_SPECIFIC_EXEMPTIONS environment variable not formatted correctly",
         )
 
     @patch.dict(
