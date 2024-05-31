@@ -36,7 +36,7 @@ def main():  # pragma: no cover
         enable_security_updates,
         exempt_ecosystems,
         update_existing,
-        repo_specfic_exemptions,
+        repo_specific_exemptions,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -100,7 +100,7 @@ def main():  # pragma: no cover
             repo,
             group_dependencies,
             exempt_ecosystems,
-            repo_specfic_exemptions,
+            repo_specific_exemptions,
             existing_config,
         )
 

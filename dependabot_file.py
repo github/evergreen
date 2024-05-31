@@ -35,7 +35,7 @@ def build_dependabot_file(
     repo,
     group_dependencies,
     exempt_ecosystems,
-    repo_specfic_exemptions,
+    repo_specific_exemptions,
     existing_config,
 ) -> str | None:
     """
@@ -45,7 +45,7 @@ def build_dependabot_file(
         repo: the repository to build the dependabot.yml file for
         group_dependencies: whether to group dependencies in the dependabot.yml file
         exempt_ecosystems: the list of ecosystems to ignore
-        repo_specfic_exemptions: the list of ecosystems to ignore for a specific repo
+        repo_specific_exemptions: the list of ecosystems to ignore for a specific repo
         existing_config: the existing dependabot configuration file or None if it doesn't exist
 
     Returns:
@@ -90,9 +90,9 @@ updates:
 
     # If there are repository specific exemptions,
     # overwrite the global exemptions for this repo only
-    if repo_specfic_exemptions and repo.full_name in repo_specfic_exemptions:
+    if repo_specific_exemptions and repo.full_name in repo_specific_exemptions:
         exempt_ecosystems = []
-        for ecosystem in repo_specfic_exemptions[repo.full_name]:
+        for ecosystem in repo_specific_exemptions[repo.full_name]:
             exempt_ecosystems.append(ecosystem)
 
     package_managers = {
