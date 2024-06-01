@@ -311,7 +311,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], None, None)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_github_actions_without_files(self):
@@ -324,7 +324,7 @@ updates:
             resp=response
         )
 
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], None, None)
         self.assertEqual(result, None)
 
     def test_build_dependabot_file_with_groups(self):
