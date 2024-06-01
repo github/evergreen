@@ -20,7 +20,7 @@ class TestDependabotFile(unittest.TestCase):
         response.status_code = 404
         repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
 
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], {}, None)
         self.assertEqual(result, None)
 
     def test_build_dependabot_file_with_bundler(self):
@@ -38,7 +38,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-            result = build_dependabot_file(repo, False, [], None)
+            result = build_dependabot_file(repo, False, [], {}, None)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_existing_config_bundler_no_update(self):
@@ -51,7 +51,7 @@ updates:
         existing_config = MagicMock()
         existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "bundler"\n\
     directory: "/"\n    schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
-        result = build_dependabot_file(repo, False, [], existing_config)
+        result = build_dependabot_file(repo, False, [], {}, existing_config)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_2_space_indent_existing_config_bundler_with_update(
@@ -80,7 +80,7 @@ updates:
         existing_config = MagicMock()
         existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "pip"\n    directory: "/"\n\
     schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
-        result = build_dependabot_file(repo, False, [], existing_config)
+        result = build_dependabot_file(repo, False, [], {}, existing_config)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_weird_space_indent_existing_config_bundler_with_update(
@@ -95,7 +95,7 @@ updates:
         existing_config = MagicMock()
         existing_config.decoded = b'---\nversion: 2\nupdates:\n- package-ecosystem: "pip"\n  directory: "/"\n\
   schedule:\n    interval: "weekly"\n  commit-message:\n    prefix: "chore(deps)"\n'
-        result = build_dependabot_file(repo, False, [], existing_config)
+        result = build_dependabot_file(repo, False, [], {}, existing_config)
         self.assertEqual(result, None)
 
     def test_build_dependabot_file_with_npm(self):
@@ -113,7 +113,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-            result = build_dependabot_file(repo, False, [], None)
+            result = build_dependabot_file(repo, False, [], {}, None)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_pip(self):
@@ -137,7 +137,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-            result = build_dependabot_file(repo, False, [], None)
+            result = build_dependabot_file(repo, False, [], {}, None)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_cargo(self):
@@ -158,7 +158,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-            result = build_dependabot_file(repo, False, [], None)
+            result = build_dependabot_file(repo, False, [], {}, None)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_gomod(self):
@@ -174,7 +174,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], {}, None)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_composer(self):
@@ -195,7 +195,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-            result = build_dependabot_file(repo, False, [], None)
+            result = build_dependabot_file(repo, False, [], {}, None)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_hex(self):
@@ -216,7 +216,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-            result = build_dependabot_file(repo, False, [], None)
+            result = build_dependabot_file(repo, False, [], {}, None)
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_nuget(self):
@@ -232,7 +232,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], {}, None)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_docker(self):
@@ -248,7 +248,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], {}, None)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_terraform_with_files(self):
@@ -269,7 +269,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], {}, None)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_terraform_without_files(self):
@@ -281,7 +281,7 @@ updates:
 
         # Test absence of Terraform files
         repo.directory_contents.side_effect = lambda path: [] if path == "/" else []
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], {}, None)
         self.assertIsNone(result)
 
         # Test empty repository
@@ -290,7 +290,7 @@ updates:
         repo.directory_contents.side_effect = github3.exceptions.NotFoundError(
             resp=response
         )
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], {}, None)
         self.assertIsNone(result)
 
     def test_build_dependabot_file_with_github_actions(self):
@@ -311,7 +311,7 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], None, None)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_github_actions_without_files(self):
@@ -324,7 +324,7 @@ updates:
             resp=response
         )
 
-        result = build_dependabot_file(repo, False, [], None)
+        result = build_dependabot_file(repo, False, [], None, None)
         self.assertEqual(result, None)
 
     def test_build_dependabot_file_with_groups(self):
@@ -345,7 +345,7 @@ updates:
       development-dependencies:
         dependency-type: 'development'
 """
-        result = build_dependabot_file(repo, True, [], None)
+        result = build_dependabot_file(repo, True, [], {}, None)
         self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_exempt_ecosystems(self):
@@ -353,7 +353,16 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "Dockerfile"
 
-        result = build_dependabot_file(repo, False, ["docker"], None)
+        result = build_dependabot_file(repo, False, ["docker"], {}, None)
+        self.assertEqual(result, None)
+
+    def test_build_dependabot_file_with_repo_specific_exempt_ecosystems(self):
+        """Test that the dependabot.yml file is built correctly with exempted ecosystems"""
+        repo = MagicMock()
+        repo.full_name = "test/test"
+        repo.file_contents.side_effect = lambda filename: filename == "Dockerfile"
+
+        result = build_dependabot_file(repo, False, [], {"test/test": ["docker"]}, None)
         self.assertEqual(result, None)
 
     def test_add_existing_ecosystem_to_exempt_list(self):
