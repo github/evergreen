@@ -55,8 +55,8 @@ def parse_repo_specific_exemptions(repo_specific_exemptions_str: str) -> dict:
     exemptions_dict = {}
     if repo_specific_exemptions_str:
         # if repo_specific_exemptions_str doesn't have a ; and : character, it's not valid
-        separators = [';',':']
-        if not any(sep in repo_specific_exemptions_str for sep in separators):
+        separators = [";", ":"]
+        if not all(sep in repo_specific_exemptions_str for sep in separators):
             raise ValueError(
                 "REPO_SPECIFIC_EXEMPTIONS environment variable not formatted correctly"
             )
