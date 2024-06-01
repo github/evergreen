@@ -293,6 +293,40 @@ updates:
         result = build_dependabot_file(repo, False, [], None)
         self.assertIsNone(result)
 
+    def test_build_dependabot_file_with_github_actions(self):
+        """Test that the dependabot.yml file is built correctly with GitHub Actions"""
+        repo = MagicMock()
+        response = MagicMock()
+        response.status_code = 404
+        repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
+        repo.directory_contents.side_effect = lambda path: (
+            [("test.yml", None)] if path == ".github/workflows" else []
+        )
+
+        expected_result = """---
+version: 2
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        result = build_dependabot_file(repo, False, [], None)
+        self.assertEqual(result, expected_result)
+
+    def test_build_dependabot_file_with_github_actions_without_files(self):
+        """Test that the dependabot.yml file is None when no YAML files are found in the .github/workflows/ directory."""
+        repo = MagicMock()
+        response = MagicMock()
+        response.status_code = 404
+        repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
+        repo.directory_contents.side_effect = github3.exceptions.NotFoundError(
+            resp=response
+        )
+
+        result = build_dependabot_file(repo, False, [], None)
+        self.assertEqual(result, None)
+
     def test_build_dependabot_file_with_groups(self):
         """Test that the dependabot.yml file is built correctly with grouped dependencies"""
         repo = MagicMock()
