@@ -21,7 +21,7 @@ def get_bool_env_var(env_var_name: str, default: bool = False) -> bool:
     """
     ev = os.environ.get(env_var_name, "")
     if ev == "" and default:
-        return True
+        return default
     return ev.strip().lower() == "true"
 
 
