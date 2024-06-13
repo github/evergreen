@@ -1,6 +1,6 @@
 #checkov:skip=CKV_DOCKER_2
 #checkov:skip=CKV_DOCKER_3
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:e3ae8cf03c4f0abbfef13a8147478a7cd92798a94fa729a36a185d9106cbae32
 LABEL org.opencontainers.image.source https://github.com/github/evergreen
 
 WORKDIR /action/workspace
