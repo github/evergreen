@@ -80,8 +80,8 @@ def main():  # pragma: no cover
             print("Skipping " + repo.full_name + " (visibility-filtered)")
             continue
         existing_config = None
-        filename_list = [".github/dependabot.yml", ".github/dependabot.yaml"]
-        dependabot_filename_to_use = None
+        filename_list = [".github/dependabot.yaml", ".github/dependabot.yml"]
+        dependabot_filename_to_use = filename_list[0]  # Default to the first filename
         for filename in filename_list:
             existing_config = check_existing_config(repo, filename, update_existing)
             if existing_config:
