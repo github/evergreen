@@ -662,7 +662,7 @@ class TestCheckExistingConfig(unittest.TestCase):
         filename = "dependabot.yaml"
         mock_repo.file_contents.return_value.size = 5
 
-        result = check_existing_config(mock_repo, filename, True)
+        result = check_existing_config(mock_repo, filename)
 
         self.assertIsNotNone(result)
 
@@ -676,21 +676,7 @@ class TestCheckExistingConfig(unittest.TestCase):
             mock_response
         )
 
-        result = check_existing_config(mock_repo, "dependabot.yml", True)
-
-        self.assertIsNone(result)
-
-    def test_check_existing_config_with_existing_config_without_update_existing_set(
-        self,
-    ):
-        """
-        Test the case where there is an existing configuration but UPDATE_EXISTING is False
-        """
-        mock_repo = MagicMock()
-        filename = "dependabot.yaml"
-        mock_repo.file_contents.return_value.size = 5
-
-        result = check_existing_config(mock_repo, filename, False)
+        result = check_existing_config(mock_repo, "dependabot.yml")
 
         self.assertIsNone(result)
 
