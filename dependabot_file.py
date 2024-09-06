@@ -65,7 +65,8 @@ def build_dependabot_file(
         "github-actions": False,
     }
     DEFAULT_INDENT = 2  # pylint: disable=invalid-name
-
+    # create a local copy in order to avoid overwriting the global exemption list
+    exempt_ecosystems_list = exempt_ecosystems.copy()
     if existing_config:
         dependabot_file = existing_config.decoded.decode("utf-8")
         ecosystem_line = next(
@@ -86,14 +87,14 @@ version: 2
 updates:
 """
 
-    add_existing_ecosystem_to_exempt_list(exempt_ecosystems, existing_config)
+    add_existing_ecosystem_to_exempt_list(exempt_ecosystems_list, existing_config)
 
     # If there are repository specific exemptions,
     # overwrite the global exemptions for this repo only
     if repo_specific_exemptions and repo.full_name in repo_specific_exemptions:
-        exempt_ecosystems = []
+        exempt_ecosystems_list = []
         for ecosystem in repo_specific_exemptions[repo.full_name]:
-            exempt_ecosystems.append(ecosystem)
+            exempt_ecosystems_list.append(ecosystem)
 
     package_managers = {
         "bundler": ["Gemfile", "Gemfile.lock"],
@@ -118,7 +119,7 @@ updates:
 
     # Detect package managers where manifest files have known names
     for manager, manifest_files in package_managers.items():
-        if manager in exempt_ecosystems:
+        if manager in exempt_ecosystems_list:
             continue
         for file in manifest_files:
             try:
@@ -132,7 +133,7 @@ updates:
                 pass
 
     # detect package managers with variable file names
-    if "terraform" not in exempt_ecosystems:
+    if "terraform" not in exempt_ecosystems_list:
         try:
             for file in repo.directory_contents("/"):
                 if file[0].endswith(".tf"):
@@ -143,7 +144,7 @@ updates:
                     break
         except github3.exceptions.NotFoundError:
             pass
-    if "github-actions" not in exempt_ecosystems:
+    if "github-actions" not in exempt_ecosystems_list:
         try:
             for file in repo.directory_contents(".github/workflows"):
                 if file[0].endswith(".yml") or file[0].endswith(".yaml"):
