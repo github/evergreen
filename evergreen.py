@@ -107,7 +107,7 @@ def main():  # pragma: no cover
         dependabot_file = build_dependabot_file(
             repo,
             group_dependencies,
-            exempt_ecosystems.copy(),
+            exempt_ecosystems,
             repo_specific_exemptions,
             existing_config,
         )
