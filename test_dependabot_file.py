@@ -387,6 +387,68 @@ updates:
         for ecosystem in exempt_ecosystems:
             self.assertIn(ecosystem, exempt_ecosystems)
 
+    def test_build_dependabot_file_for_multiple_repos_with_few_existing_config(self):
+        """
+        Test the case where there are multiple repos with few existing dependabot config
+        """
+        existing_config_repo = MagicMock()
+        existing_config_repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
+
+        existing_config = MagicMock()
+        existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "bundler"\n\
+    directory: "/"\n    schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
+        exempt_ecosystems = []
+        result = build_dependabot_file(existing_config_repo, False, exempt_ecosystems, {}, existing_config)
+        self.assertEqual(result, None)
+
+        no_existing_config_repo = MagicMock()
+        filename_list = ["package.json", "package-lock.json", "yarn.lock"]
+        for filename in filename_list:
+            no_existing_config_repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        result = build_dependabot_file(no_existing_config_repo, False, exempt_ecosystems, {}, None)
+        self.assertEqual(result, expected_result)
+
+    def test_check_multiple_repos_with_no_dependabot_config(self):
+        """
+        Test the case where there is a single repo
+        """
+        mock_repo_1 = MagicMock()
+        mock_repo_1.file_contents.side_effect = lambda filename: filename == "go.mod"
+
+        expected_result = """---
+version: 2
+updates:
+  - package-ecosystem: 'gomod'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        exempt_ecosystems = []
+        result = build_dependabot_file(mock_repo_1, False, exempt_ecosystems, {}, None)
+        self.assertEqual(result, expected_result)
+
+        no_existing_config_repo = MagicMock()
+        filename_list = ["package.json", "package-lock.json", "yarn.lock"]
+        for filename in filename_list:
+            no_existing_config_repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            expected_result = """---
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        result = build_dependabot_file(no_existing_config_repo, False, exempt_ecosystems, {}, None)
+        self.assertEqual(result, expected_result)
 
 if __name__ == "__main__":
     unittest.main()
