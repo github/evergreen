@@ -392,19 +392,25 @@ updates:
         Test the case where there are multiple repos with few existing dependabot config
         """
         existing_config_repo = MagicMock()
-        existing_config_repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
+        existing_config_repo.file_contents.side_effect = (
+            lambda f, filename="Gemfile": f == filename
+        )
 
         existing_config = MagicMock()
         existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "bundler"\n\
     directory: "/"\n    schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
         exempt_ecosystems = []
-        result = build_dependabot_file(existing_config_repo, False, exempt_ecosystems, {}, existing_config)
+        result = build_dependabot_file(
+            existing_config_repo, False, exempt_ecosystems, {}, existing_config
+        )
         self.assertEqual(result, None)
 
         no_existing_config_repo = MagicMock()
         filename_list = ["package.json", "package-lock.json", "yarn.lock"]
         for filename in filename_list:
-            no_existing_config_repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            no_existing_config_repo.file_contents.side_effect = (
+                lambda f, filename=filename: f == filename
+            )
             expected_result = """---
 version: 2
 updates:
@@ -413,7 +419,9 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(no_existing_config_repo, False, exempt_ecosystems, {}, None)
+        result = build_dependabot_file(
+            no_existing_config_repo, False, exempt_ecosystems, {}, None
+        )
         self.assertEqual(result, expected_result)
 
     def test_check_multiple_repos_with_no_dependabot_config(self):
@@ -438,7 +446,9 @@ updates:
         no_existing_config_repo = MagicMock()
         filename_list = ["package.json", "package-lock.json", "yarn.lock"]
         for filename in filename_list:
-            no_existing_config_repo.file_contents.side_effect = lambda f, filename=filename: f == filename
+            no_existing_config_repo.file_contents.side_effect = (
+                lambda f, filename=filename: f == filename
+            )
             expected_result = """---
 version: 2
 updates:
@@ -447,7 +457,9 @@ updates:
     schedule:
       interval: 'weekly'
 """
-        result = build_dependabot_file(no_existing_config_repo, False, exempt_ecosystems, {}, None)
+        result = build_dependabot_file(
+            no_existing_config_repo, False, exempt_ecosystems, {}, None
+        )
         self.assertEqual(result, expected_result)
 
 
