@@ -1,3 +1,5 @@
+# pylint: disable=too-many-public-methods
+
 """Test the get_env_vars function"""
 
 import os
@@ -29,6 +31,8 @@ class TestEnv(unittest.TestCase):
             "TYPE",
             "UPDATE_EXISTING",
             "REPO_SPECIFIC_EXEMPTIONS",
+            "SCHEDULE",
+            "SCHEDULE_DAY",
         ]
         for key in env_keys:
             if key in os.environ:
@@ -75,6 +79,8 @@ class TestEnv(unittest.TestCase):
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -124,6 +130,8 @@ class TestEnv(unittest.TestCase):
                 "repo1": ["gomod"],
                 "repo2": ["docker", "gomod"],
             },  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -230,6 +238,8 @@ class TestEnv(unittest.TestCase):
                 "org1/repo1": ["docker"],
                 "org2/repo2": ["gomod"],
             },  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -269,6 +279,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -309,6 +321,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             True,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -363,6 +377,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -425,6 +441,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -465,6 +483,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -506,6 +526,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -547,6 +569,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -618,6 +642,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -660,6 +686,8 @@ we can keep our dependencies up to date and secure.",
             ["gomod", "docker"],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -701,6 +729,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -743,6 +773,8 @@ we can keep our dependencies up to date and secure.",
             [],  # exempt_ecosystems
             False,  # update_existing
             {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -789,7 +821,7 @@ we can keep our dependencies up to date and secure.",
         clear=True,
     )
     def test_get_env_vars_with_badly_formatted_created_after_date(self):
-        """Test that"""
+        """Test that badly formatted CREATED_AFTER_DATE throws exception"""
         with self.assertRaises(ValueError) as context_manager:
             get_env_vars(True)
         the_exception = context_manager.exception
@@ -797,6 +829,88 @@ we can keep our dependencies up to date and secure.",
             str(the_exception),
             "CREATED_AFTER_DATE '20200101' environment variable not in YYYY-MM-DD",
         )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "SCHEDULE": "annually",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_bad_schedule_choice(self):
+        """Test that bad schedule choice throws exception"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "SCHEDULE environment variable not 'daily', 'weekly', or 'monthly'",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "SCHEDULE": "weekly",
+            "SCHEDULE_DAY": "thorsday",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_bad_schedule_day_choice(self):
+        """Test that bad schedule day choice throws exception"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "SCHEDULE_DAY environment variable not 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', or 'sunday'",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "SCHEDULE": "weekly",
+            "SCHEDULE_DAY": "tuesday",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_valid_schedule_and_schedule_day(self):
+        """Test valid schedule and schedule day choices"""
+        expected_result = (
+            "my_organization",
+            [],
+            None,
+            None,
+            b"",
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            "",
+            False,
+            "Create/Update dependabot.yaml",
+            None,
+            False,
+            ["internal", "private", "public"],
+            None,  # batch_size
+            True,  # enable_security_updates
+            [],  # exempt_ecosystems
+            False,  # update_existing
+            {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "tuesday",  # schedule_day
+        )
+        result = get_env_vars(True)
+        self.assertEqual(result, expected_result)
 
 
 if __name__ == "__main__":

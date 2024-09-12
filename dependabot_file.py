@@ -4,7 +4,9 @@ import github3
 import yaml
 
 
-def make_dependabot_config(ecosystem, group_dependencies, indent) -> str:
+def make_dependabot_config(
+    ecosystem, group_dependencies, indent, schedule, schedule_day
+) -> str:
     """
     Make the dependabot configuration for a specific package ecosystem
 
@@ -12,15 +14,23 @@ def make_dependabot_config(ecosystem, group_dependencies, indent) -> str:
         ecosystem: the package ecosystem to make the dependabot configuration for
         group_dependencies: whether to group dependencies in the dependabot.yml file
         indent: the number of spaces to indent the dependabot configuration ex: "  "
+        schedule: the schedule to run dependabot ex: "daily"
+        schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "daily"
 
     Returns:
         str: the dependabot configuration for the package ecosystem
     """
+    schedule_day_line = ""
+    if schedule_day:
+        schedule_day_line += f"""
+{indent}{indent}{indent}day: '{schedule_day}'"""
+
     dependabot_config = f"""{indent}- package-ecosystem: '{ecosystem}'
 {indent}{indent}directory: '/'
 {indent}{indent}schedule:
-{indent}{indent}{indent}interval: 'weekly'
+{indent}{indent}{indent}interval: '{schedule}'{schedule_day_line}
 """
+
     if group_dependencies:
         dependabot_config += f"""{indent}{indent}groups:
 {indent}{indent}{indent}production-dependencies:
@@ -37,6 +47,8 @@ def build_dependabot_file(
     exempt_ecosystems,
     repo_specific_exemptions,
     existing_config,
+    schedule,
+    schedule_day,
 ) -> str | None:
     """
     Build the dependabot.yml file for a repo based on the repo contents
@@ -47,6 +59,8 @@ def build_dependabot_file(
         exempt_ecosystems: the list of ecosystems to ignore
         repo_specific_exemptions: the list of ecosystems to ignore for a specific repo
         existing_config: the existing dependabot configuration file or None if it doesn't exist
+        schedule: the schedule to run dependabot ex: "daily"
+        schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "daily"
 
     Returns:
         str: the dependabot.yml file for the repo
@@ -126,7 +140,7 @@ updates:
                 if repo.file_contents(file):
                     package_managers_found[manager] = True
                     dependabot_file += make_dependabot_config(
-                        manager, group_dependencies, indent
+                        manager, group_dependencies, indent, schedule, schedule_day
                     )
                     break
             except github3.exceptions.NotFoundError:
@@ -139,7 +153,7 @@ updates:
                 if file[0].endswith(".tf"):
                     package_managers_found["terraform"] = True
                     dependabot_file += make_dependabot_config(
-                        "terraform", group_dependencies, indent
+                        "terraform", group_dependencies, indent, schedule, schedule_day
                     )
                     break
         except github3.exceptions.NotFoundError:
@@ -150,7 +164,11 @@ updates:
                 if file[0].endswith(".yml") or file[0].endswith(".yaml"):
                     package_managers_found["github-actions"] = True
                     dependabot_file += make_dependabot_config(
-                        "github-actions", group_dependencies, indent
+                        "github-actions",
+                        group_dependencies,
+                        indent,
+                        schedule,
+                        schedule_day,
                     )
                     break
         except github3.exceptions.NotFoundError:
