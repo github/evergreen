@@ -15,7 +15,7 @@ def make_dependabot_config(
         group_dependencies: whether to group dependencies in the dependabot.yml file
         indent: the number of spaces to indent the dependabot configuration ex: "  "
         schedule: the schedule to run dependabot ex: "daily"
-        schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "daily"
+        schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "weekly"
 
     Returns:
         str: the dependabot configuration for the package ecosystem
