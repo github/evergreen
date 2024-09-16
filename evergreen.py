@@ -37,6 +37,8 @@ def main():  # pragma: no cover
         exempt_ecosystems,
         update_existing,
         repo_specific_exemptions,
+        schedule,
+        schedule_day,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -110,6 +112,8 @@ def main():  # pragma: no cover
             exempt_ecosystems,
             repo_specific_exemptions,
             existing_config,
+            schedule,
+            schedule_day,
         )
 
         if dependabot_file is None:

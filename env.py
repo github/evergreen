@@ -90,7 +90,9 @@ def parse_repo_specific_exemptions(repo_specific_exemptions_str: str) -> dict:
     return exemptions_dict
 
 
-def get_env_vars(test: bool = False) -> tuple[
+def get_env_vars(
+    test: bool = False,
+) -> tuple[
     str | None,
     list[str],
     int | None,
@@ -113,6 +115,8 @@ def get_env_vars(test: bool = False) -> tuple[
     list[str],
     bool | None,
     dict,
+    str,
+    str,
 ]:
     """
     Get the environment variables for use in the action.
@@ -142,6 +146,8 @@ def get_env_vars(test: bool = False) -> tuple[
         exempt_ecosystems_list (list[str]): A list of package ecosystems to exempt from the action
         update_existing (bool): Whether to update existing dependabot configuration files
         repo_specific_exemptions (dict): A dictionary of per repository ecosystem exemptions
+        schedule (str): The schedule to run the action on
+        schedule_day (str): The day of the week to run the action on if schedule is daily
     """
 
     if not test:
@@ -288,6 +294,36 @@ Please enable it by merging this pull request so that we can keep our dependenci
         repo_specific_exemptions_str
     )
 
+    schedule = os.getenv("SCHEDULE", "").strip().lower()
+    if schedule and schedule not in ["daily", "weekly", "monthly"]:
+        raise ValueError(
+            "SCHEDULE environment variable not 'daily', 'weekly', or 'monthly'"
+        )
+    if not schedule:
+        schedule = "weekly"
+    schedule_day = os.getenv("SCHEDULE_DAY", "").strip().lower()
+    if schedule != "weekly" and schedule_day:
+        raise ValueError(
+            "SCHEDULE_DAY environment variable not needed when SCHEDULE is not 'weekly'"
+        )
+    if (
+        schedule == "weekly"
+        and schedule_day
+        and schedule_day
+        not in [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]
+    ):
+        raise ValueError(
+            "SCHEDULE_DAY environment variable not 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', or 'sunday'"
+        )
+
     return (
         organization,
         repositories_list,
@@ -311,4 +347,6 @@ Please enable it by merging this pull request so that we can keep our dependenci
         exempt_ecosystems_list,
         update_existing,
         repo_specific_exemptions,
+        schedule,
+        schedule_day,
     )
