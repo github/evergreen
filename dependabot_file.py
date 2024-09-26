@@ -139,6 +139,10 @@ updates:
             try:
                 if repo.file_contents(file):
                     package_managers_found[manager] = True
+                    # If the last thing in the file is not a newline,
+                    # add one before adding a new language config to the file
+                    if dependabot_file and dependabot_file[-1] != "\n":
+                        dependabot_file += "\n"
                     dependabot_file += make_dependabot_config(
                         manager, group_dependencies, indent, schedule, schedule_day
                     )

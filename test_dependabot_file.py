@@ -129,10 +129,11 @@ updates:
   - package-ecosystem: 'bundler'
     directory: '/'
     schedule:
-      interval: 'weekly'"""
+      interval: 'weekly'
+"""
         existing_config = MagicMock()
         existing_config.decoded = b'---\nversion: 2\nupdates:\n  - package-ecosystem: "pip"\n    directory: "/"\n\
-    schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"\n'
+    schedule:\n      interval: "weekly"\n    commit-message:\n      prefix: "chore(deps)"'
         result = build_dependabot_file(
             repo, False, [], {}, existing_config, "weekly", ""
         )
