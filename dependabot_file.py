@@ -77,6 +77,7 @@ def build_dependabot_file(
         "docker": False,
         "terraform": False,
         "github-actions": False,
+        "maven": False,
     }
     DEFAULT_INDENT = 2  # pylint: disable=invalid-name
     # create a local copy in order to avoid overwriting the global exemption list
@@ -129,6 +130,7 @@ updates:
             ".csproj",
         ],
         "docker": ["Dockerfile"],
+        "maven": ["pom.xml"],
     }
 
     # Detect package managers where manifest files have known names
