@@ -115,7 +115,7 @@ def main():  # pragma: no cover
             existing_config,
             schedule,
             schedule_day,
-            labels
+            labels,
         )
 
         if dependabot_file is None:

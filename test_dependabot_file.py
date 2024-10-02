@@ -1,3 +1,4 @@
+# pylint: disable=too-many-public-methods
 """Tests for the dependabot_file.py functions."""
 
 import unittest
@@ -411,7 +412,9 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "Dockerfile"
 
-        result = build_dependabot_file(repo, False, ["docker"], {}, None, "weekly", "", [])
+        result = build_dependabot_file(
+            repo, False, ["docker"], {}, None, "weekly", "", []
+        )
         self.assertEqual(result, None)
 
     def test_build_dependabot_file_with_repo_specific_exempt_ecosystems(self):
@@ -487,7 +490,14 @@ updates:
       interval: 'weekly'
 """
         result = build_dependabot_file(
-            no_existing_config_repo, False, exempt_ecosystems, {}, None, "weekly", "", []
+            no_existing_config_repo,
+            False,
+            exempt_ecosystems,
+            {},
+            None,
+            "weekly",
+            "",
+            [],
         )
         self.assertEqual(result, expected_result)
 
@@ -527,10 +537,16 @@ updates:
       interval: 'weekly'
 """
         result = build_dependabot_file(
-            no_existing_config_repo, False, exempt_ecosystems, {}, None, "weekly", "", []
+            no_existing_config_repo,
+            False,
+            exempt_ecosystems,
+            {},
+            None,
+            "weekly",
+            "",
+            [],
         )
         self.assertEqual(result, expected_result)
-
 
     def test_build_dependabot_file_with_label(self):
         """Test that the dependabot.yml file is built correctly with one label set"""
@@ -574,9 +590,17 @@ updates:
       - "test2"
 """
             result = build_dependabot_file(
-                repo, False, [], {}, None, "weekly", "", ["dependencies", "test1", "test2"]
+                repo,
+                False,
+                [],
+                {},
+                None,
+                "weekly",
+                "",
+                ["dependencies", "test1", "test2"],
             )
             self.assertEqual(result, expected_result)
+
 
 if __name__ == "__main__":
     unittest.main()

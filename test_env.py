@@ -1,4 +1,4 @@
-# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods,too-many-lines
 
 """Test the get_env_vars function"""
 
@@ -933,7 +933,7 @@ we can keep our dependencies up to date and secure.",
         {
             "ORGANIZATION": "my_organization",
             "GH_TOKEN": "my_token",
-            "LABELS": "dependencies"
+            "LABELS": "dependencies",
         },
         clear=True,
     )
@@ -976,7 +976,7 @@ we can keep our dependencies up to date and secure.",
         {
             "ORGANIZATION": "my_organization",
             "GH_TOKEN": "my_token",
-            "LABELS": "dependencies,  test ,test2 "
+            "LABELS": "dependencies,  test ,test2 ",
         },
         clear=True,
     )
@@ -1009,10 +1009,11 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
-            ["dependencies", "test" ,"test2"],  # labels
+            ["dependencies", "test", "test2"],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
+
 
 if __name__ == "__main__":
     unittest.main()

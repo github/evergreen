@@ -329,9 +329,7 @@ Please enable it by merging this pull request so that we can keep our dependenci
     labels_str = os.getenv("LABELS")
     labels_list = []
     if labels_str:
-        labels_list = [
-            label.lower().strip() for label in labels_str.split(",")
-        ]
+        labels_list = [label.lower().strip() for label in labels_str.split(",")]
 
     return (
         organization,
@@ -358,5 +356,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         repo_specific_exemptions,
         schedule,
         schedule_day,
-        labels_list
+        labels_list,
     )

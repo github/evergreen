@@ -154,7 +154,12 @@ updates:
                     if dependabot_file and dependabot_file[-1] != "\n":
                         dependabot_file += "\n"
                     dependabot_file += make_dependabot_config(
-                        manager, group_dependencies, indent, schedule, schedule_day, labels
+                        manager,
+                        group_dependencies,
+                        indent,
+                        schedule,
+                        schedule_day,
+                        labels,
                     )
                     break
             except github3.exceptions.NotFoundError:
@@ -167,7 +172,12 @@ updates:
                 if file[0].endswith(".tf"):
                     package_managers_found["terraform"] = True
                     dependabot_file += make_dependabot_config(
-                        "terraform", group_dependencies, indent, schedule, schedule_day, labels
+                        "terraform",
+                        group_dependencies,
+                        indent,
+                        schedule,
+                        schedule_day,
+                        labels,
                     )
                     break
         except github3.exceptions.NotFoundError:
