@@ -5,7 +5,7 @@ import yaml
 
 
 def make_dependabot_config(
-    ecosystem, group_dependencies, indent, schedule, schedule_day
+    ecosystem, group_dependencies, indent, schedule, schedule_day, labels
 ) -> str:
     """
     Make the dependabot configuration for a specific package ecosystem
@@ -16,6 +16,7 @@ def make_dependabot_config(
         indent: the number of spaces to indent the dependabot configuration ex: "  "
         schedule: the schedule to run dependabot ex: "daily"
         schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "weekly"
+        labels: the list of labels to be added to dependabot configuration
 
     Returns:
         str: the dependabot configuration for the package ecosystem
@@ -29,6 +30,13 @@ def make_dependabot_config(
 {indent}{indent}directory: '/'
 {indent}{indent}schedule:
 {indent}{indent}{indent}interval: '{schedule}'{schedule_day_line}
+"""
+
+    if labels:
+        dependabot_config += f"""{indent}{indent}labels:
+"""
+        for label in labels:
+            dependabot_config += f"""{indent}{indent}{indent}- \"{label}\"
 """
 
     if group_dependencies:
@@ -49,6 +57,7 @@ def build_dependabot_file(
     existing_config,
     schedule,
     schedule_day,
+    labels,
 ) -> str | None:
     """
     Build the dependabot.yml file for a repo based on the repo contents
@@ -61,6 +70,7 @@ def build_dependabot_file(
         existing_config: the existing dependabot configuration file or None if it doesn't exist
         schedule: the schedule to run dependabot ex: "daily"
         schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "daily"
+        labels: the list of labels to be added to dependabot configuration
 
     Returns:
         str: the dependabot.yml file for the repo
@@ -144,7 +154,7 @@ updates:
                     if dependabot_file and dependabot_file[-1] != "\n":
                         dependabot_file += "\n"
                     dependabot_file += make_dependabot_config(
-                        manager, group_dependencies, indent, schedule, schedule_day
+                        manager, group_dependencies, indent, schedule, schedule_day, labels
                     )
                     break
             except github3.exceptions.NotFoundError:
@@ -157,7 +167,7 @@ updates:
                 if file[0].endswith(".tf"):
                     package_managers_found["terraform"] = True
                     dependabot_file += make_dependabot_config(
-                        "terraform", group_dependencies, indent, schedule, schedule_day
+                        "terraform", group_dependencies, indent, schedule, schedule_day, labels
                     )
                     break
         except github3.exceptions.NotFoundError:
@@ -173,6 +183,7 @@ updates:
                         indent,
                         schedule,
                         schedule_day,
+                        labels,
                     )
                     break
         except github3.exceptions.NotFoundError:
