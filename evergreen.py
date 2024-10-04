@@ -1,5 +1,6 @@
 """This file contains the main() and other functions needed to open an issue/PR dependabot is not enabled but could be"""
 
+import sys
 import uuid
 from datetime import datetime
 
@@ -39,6 +40,7 @@ def main():  # pragma: no cover
         repo_specific_exemptions,
         schedule,
         schedule_day,
+        team_name,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -60,8 +62,10 @@ def main():  # pragma: no cover
             )
         project_id = get_global_project_id(token, organization, project_id)
 
-    # Get the repositories from the organization or list of repositories
-    repos = get_repos_iterator(organization, repository_list, github_connection)
+    # Get the repositories from the organization, team name, or list of repositories
+    repos = get_repos_iterator(
+        organization, team_name, repository_list, github_connection
+    )
 
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
     count_eligible = 0
@@ -256,11 +260,18 @@ def enable_dependabot_security_updates(owner, repo, access_token):
         print("\tFailed to enable Dependabot security updates.")
 
 
-def get_repos_iterator(organization, repository_list, github_connection):
-    """Get the repositories from the organization or list of repositories"""
+def get_repos_iterator(organization, team_name, repository_list, github_connection):
+    """Get the repositories from the organization, team_name, or list of repositories"""
     repos = []
-    if organization and not repository_list:
+    if organization and not repository_list and not team_name:
         repos = github_connection.organization(organization).repositories()
+    elif team_name and organization:
+        # Get the repositories from the team
+        team = github_connection.organization(organization).team_by_name(team_name)
+        if team.repos_count == 0:
+            print(f"Team {team_name} has no repositories")
+            sys.exit(1)
+        repos = team.repositories()
     else:
         # Get the repositories from the repository_list
         for repo in repository_list:

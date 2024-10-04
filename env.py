@@ -117,6 +117,7 @@ def get_env_vars(
     dict,
     str,
     str,
+    str | None,
 ]:
     """
     Get the environment variables for use in the action.
@@ -148,6 +149,7 @@ def get_env_vars(
         repo_specific_exemptions (dict): A dictionary of per repository ecosystem exemptions
         schedule (str): The schedule to run the action on
         schedule_day (str): The day of the week to run the action on if schedule is daily
+        team_name (str): The team to search for repositories in
     """
 
     if not test:
@@ -157,15 +159,16 @@ def get_env_vars(
 
     organization = os.getenv("ORGANIZATION")
     repositories_str = os.getenv("REPOSITORY")
+    team_name = os.getenv("TEAM_NAME")
     # Either organization or repository must be set
     if not organization and not repositories_str:
         raise ValueError(
             "ORGANIZATION and REPOSITORY environment variables were not set. Please set one"
         )
-
-    if repositories_str and repositories_str.find("/") == 0:
+    # Team name and repository are mutually exclusive
+    if repositories_str and team_name:
         raise ValueError(
-            "REPOSITORY environment variable was not set correctly. Please set it to a comma separated list of repositories in the format org/repo"
+            "TEAM_NAME environment variable cannot be used with ORGANIZATION or REPOSITORY"
         )
 
     # Separate repositories_str into a list based on the comma separator
@@ -349,4 +352,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         repo_specific_exemptions,
         schedule,
         schedule_day,
+        team_name,
     )

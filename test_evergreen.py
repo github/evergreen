@@ -315,7 +315,9 @@ class TestGetReposIterator(unittest.TestCase):
         mock_organization.repositories.return_value = mock_repositories
         github_connection.organization.return_value = mock_organization
 
-        result = get_repos_iterator(organization, repository_list, github_connection)
+        result = get_repos_iterator(
+            organization, None, repository_list, github_connection
+        )
 
         # Assert that the organization method was called with the correct argument
         github_connection.organization.assert_called_once_with(organization)
@@ -337,7 +339,9 @@ class TestGetReposIterator(unittest.TestCase):
         mock_repository_list = [mock_repository, mock_repository]
         github_connection.repository.side_effect = mock_repository_list
 
-        result = get_repos_iterator(organization, repository_list, github_connection)
+        result = get_repos_iterator(
+            organization, None, repository_list, github_connection
+        )
 
         # Assert that the repository method was called with the correct arguments for each repository in the list
         expected_calls = [
@@ -348,6 +352,40 @@ class TestGetReposIterator(unittest.TestCase):
 
         # Assert that the function returned the expected result
         self.assertEqual(result, mock_repository_list)
+
+    @patch("github3.login")
+    def test_get_repos_iterator_with_team(self, mock_github):
+        """Test the get_repos_iterator function with a team"""
+        organization = "my_organization"
+        repository_list = []
+        team_name = "my_team"
+        github_connection = mock_github.return_value
+
+        mock_team_repositories = MagicMock()
+        github_connection.organization.return_value.team_by_name.return_value.repositories.return_value = (
+            mock_team_repositories
+        )
+
+        result = get_repos_iterator(
+            organization,
+            team_name,
+            repository_list,
+            github_connection,
+        )
+
+        # Assert that the organization method was called with the correct argument
+        github_connection.organization.assert_called_once_with(organization)
+
+        # Assert that the team_by_name method was called on the organization object
+        github_connection.organization.return_value.team_by_name.assert_called_once_with(
+            team_name
+        )
+
+        # Assert that the repositories method was called on the team object
+        github_connection.organization.return_value.team_by_name.return_value.repositories.assert_called_once()
+
+        # Assert that the function returned the expected result
+        self.assertEqual(result, mock_team_repositories)
 
 
 class TestGetGlobalProjectId(unittest.TestCase):
