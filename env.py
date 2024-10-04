@@ -117,6 +117,7 @@ def get_env_vars(
     dict,
     str,
     str,
+    list[str],
 ]:
     """
     Get the environment variables for use in the action.
@@ -148,6 +149,7 @@ def get_env_vars(
         repo_specific_exemptions (dict): A dictionary of per repository ecosystem exemptions
         schedule (str): The schedule to run the action on
         schedule_day (str): The day of the week to run the action on if schedule is daily
+        labels (list[str]): A list of labels to be added to dependabot configuration
     """
 
     if not test:
@@ -324,6 +326,11 @@ Please enable it by merging this pull request so that we can keep our dependenci
             "SCHEDULE_DAY environment variable not 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', or 'sunday'"
         )
 
+    labels_str = os.getenv("LABELS")
+    labels_list = []
+    if labels_str:
+        labels_list = [label.lower().strip() for label in labels_str.split(",")]
+
     return (
         organization,
         repositories_list,
@@ -349,4 +356,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         repo_specific_exemptions,
         schedule,
         schedule_day,
+        labels_list,
     )
