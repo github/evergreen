@@ -41,6 +41,7 @@ def main():  # pragma: no cover
         schedule,
         schedule_day,
         team_name,
+        labels,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -118,6 +119,7 @@ def main():  # pragma: no cover
             existing_config,
             schedule,
             schedule_day,
+            labels,
         )
 
         if dependabot_file is None:

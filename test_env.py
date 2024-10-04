@@ -1,4 +1,4 @@
-# pylint: disable=too-many-public-methods, too-many-lines
+# pylint: disable=too-many-public-methods,too-many-lines
 
 """Test the get_env_vars function"""
 
@@ -33,6 +33,7 @@ class TestEnv(unittest.TestCase):
             "REPO_SPECIFIC_EXEMPTIONS",
             "SCHEDULE",
             "SCHEDULE_DAY",
+            "LABELS",
         ]
         for key in env_keys:
             if key in os.environ:
@@ -82,6 +83,7 @@ class TestEnv(unittest.TestCase):
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -134,6 +136,7 @@ class TestEnv(unittest.TestCase):
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -243,6 +246,7 @@ class TestEnv(unittest.TestCase):
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -368,6 +372,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -411,6 +416,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -468,6 +474,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -533,6 +540,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -576,6 +584,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -620,6 +629,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -664,6 +674,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -738,6 +749,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -783,6 +795,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -827,6 +840,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -872,6 +886,7 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "",  # schedule_day
             None,  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1006,6 +1021,93 @@ we can keep our dependencies up to date and secure.",
             "weekly",  # schedule
             "tuesday",  # schedule_day
             None,  # team_name
+            [],  # labels
+        )
+        result = get_env_vars(True)
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "LABELS": "dependencies",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_a_valid_label(self):
+        """Test valid single label"""
+        expected_result = (
+            "my_organization",
+            [],
+            None,
+            None,
+            b"",
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            "",
+            False,
+            "Create/Update dependabot.yaml",
+            None,
+            False,
+            ["internal", "private", "public"],
+            None,  # batch_size
+            True,  # enable_security_updates
+            [],  # exempt_ecosystems
+            False,  # update_existing
+            {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
+            ["dependencies"],  # labels
+        )
+        result = get_env_vars(True)
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "LABELS": "dependencies,  test ,test2 ",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_valid_labels_containing_spaces(self):
+        """Test valid list of labels with spaces"""
+        expected_result = (
+            "my_organization",
+            [],
+            None,
+            None,
+            b"",
+            "my_token",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. \
+Please enable it by merging this pull request so that \
+we can keep our dependencies up to date and secure.",
+            "",
+            False,
+            "Create/Update dependabot.yaml",
+            None,
+            False,
+            ["internal", "private", "public"],
+            None,  # batch_size
+            True,  # enable_security_updates
+            [],  # exempt_ecosystems
+            False,  # update_existing
+            {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
+            ["dependencies", "test", "test2"],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
