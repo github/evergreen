@@ -571,7 +571,7 @@ updates:
             self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_labels(self):
-        """Test that the dependabot.yml file is built correctly with labels set"""
+        """Test that the dependabot.yml file is built correctly with multiple labels set"""
         repo = MagicMock()
         filename_list = ["Gemfile", "Gemfile.lock"]
 
