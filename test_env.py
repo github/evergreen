@@ -301,6 +301,7 @@ class TestEnv(unittest.TestCase):
             "weekly",  # schedule
             "",  # schedule_day
             "engineering",  # team_name
+            [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1064,6 +1065,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             ["dependencies"],  # labels
         )
         result = get_env_vars(True)
@@ -1107,6 +1109,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             ["dependencies", "test", "test2"],  # labels
         )
         result = get_env_vars(True)
