@@ -4,6 +4,7 @@
 [![Lint Code Base](https://github.com/github/evergreen/actions/workflows/super-linter.yaml/badge.svg)](https://github.com/github/evergreen/actions/workflows/super-linter.yaml)
 [![Python package](https://github.com/github/evergreen/actions/workflows/python-ci.yml/badge.svg)](https://github.com/github/evergreen/actions/workflows/python-ci.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/github/evergreen/badge)](https://scorecard.dev/viewer/?uri=github.com/github/evergreen)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9523/badge)](https://www.bestpractices.dev/projects/9523)
 
 This is a GitHub Action that given an organization or specified repositories, opens an issue/PR if dependabot is not enabled, or there are more package ecosystems that could be. It also enables [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) for the repository.
 
