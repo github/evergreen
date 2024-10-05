@@ -332,7 +332,7 @@ class TestEnv(unittest.TestCase):
         the_exception = cm.exception
         self.assertEqual(
             str(the_exception),
-            "TEAM_NAME environment variable cannot be used with ORGANIZATION or REPOSITORY",
+            "TEAM_NAME environment variable cannot be used with REPOSITORY",
         )
 
     @patch.dict(
