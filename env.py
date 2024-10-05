@@ -170,7 +170,7 @@ def get_env_vars(
     # Team name and repository are mutually exclusive
     if repositories_str and team_name:
         raise ValueError(
-            "TEAM_NAME environment variable cannot be used with ORGANIZATION or REPOSITORY"
+            "TEAM_NAME environment variable cannot be used with REPOSITORY"
         )
 
     # Separate repositories_str into a list based on the comma separator
