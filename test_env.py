@@ -82,6 +82,7 @@ class TestEnv(unittest.TestCase):
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -134,6 +135,7 @@ class TestEnv(unittest.TestCase):
             },  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -243,10 +245,95 @@ class TestEnv(unittest.TestCase):
             },  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "TEAM_NAME": "engineering",
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "EXEMPT_REPOS": "repo4,repo5",
+            "TYPE": "pull",
+            "TITLE": "Dependabot Alert custom title",
+            "BODY": "Dependabot custom body",
+            "CREATED_AFTER_DATE": "2023-01-01",
+            "DRY_RUN": "true",
+            "COMMIT_MESSAGE": "Create dependabot configuration",
+            "PROJECT_ID": "123",
+            "GROUP_DEPENDENCIES": "false",
+            "REPO_SPECIFIC_EXEMPTIONS": "org1/repo1:docker;org2/repo2:gomod",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_team(self):
+        """Test that all environment variables are set correctly using a team"""
+        expected_result = (
+            "my_organization",
+            [],
+            None,
+            None,
+            b"",
+            "my_token",
+            "",
+            ["repo4", "repo5"],
+            "pull",
+            "Dependabot Alert custom title",
+            "Dependabot custom body",
+            "2023-01-01",
+            True,
+            "Create dependabot configuration",
+            "123",
+            False,
+            ["internal", "private", "public"],
+            None,  # batch_size
+            True,  # enable_security_updates
+            [],  # exempt_ecosystems
+            False,  # update_existing
+            {
+                "org1/repo1": ["docker"],
+                "org2/repo2": ["gomod"],
+            },  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
+            "engineering",  # team_name
+            [],  # labels
+        )
+        result = get_env_vars(True)
+        self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "TEAM_NAME": "engineering",
+            "REPOSITORY": "org/repo1,org2/repo2",
+            "GH_TOKEN": "my_token",
+            "EXEMPT_REPOS": "repo4,repo5",
+            "TYPE": "pull",
+            "TITLE": "Dependabot Alert custom title",
+            "BODY": "Dependabot custom body",
+            "CREATED_AFTER_DATE": "2023-01-01",
+            "DRY_RUN": "true",
+            "COMMIT_MESSAGE": "Create dependabot configuration",
+            "PROJECT_ID": "123",
+            "GROUP_DEPENDENCIES": "false",
+            "REPO_SPECIFIC_EXEMPTIONS": "org1/repo1:docker;org2/repo2:gomod",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_team_and_repo(self):
+        """Test the prgoram errors when TEAM_NAME is set with REPOSITORY"""
+        with self.assertRaises(ValueError) as cm:
+            get_env_vars(True)
+        the_exception = cm.exception
+        self.assertEqual(
+            str(the_exception),
+            "TEAM_NAME environment variable cannot be used with REPOSITORY",
+        )
 
     @patch.dict(
         os.environ,
@@ -285,6 +372,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -328,6 +416,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -385,6 +474,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -450,6 +540,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -493,6 +584,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -537,6 +629,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -581,6 +674,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -655,6 +749,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -700,6 +795,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -744,6 +840,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -789,6 +886,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -923,6 +1021,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "tuesday",  # schedule_day
+            None,  # team_name
             [],  # labels
         )
         result = get_env_vars(True)
@@ -966,6 +1065,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             ["dependencies"],  # labels
         )
         result = get_env_vars(True)
@@ -1009,6 +1109,7 @@ we can keep our dependencies up to date and secure.",
             {},  # repo_specific_exemptions
             "weekly",  # schedule
             "",  # schedule_day
+            None,  # team_name
             ["dependencies", "test", "test2"],  # labels
         )
         result = get_env_vars(True)
