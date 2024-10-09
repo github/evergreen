@@ -310,6 +310,22 @@ updates:
         result = build_dependabot_file(repo, False, [], {}, None, "weekly", "", [])
         self.assertEqual(result, expected_result)
 
+    def test_build_dependabot_file_with_maven(self):
+        """Test that the dependabot.yml file is built correctly with maven"""
+        repo = MagicMock()
+        repo.file_contents.side_effect = lambda filename: filename == "pom.xml"
+
+        expected_result = """---
+version: 2
+updates:
+  - package-ecosystem: 'maven'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        result = build_dependabot_file(repo, False, [], {}, None, "weekly", "", [])
+        self.assertEqual(result, expected_result)
+
     def test_build_dependabot_file_with_terraform_with_files(self):
         """Test that the dependabot.yml file is built correctly with Terraform"""
         repo = MagicMock()
