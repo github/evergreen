@@ -57,9 +57,7 @@ class TestAuth(unittest.TestCase):
         mock_response.json.return_value = {"token": dummy_token}
         mock_post.return_value = mock_response
 
-        result = auth.get_github_app_installation_token(
-            b"gh_private_token", "gh_app_id", "gh_installation_id"
-        )
+        result = auth.get_github_app_installation_token(b"ghe", "gh_private_token", "gh_app_id", "gh_installation_id")
 
         self.assertEqual(result, dummy_token)
 
