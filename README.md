@@ -28,7 +28,8 @@ All feedback regarding our GitHub Actions, as a whole, should be communicated th
 1. Create a repository to host this GitHub Action or select an existing repository.
 1. Select a best fit workflow file from the [examples below](#example-workflows).
 1. Copy that example into your repository (from step 1) and into the proper directory for GitHub Actions: `.github/workflows/` directory with the file extension `.yml` (ie. `.github/workflows/evergreen.yml`)
-1. Edit the values below from the sample workflow with your information:  
+1. Edit the values below from the sample workflow with your information:
+
    - `ORGANIZATION`
    - `TEAM_NAME`
    - `REPOSITORY`
@@ -41,6 +42,7 @@ All feedback regarding our GitHub Actions, as a whole, should be communicated th
    If running the action on just **one repository** or a **list of repositories**, then no organization is needed.  
    If running the action on a **team**, then an organization is required and no repository is needed.  
    The type should be either `issue` or `pull` representing the action that you want taken after discovering a repository that should enable dependabot.
+
 1. Optionally, edit the value `CREATED_AFTER_DATE` if you are setting up this action to run regularly and only want newly created repositories to be considered.
    Otherwise, if you want all specified repositories regardless of when they were created to be considered, then leave it blank.
 1. Optionally edit the value `UPDATE_EXISTING` (default value `false`) if you want to update existing dependabot configuration files.
@@ -49,18 +51,20 @@ All feedback regarding our GitHub Actions, as a whole, should be communicated th
 1. Also edit the value for `GH_ENTERPRISE_URL` if you are using a GitHub Server and not using github.com.
    For github.com users, leave it empty.
 1. Update the value of `GH_TOKEN`. Do this by creating a [GitHub API token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) with the following permissions:
+
    - If using **classic tokens**:
-      - `workflow`, this will set also all permissions for `repo`
-      - under `admin`, `read:org` and `write:org`
+     - `workflow`, this will set also all permissions for `repo`
+     - under `admin`, `read:org` and `write:org`
    - If using **fine grain tokens**:
-      - `Administration` - Read and Write (Needed to activate the [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) )
-      - `Pull Requests` - Read and Write (If `TYPE` input is set to `pull`)
-      - `Issues` - Read and Write (If `TYPE` input is set to `issue`)
-      - `Workflows` - Read and Write (Needed to create the `dependabot.yml` file)
+     - `Administration` - Read and Write (Needed to activate the [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) )
+     - `Pull Requests` - Read and Write (If `TYPE` input is set to `pull`)
+     - `Issues` - Read and Write (If `TYPE` input is set to `issue`)
+     - `Workflows` - Read and Write (Needed to create the `dependabot.yml` file)
 
    Then take the value of the API token you just created, and [create a repository secret](https://docs.github.com/en/actions/security-guides/encrypted-secrets) where the name of the secret is `GH_TOKEN` and the value of the secret the API token.
    Then finally update the workflow file to use that repository secret by changing `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` to `GH_TOKEN: ${{ secrets.GH_TOKEN }}`.
    The name of the secret can really be anything, it just needs to match between when you create the secret name and when you refer to it in the workflow file.
+
 1. If you want the resulting issue with the output to appear in a different repository other than the one the workflow file runs in, update the line `token: ${{ secrets.GITHUB_TOKEN }}` with your own GitHub API token stored as a repository secret. This process is the same as described in the step above. More info on creating secrets can be found [here](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
 1. Commit the workflow file to the default branch (often `master` or `main`)
 1. Wait for the action to trigger based on the `schedule` entry or manually trigger the workflow as shown in the [documentation](https://docs.github.com/en/actions/using-workflows/manually-running-a-workflow).
@@ -222,7 +226,6 @@ jobs:
           ORGANIZATION: your_organization
           UPDATE_EXISTING: True
           GROUP_DEPENDENCIES: True
-
 ```
 
 ## Local usage without Docker
