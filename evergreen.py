@@ -45,20 +45,28 @@ def main():  # pragma: no cover
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
-    github_connection = auth.auth_to_github(token, gh_app_id, gh_app_installation_id, gh_app_private_key, ghe)
+    github_connection = auth.auth_to_github(
+        token, gh_app_id, gh_app_installation_id, gh_app_private_key, ghe
+    )
 
     if not token and gh_app_id and gh_app_installation_id and gh_app_private_key:
-        token = auth.get_github_app_installation_token(ghe, gh_app_id, gh_app_private_key, gh_app_installation_id)
+        token = auth.get_github_app_installation_token(
+            ghe, gh_app_id, gh_app_private_key, gh_app_installation_id
+        )
 
     # If Project ID is set, lookup the global project ID
     if project_id:
         # Check Organization is set as it is required for linking to a project
         if not organization:
-            raise ValueError("ORGANIZATION environment variable was not set. Please set it")
+            raise ValueError(
+                "ORGANIZATION environment variable was not set. Please set it"
+            )
         project_id = get_global_project_id(ghe, token, organization, project_id)
 
     # Get the repositories from the organization, team name, or list of repositories
-    repos = get_repos_iterator(organization, team_name, repository_list, github_connection)
+    repos = get_repos_iterator(
+        organization, team_name, repository_list, github_connection
+    )
 
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
     count_eligible = 0
@@ -88,10 +96,14 @@ def main():  # pragma: no cover
                 break
 
         if existing_config and not update_existing:
-            print(f"Skipping {repo.full_name} (dependabot file already exists and update_existing is False)")
+            print(
+                f"Skipping {repo.full_name} (dependabot file already exists and update_existing is False)"
+            )
             continue
 
-        if created_after_date and is_repo_created_date_before(repo.created_at, created_after_date):
+        if created_after_date and is_repo_created_date_before(
+            repo.created_at, created_after_date
+        ):
             print(f"Skipping {repo.full_name} (created after filter)")
             continue
 
@@ -131,7 +143,9 @@ def main():  # pragma: no cover
 
         # Get dependabot security updates enabled if possible
         if enable_security_updates:
-            if not is_dependabot_security_updates_enabled(ghe, repo.owner, repo.name, token):
+            if not is_dependabot_security_updates_enabled(
+                ghe, repo.owner, repo.name, token
+            ):
                 enable_dependabot_security_updates(ghe, repo.owner, repo.name, token)
 
         if follow_up_type == "issue":
@@ -142,7 +156,9 @@ def main():  # pragma: no cover
                 issue = repo.create_issue(title, body_issue)
                 print(f"\tCreated issue {issue.html_url}")
                 if project_id:
-                    issue_id = get_global_issue_id(ghe, token, organization, repo.name, issue.number)
+                    issue_id = get_global_issue_id(
+                        ghe, token, organization, repo.name, issue.number
+                    )
                     link_item_to_project(ghe, token, project_id, issue_id)
                     print(f"\tLinked issue to project {project_id}")
         else:
@@ -164,7 +180,9 @@ def main():  # pragma: no cover
                     )
                     print(f"\tCreated pull request {pull.html_url}")
                     if project_id:
-                        pr_id = get_global_pr_id(ghe, token, organization, repo.name, pull.number)
+                        pr_id = get_global_pr_id(
+                            ghe, token, organization, repo.name, pull.number
+                        )
                         response = link_item_to_project(ghe, token, project_id, pr_id)
                         if response:
                             print(f"\tLinked pull request to project {project_id}")
@@ -178,7 +196,9 @@ def main():  # pragma: no cover
 def is_repo_created_date_before(repo_created_at: str, created_after_date: str):
     """Check if the repository was created before the created_after_date"""
     repo_created_at_date = datetime.fromisoformat(repo_created_at).replace(tzinfo=None)
-    return created_after_date and repo_created_at_date < datetime.strptime(created_after_date, "%Y-%m-%d")
+    return created_after_date and repo_created_at_date < datetime.strptime(
+        created_after_date, "%Y-%m-%d"
+    )
 
 
 def is_dependabot_security_updates_enabled(ghe, owner, repo, access_token):
@@ -255,7 +275,9 @@ def get_repos_iterator(organization, team_name, repository_list, github_connecti
     else:
         # Get the repositories from the repository_list
         for repo in repository_list:
-            repos.append(github_connection.repository(repo.split("/")[0], repo.split("/")[1]))
+            repos.append(
+                github_connection.repository(repo.split("/")[0], repo.split("/")[1])
+            )
 
     return repos
 
@@ -314,7 +336,9 @@ def commit_changes(
             branch=branch_name,
         )
 
-    pull = repo.create_pull(title=title, body=body, head=branch_name, base=repo.default_branch)
+    pull = repo.create_pull(
+        title=title, body=body, head=branch_name, base=repo.default_branch
+    )
     return pull
 
 
@@ -326,7 +350,9 @@ def get_global_project_id(ghe, token, organization, number):
     api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
     url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
-    data = {"query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'}
+    data = {
+        "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
+    }
 
     try:
         response = requests.post(url, headers=headers, json=data, timeout=20)
@@ -418,7 +444,9 @@ def link_item_to_project(ghe, token, project_id, item_id):
     api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
     url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
-    data = {"query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'}
+    data = {
+        "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
+    }
 
     try:
         response = requests.post(url, headers=headers, json=data, timeout=20)

@@ -39,7 +39,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         access_token = "my_access_token"
         ghe = ""
 
-        expected_url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        expected_url = (
+            f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        )
         expected_headers = {
             "Authorization": f"Bearer {access_token}",
             "Accept": "application/vnd.github.london-preview+json",
@@ -50,9 +52,13 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = expected_response
 
-            result = is_dependabot_security_updates_enabled(ghe, owner, repo, access_token)
+            result = is_dependabot_security_updates_enabled(
+                ghe, owner, repo, access_token
+            )
 
-            mock_get.assert_called_once_with(expected_url, headers=expected_headers, timeout=20)
+            mock_get.assert_called_once_with(
+                expected_url, headers=expected_headers, timeout=20
+            )
             self.assertTrue(result)
 
     def test_is_dependabot_security_updates_disabled(self):
@@ -69,7 +75,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         access_token = "my_access_token"
         ghe = ""
 
-        expected_url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        expected_url = (
+            f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        )
         expected_headers = {
             "Authorization": f"Bearer {access_token}",
             "Accept": "application/vnd.github.london-preview+json",
@@ -79,9 +87,13 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = {"enabled": False}
 
-            result = is_dependabot_security_updates_enabled(ghe, owner, repo, access_token)
+            result = is_dependabot_security_updates_enabled(
+                ghe, owner, repo, access_token
+            )
 
-            mock_get.assert_called_once_with(expected_url, headers=expected_headers, timeout=20)
+            mock_get.assert_called_once_with(
+                expected_url, headers=expected_headers, timeout=20
+            )
             self.assertFalse(result)
 
     def test_is_dependabot_security_updates_not_found(self):
@@ -98,7 +110,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         access_token = "my_access_token"
         ghe = ""
 
-        expected_url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        expected_url = (
+            f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        )
         expected_headers = {
             "Authorization": f"Bearer {access_token}",
             "Accept": "application/vnd.github.london-preview+json",
@@ -107,9 +121,13 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 404
 
-            result = is_dependabot_security_updates_enabled(ghe, owner, repo, access_token)
+            result = is_dependabot_security_updates_enabled(
+                ghe, owner, repo, access_token
+            )
 
-            mock_get.assert_called_once_with(expected_url, headers=expected_headers, timeout=20)
+            mock_get.assert_called_once_with(
+                expected_url, headers=expected_headers, timeout=20
+            )
             self.assertFalse(result)
 
     def test_enable_dependabot_security_updates(self):
@@ -126,7 +144,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         access_token = "my_access_token"
         ghe = ""
 
-        expected_url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        expected_url = (
+            f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        )
         expected_headers = {
             "Authorization": f"Bearer {access_token}",
             "Accept": "application/vnd.github.london-preview+json",
@@ -138,8 +158,12 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             with patch("builtins.print") as mock_print:
                 enable_dependabot_security_updates(ghe, owner, repo, access_token)
 
-                mock_put.assert_called_once_with(expected_url, headers=expected_headers, timeout=20)
-                mock_print.assert_called_once_with("\tDependabot security updates enabled successfully.")
+                mock_put.assert_called_once_with(
+                    expected_url, headers=expected_headers, timeout=20
+                )
+                mock_print.assert_called_once_with(
+                    "\tDependabot security updates enabled successfully."
+                )
 
     def test_enable_dependabot_security_updates_failed(self):
         """
@@ -155,7 +179,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         access_token = "my_access_token"
         ghe = ""
 
-        expected_url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        expected_url = (
+            f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+        )
         expected_headers = {
             "Authorization": f"Bearer {access_token}",
             "Accept": "application/vnd.github.london-preview+json",
@@ -167,8 +193,12 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             with patch("builtins.print") as mock_print:
                 enable_dependabot_security_updates(ghe, owner, repo, access_token)
 
-                mock_put.assert_called_once_with(expected_url, headers=expected_headers, timeout=20)
-                mock_print.assert_called_once_with("\tFailed to enable Dependabot security updates.")
+                mock_put.assert_called_once_with(
+                    expected_url, headers=expected_headers, timeout=20
+                )
+                mock_print.assert_called_once_with(
+                    "\tFailed to enable Dependabot security updates."
+                )
 
 
 class TestCommitChanges(unittest.TestCase):
@@ -177,7 +207,9 @@ class TestCommitChanges(unittest.TestCase):
     @patch("uuid.uuid4")
     def test_commit_changes(self, mock_uuid):
         """Test the commit_changes function."""
-        mock_uuid.return_value = uuid.UUID("12345678123456781234567812345678")  # Mock UUID generation
+        mock_uuid.return_value = uuid.UUID(
+            "12345678123456781234567812345678"
+        )  # Mock UUID generation
         mock_repo = MagicMock()  # Mock repo object
         mock_repo.default_branch = "main"
         mock_repo.ref.return_value.object.sha = "abc123"  # Mock SHA for latest commit
@@ -201,7 +233,9 @@ class TestCommitChanges(unittest.TestCase):
         )
 
         # Assert that the methods were called with the correct arguments
-        mock_repo.create_ref.assert_called_once_with(f"refs/heads/{branch_name}", "abc123")
+        mock_repo.create_ref.assert_called_once_with(
+            f"refs/heads/{branch_name}", "abc123"
+        )
         mock_repo.create_file.assert_called_once_with(
             path=dependabot_file_name,
             message=commit_message,
@@ -292,7 +326,9 @@ class TestGetReposIterator(unittest.TestCase):
         mock_organization.repositories.return_value = mock_repositories
         github_connection.organization.return_value = mock_organization
 
-        result = get_repos_iterator(organization, None, repository_list, github_connection)
+        result = get_repos_iterator(
+            organization, None, repository_list, github_connection
+        )
 
         # Assert that the organization method was called with the correct argument
         github_connection.organization.assert_called_once_with(organization)
@@ -314,7 +350,9 @@ class TestGetReposIterator(unittest.TestCase):
         mock_repository_list = [mock_repository, mock_repository]
         github_connection.repository.side_effect = mock_repository_list
 
-        result = get_repos_iterator(organization, None, repository_list, github_connection)
+        result = get_repos_iterator(
+            organization, None, repository_list, github_connection
+        )
 
         # Assert that the repository method was called with the correct arguments for each repository in the list
         expected_calls = [
@@ -335,7 +373,9 @@ class TestGetReposIterator(unittest.TestCase):
         github_connection = mock_github.return_value
 
         mock_team_repositories = MagicMock()
-        github_connection.organization.return_value.team_by_name.return_value.repositories.return_value = mock_team_repositories
+        github_connection.organization.return_value.team_by_name.return_value.repositories.return_value = (
+            mock_team_repositories
+        )
 
         result = get_repos_iterator(
             organization,
@@ -348,7 +388,9 @@ class TestGetReposIterator(unittest.TestCase):
         github_connection.organization.assert_called_once_with(organization)
 
         # Assert that the team_by_name method was called on the organization object
-        github_connection.organization.return_value.team_by_name.assert_called_once_with(team_name)
+        github_connection.organization.return_value.team_by_name.assert_called_once_with(
+            team_name
+        )
 
         # Assert that the repositories method was called on the team object
         github_connection.organization.return_value.team_by_name.return_value.repositories.assert_called_once()
@@ -370,15 +412,21 @@ class TestGetGlobalProjectId(unittest.TestCase):
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
-        expected_data = {"query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'}
-        expected_response = {"data": {"organization": {"projectV2": {"id": "my_project_id"}}}}
+        expected_data = {
+            "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
+        }
+        expected_response = {
+            "data": {"organization": {"projectV2": {"id": "my_project_id"}}}
+        }
 
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = expected_response
 
         result = get_global_project_id(ghe, token, organization, number)
 
-        mock_post.assert_called_once_with(expected_url, headers=expected_headers, json=expected_data, timeout=20)
+        mock_post.assert_called_once_with(
+            expected_url, headers=expected_headers, json=expected_data, timeout=20
+        )
         self.assertEqual(result, "my_project_id")
 
     @patch("requests.post")
@@ -391,14 +439,18 @@ class TestGetGlobalProjectId(unittest.TestCase):
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
-        expected_data = {"query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'}
+        expected_data = {
+            "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
+        }
 
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
         with patch("builtins.print") as mock_print:
             result = get_global_project_id(ghe, token, organization, number)
 
-            mock_post.assert_called_once_with(expected_url, headers=expected_headers, json=expected_data, timeout=20)
+            mock_post.assert_called_once_with(
+                expected_url, headers=expected_headers, json=expected_data, timeout=20
+            )
             mock_print.assert_called_once_with("Request failed: Request failed")
             self.assertIsNone(result)
 
@@ -412,7 +464,9 @@ class TestGetGlobalProjectId(unittest.TestCase):
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
-        expected_data = {"query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'}
+        expected_data = {
+            "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
+        }
         expected_response = {"data": {"organization": {"projectV2": {}}}}
 
         mock_post.return_value.status_code = 200
@@ -421,7 +475,9 @@ class TestGetGlobalProjectId(unittest.TestCase):
         with patch("builtins.print") as mock_print:
             result = get_global_project_id(ghe, token, organization, number)
 
-            mock_post.assert_called_once_with(expected_url, headers=expected_headers, json=expected_data, timeout=20)
+            mock_post.assert_called_once_with(
+                expected_url, headers=expected_headers, json=expected_data, timeout=20
+            )
             mock_print.assert_called_once_with("Failed to parse response: 'id'")
             self.assertIsNone(result)
 
@@ -493,7 +549,9 @@ class TestGetGlobalPullRequestID(unittest.TestCase):
         # Mock the response from requests.post
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {"data": {"repository": {"pullRequest": {"id": "test_id"}}}}
+        mock_response.json.return_value = {
+            "data": {"repository": {"pullRequest": {"id": "test_id"}}}
+        }
         mock_post.return_value = mock_response
 
         # Call the function with test data
@@ -543,7 +601,9 @@ class TestLinkItemToProject(unittest.TestCase):
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
-        expected_data = {"query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'}
+        expected_data = {
+            "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
+        }
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -551,7 +611,9 @@ class TestLinkItemToProject(unittest.TestCase):
 
         result = link_item_to_project(ghe, token, project_id, item_id)
 
-        mock_post.assert_called_once_with(expected_url, headers=expected_headers, json=expected_data, timeout=20)
+        mock_post.assert_called_once_with(
+            expected_url, headers=expected_headers, json=expected_data, timeout=20
+        )
         mock_response.raise_for_status.assert_called_once()
 
         # Assert that the function returned None
@@ -567,14 +629,18 @@ class TestLinkItemToProject(unittest.TestCase):
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
-        expected_data = {"query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'}
+        expected_data = {
+            "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
+        }
 
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
         with patch("builtins.print") as mock_print:
             result = link_item_to_project(ghe, token, project_id, item_id)
 
-            mock_post.assert_called_once_with(expected_url, headers=expected_headers, json=expected_data, timeout=20)
+            mock_post.assert_called_once_with(
+                expected_url, headers=expected_headers, json=expected_data, timeout=20
+            )
             mock_print.assert_called_once_with("Request failed: Request failed")
 
             # Assert that the function returned None
@@ -663,7 +729,9 @@ class TestCheckExistingConfig(unittest.TestCase):
         """
         mock_repo = MagicMock()
         mock_response = MagicMock()
-        mock_repo.file_contents.side_effect = github3.exceptions.NotFoundError(mock_response)
+        mock_repo.file_contents.side_effect = github3.exceptions.NotFoundError(
+            mock_response
+        )
 
         result = check_existing_config(mock_repo, "dependabot.yml")
 
