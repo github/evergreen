@@ -1,12 +1,7 @@
 """This is the module that contains functions related to authenticating to GitHub with a personal access token."""
 
-import logging
-import logging.config
-
 import github3
 import requests
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 def auth_to_github(
