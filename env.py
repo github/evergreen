@@ -98,6 +98,7 @@ def get_env_vars(
     int | None,
     int | None,
     bytes,
+    bool,
     str,
     str,
     list[str],
@@ -132,6 +133,7 @@ def get_env_vars(
         gh_app_id (int | None): The GitHub App ID to use for authentication
         gh_app_installation_id (int | None): The GitHub App Installation ID to use for authentication
         gh_app_private_key_bytes (bytes): The GitHub App Private Key as bytes to use for authentication
+        gh_app_enterprise_only (bool): Set this to true if the GH APP is created on GHE and needs to communicate with GHE api only
         token (str): The GitHub token to use for authentication
         ghe (str): The GitHub Enterprise URL to use for authentication
         exempt_repositories_list (list[str]): A list of repositories to exempt from the action
@@ -183,6 +185,7 @@ def get_env_vars(
     gh_app_id = get_int_env_var("GH_APP_ID")
     gh_app_private_key_bytes = os.environ.get("GH_APP_PRIVATE_KEY", "").encode("utf8")
     gh_app_installation_id = get_int_env_var("GH_APP_INSTALLATION_ID")
+    gh_app_enterprise_only = get_bool_env_var("GITHUB_APP_ENTERPRISE_ONLY")
 
     if gh_app_id and (not gh_app_private_key_bytes or not gh_app_installation_id):
         raise ValueError(
@@ -340,6 +343,7 @@ Please enable it by merging this pull request so that we can keep our dependenci
         gh_app_id,
         gh_app_installation_id,
         gh_app_private_key_bytes,
+        gh_app_enterprise_only,
         token,
         ghe,
         exempt_repositories_list,

@@ -22,6 +22,7 @@ class TestEnv(unittest.TestCase):
             "GH_APP_ID",
             "GH_APP_INSTALLATION_ID",
             "GH_APP_PRIVATE_KEY",
+            "GITHUB_APP_ENTERPRISE_ONLY",
             "GH_ENTERPRISE_URL",
             "GH_TOKEN",
             "GROUP_DEPENDENCIES",
@@ -63,6 +64,7 @@ class TestEnv(unittest.TestCase):
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             ["repo4", "repo5"],
@@ -113,6 +115,7 @@ class TestEnv(unittest.TestCase):
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             ["repo4", "repo5"],
@@ -223,6 +226,7 @@ class TestEnv(unittest.TestCase):
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             ["repo4", "repo5"],
@@ -278,6 +282,7 @@ class TestEnv(unittest.TestCase):
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             ["repo4", "repo5"],
@@ -351,6 +356,7 @@ class TestEnv(unittest.TestCase):
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -395,6 +401,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -453,6 +460,7 @@ we can keep our dependencies up to date and secure.",
             12345,
             678910,
             b"hello",
+            False,
             "",
             "",
             [],
@@ -479,6 +487,58 @@ we can keep our dependencies up to date and secure.",
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_APP_ID": "12345",
+            "GH_APP_INSTALLATION_ID": "",
+            "GH_APP_PRIVATE_KEY": "",
+            "GH_TOKEN": "",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_auth_with_github_app_installation_missing_inputs(self):
+        """Test that an error is raised there are missing inputs for the gh app"""
+        expected_result = (
+            "my_organization",
+            [],
+            12345,
+            None,
+            b"",
+            False,
+            "",
+            "",
+            [],
+            "pull",
+            "Enable Dependabot",
+            "Dependabot could be enabled for this repository. Please enable it by merging "
+            "this pull request so that we can keep our dependencies up to date and "
+            "secure.",
+            "",
+            False,
+            "Create/Update dependabot.yaml",
+            None,
+            False,
+            ["internal", "private", "public"],
+            None,  # batch_size
+            True,  # enable_security_updates
+            [],  # exempt_ecosystems
+            False,  # update_existing
+            {},  # repo_specific_exemptions
+            "weekly",  # schedule
+            "",  # schedule_day
+            None,  # team_name
+            [],  # labels
+        )
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "GH_APP_ID set and GH_APP_INSTALLATION_ID or GH_APP_PRIVATE_KEY variable not set",
+        )
 
     @patch.dict(
         os.environ,
@@ -519,6 +579,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -563,6 +624,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -608,6 +670,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -653,6 +716,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -728,6 +792,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -774,6 +839,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -819,6 +885,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -865,6 +932,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -1000,6 +1068,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -1032,6 +1101,64 @@ we can keep our dependencies up to date and secure.",
         {
             "ORGANIZATION": "my_organization",
             "GH_TOKEN": "my_token",
+            "SCHEDULE": "daily",
+            "SCHEDULE_DAY": "tuesday",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_schedule_day_error_when_schedule_not_set(self):
+        """Test schedule error setting schedule day when schedule is not set"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "SCHEDULE_DAY environment variable not needed when SCHEDULE is not 'weekly'",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "TYPE": "discussion",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_incorrect_type(self):
+        """Test incorrect type error, should be issue or pull"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "TYPE environment variable not 'issue' or 'pull'",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "TITLE": "This is a really long title to test if the limit is set to a maximum number of characters supported by github",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_long_title(self):
+        """Test incorrect type error, should be issue or pull"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "TITLE environment variable is too long",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
             "LABELS": "dependencies",
         },
         clear=True,
@@ -1044,6 +1171,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],
@@ -1088,6 +1216,7 @@ we can keep our dependencies up to date and secure.",
             None,
             None,
             b"",
+            False,
             "my_token",
             "",
             [],

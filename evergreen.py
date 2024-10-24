@@ -21,6 +21,7 @@ def main():  # pragma: no cover
         gh_app_id,
         gh_app_installation_id,
         gh_app_private_key,
+        gh_app_enterprise_only,
         token,
         ghe,
         exempt_repositories_list,
@@ -46,7 +47,12 @@ def main():  # pragma: no cover
 
     # Auth to GitHub.com or GHE
     github_connection = auth.auth_to_github(
-        token, gh_app_id, gh_app_installation_id, gh_app_private_key, ghe
+        token,
+        gh_app_id,
+        gh_app_installation_id,
+        gh_app_private_key,
+        ghe,
+        gh_app_enterprise_only,
     )
 
     if not token and gh_app_id and gh_app_installation_id and gh_app_private_key:

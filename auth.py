@@ -1,7 +1,12 @@
 """This is the module that contains functions related to authenticating to GitHub with a personal access token."""
 
+import logging
+import logging.config
+
 import github3
 import requests
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def auth_to_github(
@@ -10,6 +15,7 @@ def auth_to_github(
     gh_app_installation_id: int | None,
     gh_app_private_key_bytes: bytes,
     ghe: str,
+    gh_app_enterprise_only: bool,
 ) -> github3.GitHub:
     """
     Connect to GitHub.com or GitHub Enterprise, depending on env variables.
@@ -20,12 +26,13 @@ def auth_to_github(
         gh_app_installation_id (int | None): the GitHub App Installation ID
         gh_app_private_key_bytes (bytes): the GitHub App Private Key
         ghe (str): the GitHub Enterprise URL
+        gh_app_enterprise_only (bool): Set this to true if the GH APP is created on GHE and needs to communicate with GHE api only
 
     Returns:
         github3.GitHub: the GitHub connection object
     """
     if gh_app_id and gh_app_private_key_bytes and gh_app_installation_id:
-        if ghe:
+        if ghe and gh_app_enterprise_only:
             gh = github3.github.GitHubEnterprise(url=ghe)
         else:
             gh = github3.github.GitHub()
