@@ -501,37 +501,6 @@ we can keep our dependencies up to date and secure.",
     )
     def test_get_env_vars_auth_with_github_app_installation_missing_inputs(self):
         """Test that an error is raised there are missing inputs for the gh app"""
-        expected_result = (
-            "my_organization",
-            [],
-            12345,
-            None,
-            b"",
-            False,
-            "",
-            "",
-            [],
-            "pull",
-            "Enable Dependabot",
-            "Dependabot could be enabled for this repository. Please enable it by merging "
-            "this pull request so that we can keep our dependencies up to date and "
-            "secure.",
-            "",
-            False,
-            "Create/Update dependabot.yaml",
-            None,
-            False,
-            ["internal", "private", "public"],
-            None,  # batch_size
-            True,  # enable_security_updates
-            [],  # exempt_ecosystems
-            False,  # update_existing
-            {},  # repo_specific_exemptions
-            "weekly",  # schedule
-            "",  # schedule_day
-            None,  # team_name
-            [],  # labels
-        )
         with self.assertRaises(ValueError) as context_manager:
             get_env_vars(True)
         the_exception = context_manager.exception
