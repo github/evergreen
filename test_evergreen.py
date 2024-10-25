@@ -37,6 +37,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         owner = "my_owner"
         repo = "my_repo"
         access_token = "my_access_token"
+        ghe = ""
 
         expected_url = (
             f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
@@ -51,7 +52,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = expected_response
 
-            result = is_dependabot_security_updates_enabled(owner, repo, access_token)
+            result = is_dependabot_security_updates_enabled(
+                ghe, owner, repo, access_token
+            )
 
             mock_get.assert_called_once_with(
                 expected_url, headers=expected_headers, timeout=20
@@ -70,6 +73,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         owner = "my_owner"
         repo = "my_repo"
         access_token = "my_access_token"
+        ghe = ""
 
         expected_url = (
             f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
@@ -83,7 +87,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = {"enabled": False}
 
-            result = is_dependabot_security_updates_enabled(owner, repo, access_token)
+            result = is_dependabot_security_updates_enabled(
+                ghe, owner, repo, access_token
+            )
 
             mock_get.assert_called_once_with(
                 expected_url, headers=expected_headers, timeout=20
@@ -102,6 +108,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         owner = "my_owner"
         repo = "my_repo"
         access_token = "my_access_token"
+        ghe = ""
 
         expected_url = (
             f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
@@ -114,7 +121,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 404
 
-            result = is_dependabot_security_updates_enabled(owner, repo, access_token)
+            result = is_dependabot_security_updates_enabled(
+                ghe, owner, repo, access_token
+            )
 
             mock_get.assert_called_once_with(
                 expected_url, headers=expected_headers, timeout=20
@@ -133,6 +142,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         owner = "my_owner"
         repo = "my_repo"
         access_token = "my_access_token"
+        ghe = ""
 
         expected_url = (
             f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
@@ -146,7 +156,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_put.return_value.status_code = 204
 
             with patch("builtins.print") as mock_print:
-                enable_dependabot_security_updates(owner, repo, access_token)
+                enable_dependabot_security_updates(ghe, owner, repo, access_token)
 
                 mock_put.assert_called_once_with(
                     expected_url, headers=expected_headers, timeout=20
@@ -167,6 +177,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
         owner = "my_owner"
         repo = "my_repo"
         access_token = "my_access_token"
+        ghe = ""
 
         expected_url = (
             f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
@@ -180,7 +191,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_put.return_value.status_code = 500
 
             with patch("builtins.print") as mock_print:
-                enable_dependabot_security_updates(owner, repo, access_token)
+                enable_dependabot_security_updates(ghe, owner, repo, access_token)
 
                 mock_put.assert_called_once_with(
                     expected_url, headers=expected_headers, timeout=20
@@ -397,6 +408,7 @@ class TestGetGlobalProjectId(unittest.TestCase):
         token = "my_token"
         organization = "my_organization"
         number = 123
+        ghe = ""
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
@@ -410,7 +422,7 @@ class TestGetGlobalProjectId(unittest.TestCase):
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = expected_response
 
-        result = get_global_project_id(token, organization, number)
+        result = get_global_project_id(ghe, token, organization, number)
 
         mock_post.assert_called_once_with(
             expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -423,6 +435,7 @@ class TestGetGlobalProjectId(unittest.TestCase):
         token = "my_token"
         organization = "my_organization"
         number = 123
+        ghe = ""
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
@@ -433,7 +446,7 @@ class TestGetGlobalProjectId(unittest.TestCase):
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
         with patch("builtins.print") as mock_print:
-            result = get_global_project_id(token, organization, number)
+            result = get_global_project_id(ghe, token, organization, number)
 
             mock_post.assert_called_once_with(
                 expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -447,6 +460,7 @@ class TestGetGlobalProjectId(unittest.TestCase):
         token = "my_token"
         organization = "my_organization"
         number = 123
+        ghe = ""
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
@@ -459,7 +473,7 @@ class TestGetGlobalProjectId(unittest.TestCase):
         mock_post.return_value.json.return_value = expected_response
 
         with patch("builtins.print") as mock_print:
-            result = get_global_project_id(token, organization, number)
+            result = get_global_project_id(ghe, token, organization, number)
 
             mock_post.assert_called_once_with(
                 expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -478,13 +492,14 @@ class TestGetGlobalIssueId(unittest.TestCase):
         organization = "my_organization"
         repository = "my_repository"
         issue_number = 123
+        ghe = ""
 
         expected_response = {"data": {"repository": {"issue": {"id": "1234567890"}}}}
 
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = expected_response
 
-        result = get_global_issue_id(token, organization, repository, issue_number)
+        result = get_global_issue_id(ghe, token, organization, repository, issue_number)
 
         mock_post.assert_called_once()
         self.assertEqual(result, "1234567890")
@@ -496,10 +511,11 @@ class TestGetGlobalIssueId(unittest.TestCase):
         organization = "my_organization"
         repository = "my_repository"
         issue_number = 123
+        ghe = ""
 
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
-        result = get_global_issue_id(token, organization, repository, issue_number)
+        result = get_global_issue_id(ghe, token, organization, repository, issue_number)
 
         mock_post.assert_called_once()
         self.assertIsNone(result)
@@ -511,13 +527,14 @@ class TestGetGlobalIssueId(unittest.TestCase):
         organization = "my_organization"
         repository = "my_repository"
         issue_number = 123
+        ghe = ""
 
         expected_response = {"data": {"repository": {"issue": {}}}}
 
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = expected_response
 
-        result = get_global_issue_id(token, organization, repository, issue_number)
+        result = get_global_issue_id(ghe, token, organization, repository, issue_number)
 
         mock_post.assert_called_once()
         self.assertIsNone(result)
@@ -538,7 +555,7 @@ class TestGetGlobalPullRequestID(unittest.TestCase):
         mock_post.return_value = mock_response
 
         # Call the function with test data
-        result = get_global_pr_id("test_token", "test_org", "test_repo", 1)
+        result = get_global_pr_id("", "test_token", "test_org", "test_repo", 1)
 
         # Check that the result is as expected
         self.assertEqual(result, "test_id")
@@ -550,7 +567,7 @@ class TestGetGlobalPullRequestID(unittest.TestCase):
         mock_post.side_effect = requests.exceptions.RequestException
 
         # Call the function with test data
-        result = get_global_pr_id("test_token", "test_org", "test_repo", 1)
+        result = get_global_pr_id("", "test_token", "test_org", "test_repo", 1)
 
         # Check that the result is None
         self.assertIsNone(result)
@@ -565,7 +582,7 @@ class TestGetGlobalPullRequestID(unittest.TestCase):
         mock_post.return_value = mock_response
 
         # Call the function with test data
-        result = get_global_pr_id("test_token", "test_org", "test_repo", 1)
+        result = get_global_pr_id("", "test_token", "test_org", "test_repo", 1)
 
         # Check that the result is None
         self.assertIsNone(result)
@@ -580,6 +597,7 @@ class TestLinkItemToProject(unittest.TestCase):
         token = "my_token"
         project_id = "my_project_id"
         item_id = "my_item_id"
+        ghe = ""
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
@@ -591,7 +609,7 @@ class TestLinkItemToProject(unittest.TestCase):
         mock_response.status_code = 200
         mock_post.return_value = mock_response
 
-        result = link_item_to_project(token, project_id, item_id)
+        result = link_item_to_project(ghe, token, project_id, item_id)
 
         mock_post.assert_called_once_with(
             expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -607,6 +625,7 @@ class TestLinkItemToProject(unittest.TestCase):
         token = "my_token"
         project_id = "my_project_id"
         item_id = "my_item_id"
+        ghe = ""
 
         expected_url = "https://api.github.com/graphql"
         expected_headers = {"Authorization": f"Bearer {token}"}
@@ -617,7 +636,7 @@ class TestLinkItemToProject(unittest.TestCase):
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
         with patch("builtins.print") as mock_print:
-            result = link_item_to_project(token, project_id, item_id)
+            result = link_item_to_project(ghe, token, project_id, item_id)
 
             mock_post.assert_called_once_with(
                 expected_url, headers=expected_headers, json=expected_data, timeout=20

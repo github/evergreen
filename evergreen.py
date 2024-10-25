@@ -21,6 +21,7 @@ def main():  # pragma: no cover
         gh_app_id,
         gh_app_installation_id,
         gh_app_private_key,
+        gh_app_enterprise_only,
         token,
         ghe,
         exempt_repositories_list,
@@ -46,12 +47,17 @@ def main():  # pragma: no cover
 
     # Auth to GitHub.com or GHE
     github_connection = auth.auth_to_github(
-        token, gh_app_id, gh_app_installation_id, gh_app_private_key, ghe
+        token,
+        gh_app_id,
+        gh_app_installation_id,
+        gh_app_private_key,
+        ghe,
+        gh_app_enterprise_only,
     )
 
     if not token and gh_app_id and gh_app_installation_id and gh_app_private_key:
         token = auth.get_github_app_installation_token(
-            gh_app_id, gh_app_private_key, gh_app_installation_id
+            ghe, gh_app_id, gh_app_private_key, gh_app_installation_id
         )
 
     # If Project ID is set, lookup the global project ID
@@ -61,7 +67,7 @@ def main():  # pragma: no cover
             raise ValueError(
                 "ORGANIZATION environment variable was not set. Please set it"
             )
-        project_id = get_global_project_id(token, organization, project_id)
+        project_id = get_global_project_id(ghe, token, organization, project_id)
 
     # Get the repositories from the organization, team name, or list of repositories
     repos = get_repos_iterator(
@@ -78,13 +84,13 @@ def main():  # pragma: no cover
 
         # Check all the things to see if repo is eligble for a pr/issue
         if repo.full_name in exempt_repositories_list:
-            print("Skipping " + repo.full_name + " (exempted)")
+            print(f"Skipping {repo.full_name} (exempted)")
             continue
         if repo.archived:
-            print("Skipping " + repo.full_name + " (archived)")
+            print(f"Skipping {repo.full_name} (archived)")
             continue
         if repo.visibility.lower() not in filter_visibility:
-            print("Skipping " + repo.full_name + " (visibility-filtered)")
+            print(f"Skipping {repo.full_name} (visibility-filtered)")
             continue
         existing_config = None
         filename_list = [".github/dependabot.yaml", ".github/dependabot.yml"]
@@ -97,19 +103,17 @@ def main():  # pragma: no cover
 
         if existing_config and not update_existing:
             print(
-                "Skipping "
-                + repo.full_name
-                + " (dependabot file already exists and update_existing is False)"
+                f"Skipping {repo.full_name} (dependabot file already exists and update_existing is False)"
             )
             continue
 
         if created_after_date and is_repo_created_date_before(
             repo.created_at, created_after_date
         ):
-            print("Skipping " + repo.full_name + " (created after filter)")
+            print(f"Skipping {repo.full_name} (created after filter)")
             continue
 
-        print("Checking " + repo.full_name + " for compatible package managers")
+        print(f"Checking {repo.full_name} for compatible package managers")
         # Try to detect package managers and build a dependabot file
         dependabot_file = build_dependabot_file(
             repo,
@@ -133,42 +137,36 @@ def main():  # pragma: no cover
                 if not skip:
                     print("\tEligible for configuring dependabot.")
                     count_eligible += 1
-                    print("\tConfiguration:\n" + dependabot_file)
+                    print(f"\tConfiguration:\n {dependabot_file}")
             if follow_up_type == "pull":
                 # Try to detect if the repo already has an open pull request for dependabot
                 skip = check_pending_pulls_for_duplicates(title, repo)
                 if not skip:
                     print("\tEligible for configuring dependabot.")
                     count_eligible += 1
-                    print("\tConfiguration:\n" + dependabot_file)
+                    print(f"\tConfiguration:\n {dependabot_file}")
             continue
 
         # Get dependabot security updates enabled if possible
         if enable_security_updates:
-            if not is_dependabot_security_updates_enabled(repo.owner, repo.name, token):
-                enable_dependabot_security_updates(repo.owner, repo.name, token)
+            if not is_dependabot_security_updates_enabled(
+                ghe, repo.owner, repo.name, token
+            ):
+                enable_dependabot_security_updates(ghe, repo.owner, repo.name, token)
 
         if follow_up_type == "issue":
             skip = check_pending_issues_for_duplicates(title, repo)
             if not skip:
                 count_eligible += 1
-                body_issue = (
-                    body
-                    + "\n\n```yaml\n"
-                    + "# "
-                    + dependabot_filename_to_use
-                    + "\n"
-                    + dependabot_file
-                    + "\n```"
-                )
+                body_issue = f"{body}\n\n```yaml\n# {dependabot_filename_to_use} \n{dependabot_file}\n```"
                 issue = repo.create_issue(title, body_issue)
-                print("\tCreated issue " + issue.html_url)
+                print(f"\tCreated issue {issue.html_url}")
                 if project_id:
                     issue_id = get_global_issue_id(
-                        token, organization, repo.name, issue.number
+                        ghe, token, organization, repo.name, issue.number
                     )
-                    link_item_to_project(token, project_id, issue_id)
-                    print("\tLinked issue to project " + project_id)
+                    link_item_to_project(ghe, token, project_id, issue_id)
+                    print(f"\tLinked issue to project {project_id}")
         else:
             # Try to detect if the repo already has an open pull request for dependabot
             skip = check_pending_pulls_for_duplicates(title, repo)
@@ -186,19 +184,19 @@ def main():  # pragma: no cover
                         dependabot_filename_to_use,
                         existing_config,
                     )
-                    print("\tCreated pull request " + pull.html_url)
+                    print(f"\tCreated pull request {pull.html_url}")
                     if project_id:
                         pr_id = get_global_pr_id(
-                            token, organization, repo.name, pull.number
+                            ghe, token, organization, repo.name, pull.number
                         )
-                        response = link_item_to_project(token, project_id, pr_id)
+                        response = link_item_to_project(ghe, token, project_id, pr_id)
                         if response:
-                            print("\tLinked pull request to project " + project_id)
+                            print(f"\tLinked pull request to project {project_id}")
                 except github3.exceptions.NotFoundError:
                     print("\tFailed to create pull request. Check write permissions.")
                     continue
 
-    print("Done. " + str(count_eligible) + " repositories were eligible.")
+    print(f"Done. {str(count_eligible)} repositories were eligible.")
 
 
 def is_repo_created_date_before(repo_created_at: str, created_after_date: str):
@@ -209,11 +207,13 @@ def is_repo_created_date_before(repo_created_at: str, created_after_date: str):
     )
 
 
-def is_dependabot_security_updates_enabled(owner, repo, access_token):
-    """Check if Dependabot security updates are enabled at the
-    /repos/:owner/:repo/automated-security-fixes endpoint using the requests library
+def is_dependabot_security_updates_enabled(ghe, owner, repo, access_token):
     """
-    url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+    Check if Dependabot security updates are enabled at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library
+    API: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#check-if-automated-security-fixes-are-enabled-for-a-repository
+    """
+    api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
+    url = f"{api_endpoint}/repos/{owner}/{repo}/automated-security-fixes"
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/vnd.github.london-preview+json",
@@ -247,9 +247,13 @@ def check_existing_config(repo, filename):
     return None
 
 
-def enable_dependabot_security_updates(owner, repo, access_token):
-    """Enable Dependabot security updates at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library"""
-    url = f"https://api.github.com/repos/{owner}/{repo}/automated-security-fixes"
+def enable_dependabot_security_updates(ghe, owner, repo, access_token):
+    """
+    Enable Dependabot security updates at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library
+    API: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#enable-automated-security-fixes
+    """
+    api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
+    url = f"{api_endpoint}/repos/{owner}/{repo}/automated-security-fixes"
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/vnd.github.london-preview+json",
@@ -290,7 +294,7 @@ def check_pending_pulls_for_duplicates(title, repo) -> bool:
     skip = False
     for pull_request in pull_requests:
         if pull_request.title.startswith(title):
-            print("\tPull request already exists: " + pull_request.html_url)
+            print(f"\tPull request already exists: {pull_request.html_url}")
             skip = True
             break
     return skip
@@ -302,7 +306,7 @@ def check_pending_issues_for_duplicates(title, repo) -> bool:
     skip = False
     for issue in issues:
         if issue.title.startswith(title):
-            print("\tIssue already exists: " + issue.html_url)
+            print(f"\tIssue already exists: {issue.html_url}")
             skip = True
             break
     return skip
@@ -344,9 +348,13 @@ def commit_changes(
     return pull
 
 
-def get_global_project_id(token, organization, number):
-    """Fetches the project ID from GitHub's GraphQL API."""
-    url = "https://api.github.com/graphql"
+def get_global_project_id(ghe, token, organization, number):
+    """
+    Fetches the project ID from GitHub's GraphQL API.
+    API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
+    """
+    api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
+    url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
     data = {
         "query": f'query{{organization(login: "{organization}") {{projectV2(number: {number}){{id}}}}}}'
@@ -366,9 +374,13 @@ def get_global_project_id(token, organization, number):
         return None
 
 
-def get_global_issue_id(token, organization, repository, issue_number):
-    """Fetches the issue ID from GitHub's GraphQL API"""
-    url = "https://api.github.com/graphql"
+def get_global_issue_id(ghe, token, organization, repository, issue_number):
+    """
+    Fetches the issue ID from GitHub's GraphQL API
+    API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
+    """
+    api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
+    url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
     data = {
         "query": f"""
@@ -396,9 +408,13 @@ def get_global_issue_id(token, organization, repository, issue_number):
         return None
 
 
-def get_global_pr_id(token, organization, repository, pr_number):
-    """Fetches the pull request ID from GitHub's GraphQL API"""
-    url = "https://api.github.com/graphql"
+def get_global_pr_id(ghe, token, organization, repository, pr_number):
+    """
+    Fetches the pull request ID from GitHub's GraphQL API
+    API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
+    """
+    api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
+    url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
     data = {
         "query": f"""
@@ -426,9 +442,13 @@ def get_global_pr_id(token, organization, repository, pr_number):
         return None
 
 
-def link_item_to_project(token, project_id, item_id):
-    """Links an item (issue or pull request) to a project in GitHub."""
-    url = "https://api.github.com/graphql"
+def link_item_to_project(ghe, token, project_id, item_id):
+    """
+    Links an item (issue or pull request) to a project in GitHub.
+    API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
+    """
+    api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
+    url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
     data = {
         "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
