@@ -92,6 +92,7 @@ The needed GitHub app permissions are the following:
 - `Pull Requests` - Read and Write (If `TYPE` input is set to `pull`)
 - `Issues` - Read and Write (If `TYPE` input is set to `issue`)
 - `Workflows` - Read and Write (Needed to create the `dependabot.yml` file)
+- `Contents` - Read and Write (Needed to create a commit)
 
 ##### Personal Access Token (PAT)
 
