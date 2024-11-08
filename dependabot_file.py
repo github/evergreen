@@ -1,11 +1,32 @@
 """This module contains the function to build the dependabot.yml file for a repo"""
 
+import base64
+import copy
+import io
+
 import github3
-import yaml
+import ruamel.yaml
+from ruamel.yaml.scalarstring import SingleQuotedScalarString
+
+# Define data structure for dependabot.yaml
+data = {
+    "version": 2,
+    "registries": {},
+    "updates": [],
+}
+
+yaml = ruamel.yaml.YAML()
+stream = io.StringIO()
 
 
 def make_dependabot_config(
-    ecosystem, group_dependencies, indent, schedule, schedule_day, labels
+    ecosystem,
+    group_dependencies,
+    schedule,
+    schedule_day,
+    labels,
+    dependabot_config,
+    extra_dependabot_config,
 ) -> str:
     """
     Make the dependabot configuration for a specific package ecosystem
@@ -13,40 +34,70 @@ def make_dependabot_config(
     Args:
         ecosystem: the package ecosystem to make the dependabot configuration for
         group_dependencies: whether to group dependencies in the dependabot.yml file
-        indent: the number of spaces to indent the dependabot configuration ex: "  "
         schedule: the schedule to run dependabot ex: "daily"
         schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "weekly"
         labels: the list of labels to be added to dependabot configuration
+        dependabot_config: extra dependabot configs
+        extra_dependabot_config: File with the configuration to add dependabot configs (ex: private registries)
 
     Returns:
         str: the dependabot configuration for the package ecosystem
     """
-    schedule_day_line = ""
-    if schedule_day:
-        schedule_day_line += f"""
-{indent}{indent}{indent}day: '{schedule_day}'"""
 
-    dependabot_config = f"""{indent}- package-ecosystem: '{ecosystem}'
-{indent}{indent}directory: '/'
-{indent}{indent}schedule:
-{indent}{indent}{indent}interval: '{schedule}'{schedule_day_line}
-"""
+    dependabot_config["updates"].append(
+        {
+            "package-ecosystem": SingleQuotedScalarString(ecosystem),
+            "directory": SingleQuotedScalarString("/"),
+        }
+    )
+
+    if extra_dependabot_config:
+        ecosystem_config = extra_dependabot_config.get(ecosystem)
+        if ecosystem_config:
+            dependabot_config["registries"][ecosystem] = ecosystem_config
+            dependabot_config["updates"][-1].update(
+                {"registries": [SingleQuotedScalarString(ecosystem)]}
+            )
+    else:
+        dependabot_config.pop("registries", None)
+
+    if schedule_day:
+        dependabot_config["updates"][-1].update(
+            {
+                "schedule": {
+                    "interval": SingleQuotedScalarString(schedule),
+                    "day": SingleQuotedScalarString(schedule_day),
+                },
+            }
+        )
+    else:
+        dependabot_config["updates"][-1].update(
+            {
+                "schedule": {"interval": SingleQuotedScalarString(schedule)},
+            }
+        )
 
     if labels:
-        dependabot_config += f"""{indent}{indent}labels:
-"""
+        quoted_labels = []
         for label in labels:
-            dependabot_config += f"""{indent}{indent}{indent}- \"{label}\"
-"""
+            quoted_labels.append(SingleQuotedScalarString(label))
+        dependabot_config["updates"][-1].update({"labels": quoted_labels})
 
     if group_dependencies:
-        dependabot_config += f"""{indent}{indent}groups:
-{indent}{indent}{indent}production-dependencies:
-{indent}{indent}{indent}{indent}dependency-type: 'production'
-{indent}{indent}{indent}development-dependencies:
-{indent}{indent}{indent}{indent}dependency-type: 'development'
-"""
-    return dependabot_config
+        dependabot_config["updates"][-1].update(
+            {
+                "groups": {
+                    "production-dependencies": {
+                        "dependency-type": SingleQuotedScalarString("production")
+                    },
+                    "development-dependencies": {
+                        "dependency-type": SingleQuotedScalarString("development")
+                    },
+                }
+            }
+        )
+
+    return yaml.dump(dependabot_config, stream)
 
 
 def build_dependabot_file(
@@ -58,6 +109,7 @@ def build_dependabot_file(
     schedule,
     schedule_day,
     labels,
+    extra_dependabot_config,
 ) -> str | None:
     """
     Build the dependabot.yml file for a repo based on the repo contents
@@ -71,6 +123,7 @@ def build_dependabot_file(
         schedule: the schedule to run dependabot ex: "daily"
         schedule_day: the day of the week to run dependabot ex: "monday" if schedule is "daily"
         labels: the list of labels to be added to dependabot configuration
+        extra_dependabot_config: File with the configuration to add dependabot configs (ex: private registries)
 
     Returns:
         str: the dependabot.yml file for the repo
@@ -89,30 +142,16 @@ def build_dependabot_file(
         "github-actions": False,
         "maven": False,
     }
-    DEFAULT_INDENT = 2  # pylint: disable=invalid-name
+
     # create a local copy in order to avoid overwriting the global exemption list
     exempt_ecosystems_list = exempt_ecosystems.copy()
     if existing_config:
-        dependabot_file = existing_config.decoded.decode("utf-8")
-        ecosystem_line = next(
-            line
-            for line in dependabot_file.splitlines()
-            if "- package-ecosystem:" in line
-        )
-        indent = " " * (len(ecosystem_line) - len(ecosystem_line.lstrip()))
-        if len(indent) < DEFAULT_INDENT:
-            print(
-                f"Invalid dependabot.yml file. No indentation found. Skipping {repo.full_name}"
-            )
-            return None
+        yaml.preserve_quotes = True
+        dependabot_file = yaml.load(base64.b64decode(existing_config.content))
     else:
-        indent = " " * DEFAULT_INDENT
-        dependabot_file = """---
-version: 2
-updates:
-"""
+        dependabot_file = copy.deepcopy(data)
 
-    add_existing_ecosystem_to_exempt_list(exempt_ecosystems_list, existing_config)
+    add_existing_ecosystem_to_exempt_list(exempt_ecosystems_list, dependabot_file)
 
     # If there are repository specific exemptions,
     # overwrite the global exemptions for this repo only
@@ -151,17 +190,14 @@ updates:
             try:
                 if repo.file_contents(file):
                     package_managers_found[manager] = True
-                    # If the last thing in the file is not a newline,
-                    # add one before adding a new language config to the file
-                    if dependabot_file and dependabot_file[-1] != "\n":
-                        dependabot_file += "\n"
-                    dependabot_file += make_dependabot_config(
+                    make_dependabot_config(
                         manager,
                         group_dependencies,
-                        indent,
                         schedule,
                         schedule_day,
                         labels,
+                        dependabot_file,
+                        extra_dependabot_config,
                     )
                     break
             except github3.exceptions.NotFoundError:
@@ -173,13 +209,14 @@ updates:
             for file in repo.directory_contents("/"):
                 if file[0].endswith(".tf"):
                     package_managers_found["terraform"] = True
-                    dependabot_file += make_dependabot_config(
+                    make_dependabot_config(
                         "terraform",
                         group_dependencies,
-                        indent,
                         schedule,
                         schedule_day,
                         labels,
+                        dependabot_file,
+                        extra_dependabot_config,
                     )
                     break
         except github3.exceptions.NotFoundError:
@@ -189,13 +226,14 @@ updates:
             for file in repo.directory_contents(".github/workflows"):
                 if file[0].endswith(".yml") or file[0].endswith(".yaml"):
                     package_managers_found["github-actions"] = True
-                    dependabot_file += make_dependabot_config(
+                    make_dependabot_config(
                         "github-actions",
                         group_dependencies,
-                        indent,
                         schedule,
                         schedule_day,
                         labels,
+                        dependabot_file,
+                        extra_dependabot_config,
                     )
                     break
         except github3.exceptions.NotFoundError:
@@ -212,7 +250,5 @@ def add_existing_ecosystem_to_exempt_list(exempt_ecosystems, existing_config):
     to the exempt list so we don't get duplicate entries and maintain configuration settings
     """
     if existing_config:
-        existing_config_obj = yaml.safe_load(existing_config.decoded)
-        if existing_config_obj:
-            for entry in existing_config_obj.get("updates", []):
-                exempt_ecosystems.append(entry["package-ecosystem"])
+        for entry in existing_config.get("updates", []):
+            exempt_ecosystems.append(entry["package-ecosystem"])

@@ -3,10 +3,17 @@
 """Test the get_env_vars function"""
 
 import os
+import random
+import string
 import unittest
 from unittest.mock import patch
 
-from env import get_env_vars
+from env import (
+    MAX_BODY_LENGTH,
+    MAX_COMMIT_MESSAGE_LENGTH,
+    MAX_TITLE_LENGTH,
+    get_env_vars,
+)
 
 
 class TestEnv(unittest.TestCase):
@@ -86,6 +93,7 @@ class TestEnv(unittest.TestCase):
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -140,6 +148,7 @@ class TestEnv(unittest.TestCase):
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -251,6 +260,7 @@ class TestEnv(unittest.TestCase):
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -307,6 +317,7 @@ class TestEnv(unittest.TestCase):
             "",  # schedule_day
             "engineering",  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -380,6 +391,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -425,6 +437,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -484,6 +497,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -572,6 +586,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -617,6 +632,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -663,6 +679,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -709,6 +726,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -785,6 +803,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -832,6 +851,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -878,6 +898,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -925,6 +946,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1061,6 +1083,7 @@ we can keep our dependencies up to date and secure.",
             "tuesday",  # schedule_day
             None,  # team_name
             [],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1109,25 +1132,6 @@ we can keep our dependencies up to date and secure.",
         {
             "ORGANIZATION": "my_organization",
             "GH_TOKEN": "my_token",
-            "TITLE": "This is a really long title to test if the limit is set to a maximum number of characters supported by github",
-        },
-        clear=True,
-    )
-    def test_get_env_vars_with_long_title(self):
-        """Test incorrect type error, should be issue or pull"""
-        with self.assertRaises(ValueError) as context_manager:
-            get_env_vars(True)
-        the_exception = context_manager.exception
-        self.assertEqual(
-            str(the_exception),
-            "TITLE environment variable is too long",
-        )
-
-    @patch.dict(
-        os.environ,
-        {
-            "ORGANIZATION": "my_organization",
-            "GH_TOKEN": "my_token",
             "LABELS": "dependencies",
         },
         clear=True,
@@ -1164,6 +1168,7 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             ["dependencies"],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1209,9 +1214,92 @@ we can keep our dependencies up to date and secure.",
             "",  # schedule_day
             None,  # team_name
             ["dependencies", "test", "test2"],  # labels
+            None,
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "test",
+            "COMMIT_MESSAGE": "".join(
+                random.choices(string.ascii_letters, k=MAX_COMMIT_MESSAGE_LENGTH + 1)
+            ),
+        },
+        clear=True,
+    )
+    def test_get_env_vars_commit_message_too_long(self):
+        """Test that an error is raised when the COMMIT_MESSAGE env variable has more than MAX_COMMIT_MESSAGE_LENGTH characters"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "COMMIT_MESSAGE environment variable is too long",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "test",
+            "BODY": "".join(
+                random.choices(string.ascii_letters, k=MAX_BODY_LENGTH + 1)
+            ),
+        },
+        clear=True,
+    )
+    def test_get_env_vars_pr_body_too_long(self):
+        """Test that an error is raised when the BODY env variable has more than MAX_BODY_LENGTH characters"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "BODY environment variable is too long",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "TITLE": "".join(
+                random.choices(string.ascii_letters, k=MAX_TITLE_LENGTH + 1)
+            ),
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_long_title(self):
+        """Test incorrect type error, should be issue or pull"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "TITLE environment variable is too long",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "PROJECT_ID": "project_name",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_project_id_not_a_number(self):
+        """Test incorrect type error, should be issue or pull"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "PROJECT_ID environment variable is not numeric",
+        )
 
 
 if __name__ == "__main__":

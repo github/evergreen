@@ -8,6 +8,10 @@ from os.path import dirname, join
 
 from dotenv import load_dotenv
 
+MAX_TITLE_LENGTH = 70
+MAX_BODY_LENGTH = 65536
+MAX_COMMIT_MESSAGE_LENGTH = 65536
+
 
 def get_bool_env_var(env_var_name: str, default: bool = False) -> bool:
     """Get a boolean environment variable.
@@ -120,6 +124,7 @@ def get_env_vars(
     str,
     str | None,
     list[str],
+    str | None,
 ]:
     """
     Get the environment variables for use in the action.
@@ -154,6 +159,7 @@ def get_env_vars(
         schedule_day (str): The day of the week to run the action on if schedule is daily
         team_name (str): The team to search for repositories in
         labels (list[str]): A list of labels to be added to dependabot configuration
+        dependabot_config_file (str): Dependabot extra configuration file location path
     """
 
     if not test:
@@ -219,15 +225,15 @@ def get_env_vars(
         follow_up_type = "pull"
 
     title = os.getenv("TITLE")
-    # make sure that title is a string with less than 70 characters
+    # make sure that title is a string with less than MAX_TITLE_LENGTH characters
     if title:
-        if len(title) > 70:
+        if len(title) > MAX_TITLE_LENGTH:
             raise ValueError("TITLE environment variable is too long")
     else:
         title = "Enable Dependabot"
 
     body = os.getenv("BODY")
-    if body and len(body) > 65536:
+    if body and len(body) > MAX_BODY_LENGTH:
         raise ValueError("BODY environment variable is too long")
 
     if not body:
@@ -247,7 +253,7 @@ Please enable it by merging this pull request so that we can keep our dependenci
 
     commit_message = os.getenv("COMMIT_MESSAGE")
     if commit_message:
-        if len(commit_message) > 65536:
+        if len(commit_message) > MAX_COMMIT_MESSAGE_LENGTH:
             raise ValueError("COMMIT_MESSAGE environment variable is too long")
     else:
         commit_message = "Create/Update dependabot.yaml"
@@ -337,6 +343,8 @@ Please enable it by merging this pull request so that we can keep our dependenci
     if labels_str:
         labels_list = [label.lower().strip() for label in labels_str.split(",")]
 
+    dependabot_config_file = os.getenv("DEPENDABOT_CONFIG_FILE")
+
     return (
         organization,
         repositories_list,
@@ -365,4 +373,5 @@ Please enable it by merging this pull request so that we can keep our dependenci
         schedule_day,
         team_name,
         labels_list,
+        dependabot_config_file,
     )

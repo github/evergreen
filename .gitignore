@@ -154,3 +154,6 @@ devenv.local.nix
 .envrc
 devenv.*
 .devenv*
+
+# Local testing files
+dependabot-output.yaml

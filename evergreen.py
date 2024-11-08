@@ -1,5 +1,8 @@
 """This file contains the main() and other functions needed to open an issue/PR dependabot is not enabled but could be"""
 
+import base64
+import io
+import os
 import sys
 import uuid
 from datetime import datetime
@@ -8,6 +11,7 @@ import auth
 import env
 import github3
 import requests
+import ruamel.yaml
 from dependabot_file import build_dependabot_file
 
 
@@ -43,6 +47,7 @@ def main():  # pragma: no cover
         schedule_day,
         team_name,
         labels,
+        dependabot_config_file,
     ) = env.get_env_vars()
 
     # Auth to GitHub.com or GHE
@@ -82,7 +87,7 @@ def main():  # pragma: no cover
             print(f"Batch size met at {batch_size} eligible repositories.")
             break
 
-        # Check all the things to see if repo is eligble for a pr/issue
+        # Check all the things to see if repo is eligible for a pr/issue
         if repo.full_name in exempt_repositories_list:
             print(f"Skipping {repo.full_name} (exempted)")
             continue
@@ -113,6 +118,27 @@ def main():  # pragma: no cover
             print(f"Skipping {repo.full_name} (created after filter)")
             continue
 
+        # Check if there is any extra configuration to be added to the dependabot file by checking the DEPENDABOT_CONFIG_FILE env variable
+        if dependabot_config_file:
+            yaml = ruamel.yaml.YAML()
+            yaml.preserve_quotes = True
+            # If running locally on a computer the local file takes precedence over the one existent on the repository
+            if os.path.exists(dependabot_config_file):
+                with open(
+                    dependabot_config_file, "r", encoding="utf-8"
+                ) as extra_dependabot_config:
+                    extra_dependabot_config = yaml.load(extra_dependabot_config)
+            else:
+                extra_dependabot_config = check_existing_config(
+                    repo, dependabot_config_file
+                ).content
+                extra_dependabot_config = yaml.load(
+                    base64.b64decode(extra_dependabot_config)
+                )
+        else:
+            # If no dependabot configuration file is present set the variable empty
+            extra_dependabot_config = None
+
         print(f"Checking {repo.full_name} for compatible package managers")
         # Try to detect package managers and build a dependabot file
         dependabot_file = build_dependabot_file(
@@ -124,11 +150,22 @@ def main():  # pragma: no cover
             schedule,
             schedule_day,
             labels,
+            extra_dependabot_config,
         )
+
+        yaml = ruamel.yaml.YAML()
+        stream = io.StringIO()
+        yaml.indent(mapping=2, sequence=4, offset=2)
+
+        # create locally the dependabot file
+        with open("dependabot-output.yaml", "w", encoding="utf-8") as yaml_file:
+            yaml.dump(dependabot_file, yaml_file)
 
         if dependabot_file is None:
             print("\tNo (new) compatible package manager found")
-            continue
+        else:
+            dependabot_file = yaml.dump(dependabot_file, stream)
+            dependabot_file = stream.getvalue()
 
         # If dry_run is set, just print the dependabot file
         if dry_run:
@@ -227,12 +264,12 @@ def is_dependabot_security_updates_enabled(ghe, owner, repo, access_token):
 
 def check_existing_config(repo, filename):
     """
-    Check if the dependabot file already exists in the
+    Check if a file already exists in the
     repository and return the existing config if it does
 
     Args:
         repo (github3.repos.repo.Repository): The repository to check
-        filename (str): The dependabot configuration filename to check
+        filename (str): The configuration filename to check
 
     Returns:
         github3.repos.contents.Contents | None: The existing config if it exists, otherwise None
@@ -321,7 +358,7 @@ def commit_changes(
     dependabot_filename=".github/dependabot.yml",
     existing_config=None,
 ):
-    """Commit the changes to the repo and open a pull reques and return the pull request object"""
+    """Commit the changes to the repo and open a pull request and return the pull request object"""
     default_branch = repo.default_branch
     # Get latest commit sha from default branch
     default_branch_commit = repo.ref("heads/" + default_branch).object.sha

@@ -266,7 +266,7 @@ class TestCheckPendingPullsForDuplicates(unittest.TestCase):
         result = check_pending_pulls_for_duplicates("dependabot-branch", mock_repo)
 
         # Assert that the function returned the expected result
-        self.assertEqual(result, False)
+        self.assertFalse(result)
 
     def test_check_pending_pulls_for_duplicates_with_duplicates(self):
         """Test the check_pending_pulls_for_duplicates function where there are duplicates to be found."""
@@ -278,7 +278,7 @@ class TestCheckPendingPullsForDuplicates(unittest.TestCase):
         result = check_pending_pulls_for_duplicates(mock_pull_request.title, mock_repo)
 
         # Assert that the function returned the expected result
-        self.assertEqual(result, True)
+        self.assertTrue(result)
 
 
 class TestCheckPendingIssuesForDuplicates(unittest.TestCase):
@@ -295,7 +295,7 @@ class TestCheckPendingIssuesForDuplicates(unittest.TestCase):
         mock_issue.issues.assert_called_once_with(state="open")
 
         # Assert that the function returned the expected result
-        self.assertEqual(result, False)
+        self.assertFalse(result)
 
     def test_check_pending_issues_for_duplicates_with_duplicates(self):
         """Test the check_pending_issues_for_duplicates function where there are duplicates to be found."""
@@ -308,7 +308,7 @@ class TestCheckPendingIssuesForDuplicates(unittest.TestCase):
         mock_issue.issues.assert_called_once_with(state="open")
 
         # Assert that the function returned the expected result
-        self.assertEqual(result, True)
+        self.assertTrue(result)
 
 
 class TestGetReposIterator(unittest.TestCase):
@@ -686,7 +686,7 @@ class TestIsRepoCreateDateBeforeCreatedAfterDate(unittest.TestCase):
 
         self.assertFalse(result)
 
-    def test_is_repo_created_date_is_before_created_after_date_without_timezene_again(
+    def test_is_repo_created_date_is_before_created_after_date_without_timezone_again(
         self,
     ):
         """Test the repo.created_at date is before created_after_date without timezone again."""
