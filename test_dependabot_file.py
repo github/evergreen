@@ -2,8 +2,9 @@
 """Tests for the dependabot_file.py functions."""
 
 import base64
+import os
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import github3
 import ruamel.yaml
@@ -140,7 +141,7 @@ updates:
         )
         self.assertEqual(result, expected_result)
 
-    def test_build_dependabot_file_with_2_space_indent_existing_config_bundler_with_update_and_no_newline(
+    def test_build_dependabot_file_with_weird_space_indent_existing_config_bundler_with_update(
         self,
     ):
         """Test that the dependabot.yml file is built correctly with bundler"""
@@ -149,37 +150,96 @@ updates:
 
         # expected_result maintains existing ecosystem with custom configuration
         # and adds new ecosystem
-        expected_result = yaml.load(
-            b"""
-version: 2
-updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "chore(deps)"
-  - package-ecosystem: 'bundler'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
-"""
-        )
         existing_config = MagicMock()
         existing_config.content = base64.b64encode(
             b"""
 version: 2
 updates:
-  - package-ecosystem: "pip"
+- package-ecosystem: "pip"
+directory: "/"
+  schedule:
+    interval: "weekly"
+  commit-message:
+    prefix: "chore(deps)"
+  """
+        )
+
+        with self.assertRaises(ruamel.yaml.YAMLError):
+            build_dependabot_file(
+                repo, False, [], {}, existing_config, "weekly", "", [], None
+            )
+
+    def test_build_dependabot_file_with_incorrect_indentation_in_extra_dependabot_config_file(
+        self,
+    ):
+        """Test incorrect indentation on extra_dependabot_config"""
+        repo = MagicMock()
+        repo.file_contents.side_effect = lambda f, filename="Gemfile": f == filename
+
+        # expected_result maintains existing ecosystem with custom configuration
+        # and adds new ecosystem
+        extra_dependabot_config = MagicMock()
+        extra_dependabot_config.content = base64.b64encode(
+            b"""
+npm:
+type: 'npm'
+  url: 'https://yourprivateregistry/npm/'
+  username: '${{secrets.username}}'
+  password: '${{secrets.password}}'
+  """
+        )
+
+        with self.assertRaises(ruamel.yaml.YAMLError):
+            build_dependabot_file(
+                repo, False, [], {}, None, "weekly", "", [], extra_dependabot_config
+            )
+
+    @patch.dict(os.environ, {"DEPENDABOT_CONFIG_FILE": "dependabot-config.yaml"})
+    def test_build_dependabot_file_with_extra_dependabot_config_file(self):
+        """Test that the dependabot.yaml file is built correctly with extra configurations from extra_dependabot_config"""
+
+        repo = MagicMock()
+        repo.file_contents.side_effect = (
+            lambda f, filename="package.json": f == filename
+        )
+
+        # expected_result maintains existing ecosystem with custom configuration
+        # and adds new ecosystem
+        extra_dependabot_config = MagicMock()
+        extra_dependabot_config.content = base64.b64encode(
+            b"""
+npm:
+  type: 'npm'
+  url: 'https://yourprivateregistry/npm/'
+  username: '${{secrets.username}}'
+  password: '${{secrets.password}}'
+    """
+        )
+        extra_dependabot_config = yaml.load(
+            base64.b64decode(extra_dependabot_config.content)
+        )
+
+        expected_result = yaml.load(
+            b"""
+version: 2
+registries:
+  npm:
+    type: 'npm'
+    url: 'https://yourprivateregistry/npm/'
+    username: '${{secrets.username}}'
+    password: '${{secrets.password}}'
+updates:
+  - package-ecosystem: "npm"
     directory: "/"
+    registries:
+      - 'npm'
     schedule:
       interval: "weekly"
-    commit-message:
-      prefix: "chore(deps)"
 """
         )
+
         result = build_dependabot_file(
-            repo, False, [], {}, existing_config, "weekly", "", [], None
+            repo, False, [], {}, None, "weekly", "", [], extra_dependabot_config
         )
         self.assertEqual(result, expected_result)
 

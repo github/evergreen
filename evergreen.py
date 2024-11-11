@@ -124,17 +124,25 @@ def main():  # pragma: no cover
             yaml.preserve_quotes = True
             # If running locally on a computer the local file takes precedence over the one existent on the repository
             if os.path.exists(dependabot_config_file):
-                with open(
-                    dependabot_config_file, "r", encoding="utf-8"
-                ) as extra_dependabot_config:
-                    extra_dependabot_config = yaml.load(extra_dependabot_config)
+                try:
+                    with open(
+                        dependabot_config_file, "r", encoding="utf-8"
+                    ) as extra_dependabot_config:
+                        extra_dependabot_config = yaml.load(extra_dependabot_config)
+                except ruamel.yaml.YAMLError as e:
+                    print(f"YAML indentation error: {e}")
+                    continue
             else:
-                extra_dependabot_config = check_existing_config(
-                    repo, dependabot_config_file
-                ).content
-                extra_dependabot_config = yaml.load(
-                    base64.b64decode(extra_dependabot_config)
-                )
+                try:
+                    extra_dependabot_config = check_existing_config(
+                        repo, dependabot_config_file
+                    ).content
+                    extra_dependabot_config = yaml.load(
+                        base64.b64decode(extra_dependabot_config)
+                    )
+                except ruamel.yaml.YAMLError as e:
+                    print(f"YAML indentation error: {e}")
+                    continue
         else:
             # If no dependabot configuration file is present set the variable empty
             extra_dependabot_config = None

@@ -86,7 +86,7 @@ This action can be configured to authenticate with GitHub App Installation or Pe
 | `GH_APP_PRIVATE_KEY`         | True     | `""`    | GitHub Application Private Key. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details.     |
 | `GITHUB_APP_ENTERPRISE_ONLY` | False    | false   | Set this input to `true` if your app is created in GHE and communicates with GHE.                                                                                                                       |
 
-The needed GitHub app permissions are the following:
+The needed GitHub app permissions are the following under `Repository permissions`:
 
 - `Administration` - Read and Write (Needed to activate the [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) )
 - `Pull Requests` - Read and Write (If `TYPE` input is set to `pull`)
@@ -125,7 +125,58 @@ The needed GitHub app permissions are the following:
 | `SCHEDULE`                 | False                                           | `weekly`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Schedule interval by which to check for dependency updates via Dependabot. Allowed values are `daily`, `weekly`, or `monthly`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `SCHEDULE_DAY`             | False                                           | ''                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Scheduled day by which to check for dependency updates via Dependabot. Allowed values are days of the week full names (i.e., `monday`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `LABELS`                   | False                                           | ""                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | A comma separated list of labels that should be added to pull requests opened by dependabot.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `DEPENDABOT_CONFIG_FILE`   | False                                           | ""                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Location of the configuration file for `dependabot.yml` configurations.  If the file is present locally it takes precedence over the one in the repository.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `DEPENDABOT_CONFIG_FILE`   | False                                           | ""                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Location of the configuration file for `dependabot.yml` configurations. If the file is present locally it takes precedence over the one in the repository.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+
+### Private repositories configuration
+
+Dependabot allows the configuration of [private registries](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#configuration-options-for-private-registries) for dependabot to use.  
+To add a private registry configuration to the dependabot file the `DEPENDABOT_CONFIG_FILE` needs to be set with the path of the configuration file.
+
+This configuration file needs to exist on the repository where the action runs. It can also be created locally to test some configurations (if created locally it takes precedence over the file on the repository).
+
+#### Usage
+
+Set the input variable:
+
+```
+DEPENDABOT_CONFIG_FILE = "dependabot-config.yaml"
+```
+
+Create a file on your repository in the same path:
+
+```
+npm:
+  type: 'npm'
+  url: 'https://yourprivateregistry/npm/'
+  username: '${{secrets.username}}'
+  password: '${{secrets.password}}'
+  key: <used if necessary>
+  token: <used if necessary>
+  replaces-base: <used if necessary>
+maven:
+  type: 'maven'
+  url: 'https://yourprivateregistry/maven/'
+  username: '${{secrets.username}}'
+  password: '${{secrets.password}}'
+```
+
+The principal key of each configuration need to match the package managers that the [script is looking for](https://github.com/github/evergreen/blob/main/dependabot_file.py#L78).
+
+The `dependabot.yaml` created file will look like the following with the `registries:` key added:
+
+```
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    registries:  --> added configuration
+      - 'npm'    --> added configuration
+    schedule:
+      interval: 'weekly'
+    labels:
+      - 'test'
+      - 'dependabot'
+      - 'new'
+```
 
 ### Example workflows
 
@@ -226,7 +277,7 @@ jobs:
           GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
           # GITHUB_APP_ENTERPRISE_ONLY: True --> Set to true when created GHE App needs to communicate with GHE api
           GH_ENTERPRISE_URL: ${{ github.server_url }}
-          # GH_TOKEN: ${{ steps.app-token.outputs.token }} --> the token input is not used if the github app inputs are set
+          # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} --> the token input is not used if the github app inputs are set
           ORGANIZATION: your_organization
           UPDATE_EXISTING: True
           GROUP_DEPENDENCIES: True

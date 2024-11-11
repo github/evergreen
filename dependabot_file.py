@@ -147,7 +147,11 @@ def build_dependabot_file(
     exempt_ecosystems_list = exempt_ecosystems.copy()
     if existing_config:
         yaml.preserve_quotes = True
-        dependabot_file = yaml.load(base64.b64decode(existing_config.content))
+        try:
+            dependabot_file = yaml.load(base64.b64decode(existing_config.content))
+        except ruamel.yaml.YAMLError as e:
+            print(f"YAML indentation error: {e}")
+            raise
     else:
         dependabot_file = copy.deepcopy(data)
 
