@@ -164,18 +164,18 @@ The principal key of each configuration need to match the package managers that 
 
 The `dependabot.yaml` created file will look like the following with the `registries:` key added:
 
-```
+```yaml
 updates:
-  - package-ecosystem: 'npm'
-    directory: '/'
-    registries:  --> added configuration
+  - package-ecosystem: "npm"
+    directory: "/"
+    registries: --> added configuration
       - 'npm'    --> added configuration
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
     labels:
-      - 'test'
-      - 'dependabot'
-      - 'new'
+      - "test"
+      - "dependabot"
+      - "new"
 ```
 
 ### Example workflows
