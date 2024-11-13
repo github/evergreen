@@ -138,26 +138,26 @@ This configuration file needs to exist on the repository where the action runs. 
 
 Set the input variable:
 
-```
+```yaml
 DEPENDABOT_CONFIG_FILE = "dependabot-config.yaml"
 ```
 
 Create a file on your repository in the same path:
 
-```
+```yaml
 npm:
-  type: 'npm'
-  url: 'https://yourprivateregistry/npm/'
-  username: '${{secrets.username}}'
-  password: '${{secrets.password}}'
+  type: "npm"
+  url: "https://yourprivateregistry/npm/"
+  username: "${{secrets.username}}"
+  password: "${{secrets.password}}"
   key: <used if necessary>
   token: <used if necessary>
   replaces-base: <used if necessary>
 maven:
-  type: 'maven'
-  url: 'https://yourprivateregistry/maven/'
-  username: '${{secrets.username}}'
-  password: '${{secrets.password}}'
+  type: "maven"
+  url: "https://yourprivateregistry/maven/"
+  username: "${{secrets.username}}"
+  password: "${{secrets.password}}"
 ```
 
 The principal key of each configuration need to match the package managers that the [script is looking for](https://github.com/github/evergreen/blob/main/dependabot_file.py#L78).
