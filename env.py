@@ -344,6 +344,10 @@ Please enable it by merging this pull request so that we can keep our dependenci
         labels_list = [label.lower().strip() for label in labels_str.split(",")]
 
     dependabot_config_file = os.getenv("DEPENDABOT_CONFIG_FILE")
+    if dependabot_config_file and not os.path.exists(dependabot_config_file):
+        raise ValueError(
+            f"No dependabot extra configuration found. Please create one in {dependabot_config_file}"
+        )
 
     return (
         organization,
