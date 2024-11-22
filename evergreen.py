@@ -171,6 +171,7 @@ def main():  # pragma: no cover
 
         if dependabot_file is None:
             print("\tNo (new) compatible package manager found")
+            continue
         else:
             dependabot_file = yaml.dump(dependabot_file, stream)
             dependabot_file = stream.getvalue()
