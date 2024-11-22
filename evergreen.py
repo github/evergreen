@@ -171,9 +171,10 @@ def main():  # pragma: no cover
 
         if dependabot_file is None:
             print("\tNo (new) compatible package manager found")
-        else:
-            dependabot_file = yaml.dump(dependabot_file, stream)
-            dependabot_file = stream.getvalue()
+            continue
+
+        yaml.dump(dependabot_file, stream)
+        dependabot_file = stream.getvalue()
 
         # If dry_run is set, just print the dependabot file
         if dry_run:
