@@ -54,6 +54,8 @@ def make_dependabot_config(
     if extra_dependabot_config:
         ecosystem_config = extra_dependabot_config.get(ecosystem)
         if ecosystem_config:
+            if "registries" not in dependabot_config:
+                dependabot_config.update({"registries": {}})
             dependabot_config["registries"][ecosystem] = ecosystem_config
             dependabot_config["updates"][-1].update(
                 {"registries": [SingleQuotedScalarString(ecosystem)]}
