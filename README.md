@@ -206,6 +206,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORGANIZATION: <YOUR_ORGANIZATION_GOES_HERE>
+
+      - name: Post evergreen job summary
+        run: cat summary.md >> $GITHUB_STEP_SUMMARY
 ```
 
 #### Advanced
@@ -249,6 +252,9 @@ jobs:
           TITLE: "Add dependabot configuration"
           BODY: "Please add this dependabot configuration so that we can keep the dependencies in this repo up to date and secure. for help, contact XXX"
           CREATED_AFTER_DATE: ${{ env.one_week_ago }}
+
+      - name: Post evergreen job summary
+        run: cat summary.md >> $GITHUB_STEP_SUMMARY
 ```
 
 #### Using GitHub app
@@ -281,6 +287,9 @@ jobs:
           ORGANIZATION: your_organization
           UPDATE_EXISTING: True
           GROUP_DEPENDENCIES: True
+
+      - name: Post evergreen job summary
+        run: cat summary.md >> $GITHUB_STEP_SUMMARY
 ```
 
 ## Local usage without Docker

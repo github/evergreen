@@ -79,6 +79,28 @@ def main():  # pragma: no cover
         organization, team_name, repository_list, github_connection
     )
 
+    # Setting up the action summary content
+    summary_content = f"""
+    ## 🚀 Job Summary
+    - **Organization:** {organization}
+    - **Follow Up Type:** {follow_up_type}
+    - **Dry Run:** {dry_run}
+    - **Enable Security Updates:** {enable_security_updates}
+    """
+    # Add optional parameters to the summary
+    if project_id:
+        project_link = f"https://github.com/orgs/{organization}/projects/{project_id}"
+        summary_content += f"- **Project ID:** [{project_id}]({project_link})\n"
+    if batch_size:
+        summary_content += f"- **Batch Size:** {batch_size}\n"
+
+    # Add the updated repositories table header
+    summary_content += (
+        "\n\n## 📋 Updated Repositories\n\n"
+        "| Repository | 🔒 Security Updates Enabled | 🔄 Follow Up Type | 🔗 Link |\n"
+        "| --- | --- | --- | --- |\n"
+    )
+
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
     count_eligible = 0
     for repo in repos:
@@ -200,12 +222,14 @@ def main():  # pragma: no cover
             ):
                 enable_dependabot_security_updates(ghe, repo.owner, repo.name, token)
 
+        link = ""
         if follow_up_type == "issue":
             skip = check_pending_issues_for_duplicates(title, repo)
             if not skip:
                 count_eligible += 1
                 body_issue = f"{body}\n\n```yaml\n# {dependabot_filename_to_use} \n{dependabot_file}\n```"
                 issue = repo.create_issue(title, body_issue)
+                link = issue.html_url
                 print(f"\tCreated issue {issue.html_url}")
                 if project_id:
                     issue_id = get_global_issue_id(
@@ -230,6 +254,7 @@ def main():  # pragma: no cover
                         dependabot_filename_to_use,
                         existing_config,
                     )
+                    link = pull.html_url
                     print(f"\tCreated pull request {pull.html_url}")
                     if project_id:
                         pr_id = get_global_pr_id(
@@ -241,6 +266,12 @@ def main():  # pragma: no cover
                 except github3.exceptions.NotFoundError:
                     print("\tFailed to create pull request. Check write permissions.")
                     continue
+        # Append the repository to the summary content
+        summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({link}) |\n"
+
+    print(f"Done. {str(count_eligible)} repositories were eligible.")
+    # Append the summary content to the GitHub step summary file
+    append_to_github_summary(summary_content)
 
     print(f"Done. {str(count_eligible)} repositories were eligible.")
 
@@ -507,6 +538,15 @@ def link_item_to_project(ghe, token, project_id, item_id):
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
         return None
+
+
+def append_to_github_summary(content, summary_file="summary.md"):
+    """
+    Append content to the GitHub step summary file
+    """
+    if summary_file:
+        with open(summary_file, "a", encoding="utf-8") as f:
+            f.write(content + "\n")
 
 
 if __name__ == "__main__":
