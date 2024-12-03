@@ -54,6 +54,8 @@ def make_dependabot_config(
     if extra_dependabot_config:
         ecosystem_config = extra_dependabot_config.get(ecosystem)
         if ecosystem_config:
+            if "registries" not in dependabot_config:
+                dependabot_config.update({"registries": {}})
             dependabot_config["registries"][ecosystem] = ecosystem_config
             dependabot_config["updates"][-1].update(
                 {"registries": [SingleQuotedScalarString(ecosystem)]}
@@ -184,6 +186,7 @@ def build_dependabot_file(
         ],
         "docker": ["Dockerfile"],
         "maven": ["pom.xml"],
+        "gradle": ["build.gradle", "build.gradle.kts"],
     }
 
     # Detect package managers where manifest files have known names
@@ -232,6 +235,23 @@ def build_dependabot_file(
                     package_managers_found["github-actions"] = True
                     make_dependabot_config(
                         "github-actions",
+                        group_dependencies,
+                        schedule,
+                        schedule_day,
+                        labels,
+                        dependabot_file,
+                        extra_dependabot_config,
+                    )
+                    break
+        except github3.exceptions.NotFoundError:
+            pass
+    if "devcontainers" not in exempt_ecosystems_list:
+        try:
+            for file in repo.directory_contents(".devcontainer"):
+                if file[0] == "devcontainer.json":
+                    package_managers_found["devcontainers"] = True
+                    make_dependabot_config(
+                        "devcontainers",
                         group_dependencies,
                         schedule,
                         schedule_day,

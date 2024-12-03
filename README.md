@@ -160,7 +160,7 @@ maven:
   password: "${{secrets.password}}"
 ```
 
-The principal key of each configuration need to match the package managers that the [script is looking for](https://github.com/github/evergreen/blob/main/dependabot_file.py#L78).
+The principal key of each configuration need to match the package managers that the [script is looking for](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#package-ecosystem).
 
 The `dependabot.yaml` created file will look like the following with the `registries:` key added:
 

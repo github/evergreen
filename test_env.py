@@ -1301,6 +1301,26 @@ we can keep our dependencies up to date and secure.",
             "PROJECT_ID environment variable is not numeric",
         )
 
+    @patch.dict(
+        os.environ,
+        {
+            "ORGANIZATION": "my_organization",
+            "GH_TOKEN": "my_token",
+            "SCHEDULE": "weekly",
+            "DEPENDABOT_CONFIG_FILE": "config.yaml",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_dependabot_config_file_set_but_not_found(self):
+        """Test that no dependabot file configuration is present and the DEPENDABOT_CONFIG_FILE is set"""
+        with self.assertRaises(ValueError) as context_manager:
+            get_env_vars(True)
+        the_exception = context_manager.exception
+        self.assertEqual(
+            str(the_exception),
+            "No dependabot extra configuration found. Please create one in config.yaml",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

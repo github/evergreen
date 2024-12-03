@@ -1,8 +1,6 @@
 """This file contains the main() and other functions needed to open an issue/PR dependabot is not enabled but could be"""
 
-import base64
 import io
-import os
 import sys
 import uuid
 from datetime import datetime
@@ -123,26 +121,15 @@ def main():  # pragma: no cover
             yaml = ruamel.yaml.YAML()
             yaml.preserve_quotes = True
             # If running locally on a computer the local file takes precedence over the one existent on the repository
-            if os.path.exists(dependabot_config_file):
-                try:
-                    with open(
-                        dependabot_config_file, "r", encoding="utf-8"
-                    ) as extra_dependabot_config:
-                        extra_dependabot_config = yaml.load(extra_dependabot_config)
-                except ruamel.yaml.YAMLError as e:
-                    print(f"YAML indentation error: {e}")
-                    continue
-            else:
-                try:
-                    extra_dependabot_config = check_existing_config(
-                        repo, dependabot_config_file
-                    ).content
-                    extra_dependabot_config = yaml.load(
-                        base64.b64decode(extra_dependabot_config)
-                    )
-                except ruamel.yaml.YAMLError as e:
-                    print(f"YAML indentation error: {e}")
-                    continue
+            try:
+                with open(
+                    dependabot_config_file, "r", encoding="utf-8"
+                ) as extra_dependabot_config:
+                    extra_dependabot_config = yaml.load(extra_dependabot_config)
+            except ruamel.yaml.YAMLError as e:
+                print(f"YAML indentation error: {e}")
+                continue
+
         else:
             # If no dependabot configuration file is present set the variable empty
             extra_dependabot_config = None
@@ -173,7 +160,7 @@ def main():  # pragma: no cover
             print("\tNo (new) compatible package manager found")
             continue
 
-        yaml.dump(dependabot_file, stream)
+        dependabot_file = yaml.dump(dependabot_file, stream)
         dependabot_file = stream.getvalue()
 
         # If dry_run is set, just print the dependabot file

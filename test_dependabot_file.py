@@ -205,8 +205,7 @@ type: 'npm'
 
         # expected_result maintains existing ecosystem with custom configuration
         # and adds new ecosystem
-        extra_dependabot_config = MagicMock()
-        extra_dependabot_config.content = base64.b64encode(
+        extra_dependabot_config = yaml.load(
             b"""
 npm:
   type: 'npm'
@@ -214,9 +213,6 @@ npm:
   username: '${{secrets.username}}'
   password: '${{secrets.password}}'
     """
-        )
-        extra_dependabot_config = yaml.load(
-            base64.b64decode(extra_dependabot_config.content)
         )
 
         expected_result = yaml.load(
@@ -448,6 +444,26 @@ updates:
         )
         self.assertEqual(result, expected_result)
 
+    def test_build_dependabot_file_with_gradle(self):
+        """Test that the dependabot.yml file is built correctly with gradle"""
+        repo = MagicMock()
+        repo.file_contents.side_effect = lambda filename: filename == "build.gradle"
+
+        expected_result = yaml.load(
+            b"""
+version: 2
+updates:
+  - package-ecosystem: 'gradle'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        )
+        result = build_dependabot_file(
+            repo, False, [], {}, None, "weekly", "", [], None
+        )
+        self.assertEqual(result, expected_result)
+
     def test_build_dependabot_file_with_terraform_with_files(self):
         """Test that the dependabot.yml file is built correctly with Terraform"""
         repo = MagicMock()
@@ -497,6 +513,31 @@ updates:
             repo, False, [], {}, None, "weekly", "", [], None
         )
         self.assertIsNone(result)
+
+    def test_build_dependabot_file_with_devcontainers(self):
+        """Test that the dependabot.yml file is built correctly with devcontainers"""
+        repo = MagicMock()
+        response = MagicMock()
+        response.status_code = 404
+        repo.file_contents.side_effect = github3.exceptions.NotFoundError(resp=response)
+        repo.directory_contents.side_effect = lambda path: (
+            [("devcontainer.json", None)] if path == ".devcontainer" else []
+        )
+
+        expected_result = yaml.load(
+            b"""
+version: 2
+updates:
+  - package-ecosystem: 'devcontainers'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        )
+        result = build_dependabot_file(
+            repo, False, [], None, None, "weekly", "", [], None
+        )
+        self.assertEqual(result, expected_result)
 
     def test_build_dependabot_file_with_github_actions(self):
         """Test that the dependabot.yml file is built correctly with GitHub Actions"""
