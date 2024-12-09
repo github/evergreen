@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import github3
 import requests
 from evergreen import (
+    append_to_github_summary,
     check_existing_config,
     check_pending_issues_for_duplicates,
     check_pending_pulls_for_duplicates,
@@ -736,6 +737,41 @@ class TestCheckExistingConfig(unittest.TestCase):
         result = check_existing_config(mock_repo, "dependabot.yml")
 
         self.assertIsNone(result)
+
+
+class TestAppendToGithubSummary(unittest.TestCase):
+    """Test the append_to_github_summary function in evergreen.py"""
+
+    @patch("builtins.open", new_callable=unittest.mock.mock_open)
+    def test_append_to_github_summary_with_file(self, mock_file):
+        """Test that content is appended to the specified summary file."""
+        content = "Test summary content"
+        summary_file = "summary.md"
+
+        append_to_github_summary(content, summary_file)
+
+        mock_file.assert_called_once_with(summary_file, "a", encoding="utf-8")
+        mock_file().write.assert_called_once_with(content + "\n")
+
+    @patch("builtins.open", new_callable=unittest.mock.mock_open)
+    def test_append_to_github_summary_without_summary_file(self, mock_file):
+        """Test that content is not written when summary_file is None or empty."""
+        content = "Test summary content"
+        summary_file = ""
+
+        append_to_github_summary(content, summary_file)
+
+        mock_file.assert_not_called()
+
+    @patch("builtins.open", new_callable=unittest.mock.mock_open)
+    def test_append_to_github_summary_with_default_file(self, mock_file):
+        """Test that content is appended to the default summary file when summary_file is not provided."""
+        content = "Test summary content"
+
+        append_to_github_summary(content)
+
+        mock_file.assert_called_once_with("summary.md", "a", encoding="utf-8")
+        mock_file().write.assert_called_once_with(content + "\n")
 
 
 if __name__ == "__main__":
