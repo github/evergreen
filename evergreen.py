@@ -79,11 +79,11 @@ def main():  # pragma: no cover
 
     # Setting up the action summary content
     summary_content = f"""
-    ## 🚀 Job Summary
-    - **Organization:** {organization}
-    - **Follow Up Type:** {follow_up_type}
-    - **Dry Run:** {dry_run}
-    - **Enable Security Updates:** {enable_security_updates}
+## 🚀 Job Summary
+- **Organization:** {organization}
+- **Follow Up Type:** {follow_up_type}
+- **Dry Run:** {dry_run}
+- **Enable Security Updates:** {enable_security_updates}
     """
     # Add optional parameters to the summary
     if project_id:
