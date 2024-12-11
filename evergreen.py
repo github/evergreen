@@ -209,15 +209,14 @@ def main():  # pragma: no cover
             ):
                 enable_dependabot_security_updates(ghe, repo.owner, repo.name, token)
 
-        link = ""
         if follow_up_type == "issue":
             skip = check_pending_issues_for_duplicates(title, repo)
             if not skip:
                 count_eligible += 1
                 body_issue = f"{body}\n\n```yaml\n# {dependabot_filename_to_use} \n{dependabot_file}\n```"
                 issue = repo.create_issue(title, body_issue)
-                link = issue.html_url
                 print(f"\tCreated issue {issue.html_url}")
+                summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({issue.html_url}) |\n"
                 if project_global_id:
                     issue_id = get_global_issue_id(
                         ghe, token, organization, repo.name, issue.number
@@ -241,8 +240,8 @@ def main():  # pragma: no cover
                         dependabot_filename_to_use,
                         existing_config,
                     )
-                    link = pull.html_url
                     print(f"\tCreated pull request {pull.html_url}")
+                    summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({pull.html_url}) |\n"
                     if project_global_id:
                         pr_id = get_global_pr_id(
                             ghe, token, organization, repo.name, pull.number
@@ -253,8 +252,6 @@ def main():  # pragma: no cover
                 except github3.exceptions.NotFoundError:
                     print("\tFailed to create pull request. Check write permissions.")
                     continue
-        # Append the repository to the summary content
-        summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({link}) |\n"
 
     print(f"Done. {str(count_eligible)} repositories were eligible.")
     # Append the summary content to the GitHub step summary file
