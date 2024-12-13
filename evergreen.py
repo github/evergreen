@@ -241,7 +241,12 @@ def main():  # pragma: no cover
                         existing_config,
                     )
                     print(f"\tCreated pull request {pull.html_url}")
-                    summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({pull.html_url}) |\n"
+                    summary_content += (
+                        f"| {repo.full_name} | "
+                        f"{'✅' if enable_security_updates else '❌'} | "
+                        f"{follow_up_type} | "
+                        f"[Link]({pull.html_url}) |\n"
+                    )
                     if project_global_id:
                         pr_id = get_global_pr_id(
                             ghe, token, organization, repo.name, pull.number
