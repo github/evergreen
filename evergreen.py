@@ -63,6 +63,9 @@ def main():  # pragma: no cover
             ghe, gh_app_id, gh_app_private_key, gh_app_installation_id
         )
 
+    # Set the project_global_id to None by default
+    project_global_id = None
+
     # If Project ID is set, lookup the global project ID
     if project_id:
         # Check Organization is set as it is required for linking to a project
