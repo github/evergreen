@@ -63,6 +63,9 @@ def main():  # pragma: no cover
             ghe, gh_app_id, gh_app_private_key, gh_app_installation_id
         )
 
+    # Set the project_global_id to None by default
+    project_global_id = None
+
     # If Project ID is set, lookup the global project ID
     if project_id:
         # Check Organization is set as it is required for linking to a project
@@ -70,7 +73,7 @@ def main():  # pragma: no cover
             raise ValueError(
                 "ORGANIZATION environment variable was not set. Please set it"
             )
-        project_id = get_global_project_id(ghe, token, organization, project_id)
+        project_global_id = get_global_project_id(ghe, token, organization, project_id)
 
     # Get the repositories from the organization, team name, or list of repositories
     repos = get_repos_iterator(
@@ -83,7 +86,7 @@ def main():  # pragma: no cover
 - **Organization:** {organization}
 - **Follow Up Type:** {follow_up_type}
 - **Dry Run:** {dry_run}
-- **Enable Security Updates:** {enable_security_updates}
+- **Enable Security Updates:** {enable_security_updates}\n
     """
     # Add optional parameters to the summary
     if project_id:
@@ -209,21 +212,20 @@ def main():  # pragma: no cover
             ):
                 enable_dependabot_security_updates(ghe, repo.owner, repo.name, token)
 
-        link = ""
         if follow_up_type == "issue":
             skip = check_pending_issues_for_duplicates(title, repo)
             if not skip:
                 count_eligible += 1
                 body_issue = f"{body}\n\n```yaml\n# {dependabot_filename_to_use} \n{dependabot_file}\n```"
                 issue = repo.create_issue(title, body_issue)
-                link = issue.html_url
                 print(f"\tCreated issue {issue.html_url}")
-                if project_id:
+                summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({issue.html_url}) |\n"
+                if project_global_id:
                     issue_id = get_global_issue_id(
                         ghe, token, organization, repo.name, issue.number
                     )
-                    link_item_to_project(ghe, token, project_id, issue_id)
-                    print(f"\tLinked issue to project {project_id}")
+                    link_item_to_project(ghe, token, project_global_id, issue_id)
+                    print(f"\tLinked issue to project {project_global_id}")
         else:
             # Try to detect if the repo already has an open pull request for dependabot
             skip = check_pending_pulls_for_duplicates(title, repo)
@@ -241,20 +243,27 @@ def main():  # pragma: no cover
                         dependabot_filename_to_use,
                         existing_config,
                     )
-                    link = pull.html_url
                     print(f"\tCreated pull request {pull.html_url}")
-                    if project_id:
+                    summary_content += (
+                        f"| {repo.full_name} | "
+                        f"{'✅' if enable_security_updates else '❌'} | "
+                        f"{follow_up_type} | "
+                        f"[Link]({pull.html_url}) |\n"
+                    )
+                    if project_global_id:
                         pr_id = get_global_pr_id(
                             ghe, token, organization, repo.name, pull.number
                         )
-                        response = link_item_to_project(ghe, token, project_id, pr_id)
+                        response = link_item_to_project(
+                            ghe, token, project_global_id, pr_id
+                        )
                         if response:
-                            print(f"\tLinked pull request to project {project_id}")
+                            print(
+                                f"\tLinked pull request to project {project_global_id}"
+                            )
                 except github3.exceptions.NotFoundError:
                     print("\tFailed to create pull request. Check write permissions.")
                     continue
-        # Append the repository to the summary content
-        summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({link}) |\n"
 
     print(f"Done. {str(count_eligible)} repositories were eligible.")
     # Append the summary content to the GitHub step summary file
@@ -506,7 +515,7 @@ def get_global_pr_id(ghe, token, organization, repository, pr_number):
         return None
 
 
-def link_item_to_project(ghe, token, project_id, item_id):
+def link_item_to_project(ghe, token, project_global_id, item_id):
     """
     Links an item (issue or pull request) to a project in GitHub.
     API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
@@ -515,7 +524,7 @@ def link_item_to_project(ghe, token, project_id, item_id):
     url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
     data = {
-        "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
+        "query": f'mutation {{addProjectV2ItemById(input: {{projectId: "{project_global_id}", contentId: "{item_id}"}}) {{item {{id}}}}}}'
     }
 
     try:
