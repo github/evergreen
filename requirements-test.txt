@@ -1,9 +1,9 @@
 black==24.10.0
 flake8==7.1.1
-mypy==1.13.0
+mypy==1.14.1
 mypy-extensions==1.0.0
-pylint==3.3.2
+pylint==3.3.3
 pytest==8.3.4
 pytest-cov==6.0.0
-types-PyYAML==6.0.12.20240917
+types-PyYAML==6.0.12.20241230
 types-requests==2.32.0.20241016
