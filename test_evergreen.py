@@ -1,4 +1,4 @@
-""" Test the evergreen.py module. """
+"""Test the evergreen.py module."""
 
 import unittest
 import uuid
