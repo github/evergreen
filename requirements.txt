@@ -1,4 +1,4 @@
 github3.py==4.0.1
 requests==2.32.4
-python-dotenv==1.1.0
+python-dotenv==1.1.1
 ruamel.yaml==0.18.14
