@@ -1,6 +1,7 @@
 """This file contains the main() and other functions needed to open an issue/PR dependabot is not enabled but could be"""
 
 import io
+import os
 import sys
 import uuid
 from datetime import datetime
@@ -343,7 +344,6 @@ def get_repos_iterator(organization, team_name, repository_list, github_connecti
     """Get the repositories from the organization, team_name, repository_list, or via search query"""
     # Use GitHub search API if REPOSITORY_SEARCH_QUERY is set
     try:
-        import os
         search_query = os.getenv("REPOSITORY_SEARCH_QUERY", "")
     except ImportError:
         search_query = ""
