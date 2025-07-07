@@ -208,6 +208,8 @@ def build_dependabot_file(
                     )
                     break
             except github3.exceptions.NotFoundError:
+                # The file does not exist and is not required,
+                # so we should continue to the next one rather than raising error or logging
                 pass
 
     # detect package managers with variable file names
@@ -227,6 +229,8 @@ def build_dependabot_file(
                     )
                     break
         except github3.exceptions.NotFoundError:
+            # The file does not exist and is not required,
+            # so we should continue to the next one rather than raising error or logging
             pass
     if "github-actions" not in exempt_ecosystems_list:
         try:
@@ -261,6 +265,8 @@ def build_dependabot_file(
                     )
                     break
         except github3.exceptions.NotFoundError:
+            # The file does not exist and is not required,
+            # so we should continue to the next one rather than raising error or logging
             pass
 
     if any(package_managers_found.values()):
