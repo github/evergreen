@@ -243,6 +243,8 @@ def check_existing_config(repo, filename):
         if existing_config.size > 0:
             return existing_config
     except github3.exceptions.NotFoundError:
+        # The file does not exist and is not required,
+        # so we should continue to the next one rather than raising error or logging
         pass
     return None
 

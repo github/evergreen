@@ -165,6 +165,8 @@ updates:
                     )
                     break
             except github3.exceptions.NotFoundError:
+                # The file does not exist and is not required,
+                # so we should continue to the next one rather than raising error or logging
                 pass
 
     # detect package managers with variable file names
@@ -183,6 +185,8 @@ updates:
                     )
                     break
         except github3.exceptions.NotFoundError:
+            # The file does not exist and is not required,
+            # so we should continue to the next one rather than raising error or logging
             pass
     if "github-actions" not in exempt_ecosystems_list:
         try:
@@ -199,6 +203,8 @@ updates:
                     )
                     break
         except github3.exceptions.NotFoundError:
+            # The file does not exist and is not required,
+            # so we should continue to the next one rather than raising error or logging
             pass
 
     if any(package_managers_found.values()):
