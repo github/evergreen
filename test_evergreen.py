@@ -320,6 +320,7 @@ class TestGetReposIterator(unittest.TestCase):
         """Test the get_repos_iterator function with an organization"""
         organization = "my_organization"
         repository_list = []
+        search_query = ""
         github_connection = mock_github.return_value
 
         mock_organization = MagicMock()
@@ -328,7 +329,7 @@ class TestGetReposIterator(unittest.TestCase):
         github_connection.organization.return_value = mock_organization
 
         result = get_repos_iterator(
-            organization, None, repository_list, github_connection
+            organization, None, repository_list, search_query, github_connection
         )
 
         # Assert that the organization method was called with the correct argument
@@ -345,6 +346,7 @@ class TestGetReposIterator(unittest.TestCase):
         """Test the get_repos_iterator function with a repository list"""
         organization = None
         repository_list = ["org/repo1", "org/repo2"]
+        search_query = ""
         github_connection = mock_github.return_value
 
         mock_repository = MagicMock()
@@ -352,7 +354,7 @@ class TestGetReposIterator(unittest.TestCase):
         github_connection.repository.side_effect = mock_repository_list
 
         result = get_repos_iterator(
-            organization, None, repository_list, github_connection
+            organization, None, repository_list, search_query, github_connection
         )
 
         # Assert that the repository method was called with the correct arguments for each repository in the list
@@ -371,6 +373,7 @@ class TestGetReposIterator(unittest.TestCase):
         organization = "my_organization"
         repository_list = []
         team_name = "my_team"
+        search_query = ""
         github_connection = mock_github.return_value
 
         mock_team_repositories = MagicMock()
@@ -382,6 +385,7 @@ class TestGetReposIterator(unittest.TestCase):
             organization,
             team_name,
             repository_list,
+            search_query,
             github_connection,
         )
 
