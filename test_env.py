@@ -39,6 +39,7 @@ class TestEnv(unittest.TestCase):
             "TYPE",
             "UPDATE_EXISTING",
             "REPO_SPECIFIC_EXEMPTIONS",
+            "REPOSITORY_SEARCH_QUERY",
             "SCHEDULE",
             "SCHEDULE_DAY",
             "LABELS",
@@ -68,6 +69,7 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -120,6 +122,7 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -232,6 +235,7 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             None,
             ["org/repo1", "org2/repo2"],
+            "",  # search_query
             None,
             None,
             b"",
@@ -289,6 +293,7 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -364,6 +369,7 @@ class TestEnv(unittest.TestCase):
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -410,6 +416,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -450,7 +457,7 @@ we can keep our dependencies up to date and secure.",
         the_exception = cm.exception
         self.assertEqual(
             str(the_exception),
-            "ORGANIZATION and REPOSITORY environment variables were not set. Please set one",
+            "ORGANIZATION, REPOSITORY, and REPOSITORY_SEARCH_QUERY environment variables were not set. Please set one",
         )
 
     @patch.dict(
@@ -470,6 +477,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             12345,
             678910,
             b"hello",
@@ -559,6 +567,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -605,6 +614,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -652,6 +662,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -699,6 +710,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -776,6 +788,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -824,6 +837,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -871,6 +885,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -919,6 +934,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -1056,6 +1072,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -1141,6 +1158,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",
@@ -1187,6 +1205,7 @@ we can keep our dependencies up to date and secure.",
         expected_result = (
             "my_organization",
             [],
+            "",  # search_query
             None,
             None,
             b"",

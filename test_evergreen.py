@@ -320,6 +320,7 @@ class TestGetReposIterator(unittest.TestCase):
         """Test the get_repos_iterator function with an organization"""
         organization = "my_organization"
         repository_list = []
+        search_query = ""
         github_connection = mock_github.return_value
 
         mock_organization = MagicMock()
@@ -328,7 +329,7 @@ class TestGetReposIterator(unittest.TestCase):
         github_connection.organization.return_value = mock_organization
 
         result = get_repos_iterator(
-            organization, None, repository_list, github_connection
+            organization, None, repository_list, search_query, github_connection
         )
 
         # Assert that the organization method was called with the correct argument
@@ -345,6 +346,7 @@ class TestGetReposIterator(unittest.TestCase):
         """Test the get_repos_iterator function with a repository list"""
         organization = None
         repository_list = ["org/repo1", "org/repo2"]
+        search_query = ""
         github_connection = mock_github.return_value
 
         mock_repository = MagicMock()
@@ -352,7 +354,7 @@ class TestGetReposIterator(unittest.TestCase):
         github_connection.repository.side_effect = mock_repository_list
 
         result = get_repos_iterator(
-            organization, None, repository_list, github_connection
+            organization, None, repository_list, search_query, github_connection
         )
 
         # Assert that the repository method was called with the correct arguments for each repository in the list
@@ -371,6 +373,7 @@ class TestGetReposIterator(unittest.TestCase):
         organization = "my_organization"
         repository_list = []
         team_name = "my_team"
+        search_query = ""
         github_connection = mock_github.return_value
 
         mock_team_repositories = MagicMock()
@@ -382,6 +385,7 @@ class TestGetReposIterator(unittest.TestCase):
             organization,
             team_name,
             repository_list,
+            search_query,
             github_connection,
         )
 
@@ -398,6 +402,31 @@ class TestGetReposIterator(unittest.TestCase):
 
         # Assert that the function returned the expected result
         self.assertEqual(result, mock_team_repositories)
+
+    @patch("github3.login")
+    def test_get_repos_iterator_with_search_query(self, mock_github):
+        """Test the get_repos_iterator function with a search query"""
+        organization = "my_organization"
+        repository_list = []
+        team_name = None
+        search_query = "org:my-org is:repository archived:false"
+        github_connection = mock_github.return_value
+        repo1 = MagicMock()
+        repo2 = MagicMock()
+
+        # Mock the search_repositories method to return an iterator of repositories
+        github_connection.search_repositories.return_value = [repo1, repo2]
+
+        get_repos_iterator(
+            organization,
+            team_name,
+            repository_list,
+            search_query,
+            github_connection,
+        )
+
+        # Assert that the search_repositories method was called with the correct argument
+        github_connection.search_repositories.assert_called_with(search_query)
 
 
 class TestGetGlobalProjectId(unittest.TestCase):

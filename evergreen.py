@@ -20,6 +20,7 @@ def main():  # pragma: no cover
     (
         organization,
         repository_list,
+        search_query,
         gh_app_id,
         gh_app_installation_id,
         gh_app_private_key,
@@ -77,7 +78,7 @@ def main():  # pragma: no cover
 
     # Get the repositories from the organization, team name, or list of repositories
     repos = get_repos_iterator(
-        organization, team_name, repository_list, github_connection
+        organization, team_name, repository_list, search_query, github_connection
     )
 
     # Setting up the action summary content
@@ -341,9 +342,21 @@ def enable_dependabot_security_updates(ghe, owner, repo, access_token):
         print("\tFailed to enable Dependabot security updates.")
 
 
-def get_repos_iterator(organization, team_name, repository_list, github_connection):
-    """Get the repositories from the organization, team_name, or list of repositories"""
+def get_repos_iterator(
+    organization, team_name, repository_list, search_query, github_connection
+):
+    """Get the repositories from the organization, team_name, repository_list, or via search query"""
+    # Use GitHub search API if REPOSITORY_SEARCH_QUERY is set
+    if search_query:
+        # Return repositories matching the search query
+        repos = []
+        # Search results need to be converted to a list of repositories since they are returned as a search iterator
+        for repo in github_connection.search_repositories(search_query):
+            repos.append(repo.repository)
+        return repos
+
     repos = []
+    # Default behavior: list all organization/team repositories or specific repository list
     if organization and not repository_list and not team_name:
         repos = github_connection.organization(organization).repositories()
     elif team_name and organization:
