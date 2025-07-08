@@ -99,6 +99,7 @@ def get_env_vars(
 ) -> tuple[
     str | None,
     list[str],
+    str | None,
     int | None,
     int | None,
     bytes,
@@ -135,6 +136,7 @@ def get_env_vars(
     Returns:
         organization (str): The organization to search for repositories in
         repository_list (list[str]): A list of repositories to search for
+        search_query (str): A search query string to filter repositories by
         gh_app_id (int | None): The GitHub App ID to use for authentication
         gh_app_installation_id (int | None): The GitHub App Installation ID to use for authentication
         gh_app_private_key_bytes (bytes): The GitHub App Private Key as bytes to use for authentication
@@ -169,11 +171,12 @@ def get_env_vars(
 
     organization = os.getenv("ORGANIZATION")
     repositories_str = os.getenv("REPOSITORY")
+    search_query = os.getenv("REPOSITORY_SEARCH_QUERY", "").strip()
     team_name = os.getenv("TEAM_NAME")
-    # Either organization or repository must be set
-    if not organization and not repositories_str:
+    # Either organization, repository, or search_query must be set
+    if not organization and not repositories_str and not search_query:
         raise ValueError(
-            "ORGANIZATION and REPOSITORY environment variables were not set. Please set one"
+            "ORGANIZATION, REPOSITORY, and REPOSITORY_SEARCH_QUERY environment variables were not set. Please set one"
         )
     # Team name and repository are mutually exclusive
     if repositories_str and team_name:
@@ -352,6 +355,7 @@ Please enable it by merging this pull request so that we can keep our dependenci
     return (
         organization,
         repositories_list,
+        search_query,
         gh_app_id,
         gh_app_installation_id,
         gh_app_private_key_bytes,
