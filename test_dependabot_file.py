@@ -823,7 +823,7 @@ updates:
         """Test that existing registries are preserved when adding new ecosystems"""
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "Gemfile"
-        
+
         # Create existing config with registries but no bundler ecosystem
         existing_config = MagicMock()
         existing_config.content = base64.b64encode(
@@ -842,7 +842,7 @@ updates:
       interval: "weekly"
 """
         )
-        
+
         expected_result = yaml.load(
             b"""
 version: 2
@@ -863,7 +863,7 @@ updates:
       interval: 'weekly'
 """
         )
-        
+
         result = build_dependabot_file(
             repo, False, [], {}, existing_config, "weekly", "", [], None
         )
