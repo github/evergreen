@@ -11,7 +11,6 @@ from ruamel.yaml.scalarstring import SingleQuotedScalarString
 # Define data structure for dependabot.yaml
 data = {
     "version": 2,
-    "registries": {},
     "updates": [],
 }
 
@@ -60,8 +59,6 @@ def make_dependabot_config(
             dependabot_config["updates"][-1].update(
                 {"registries": [SingleQuotedScalarString(ecosystem)]}
             )
-    else:
-        dependabot_config.pop("registries", None)
 
     if schedule_day:
         dependabot_config["updates"][-1].update(
