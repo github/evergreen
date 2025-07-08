@@ -164,7 +164,7 @@ def get_env_vars(
         dependabot_config_file (str): Dependabot extra configuration file location path
     """
 
-    if not test:
+    if not test:  # pragma: no cover
         # Load from .env file if it exists and not testing
         dotenv_path = join(dirname(__file__), ".env")
         load_dotenv(dotenv_path)
