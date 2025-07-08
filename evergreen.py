@@ -345,10 +345,7 @@ def enable_dependabot_security_updates(ghe, owner, repo, access_token):
 def get_repos_iterator(organization, team_name, repository_list, github_connection):
     """Get the repositories from the organization, team_name, repository_list, or via search query"""
     # Use GitHub search API if REPOSITORY_SEARCH_QUERY is set
-    try:
-        search_query = os.getenv("REPOSITORY_SEARCH_QUERY", "")
-    except ImportError:
-        search_query = ""
+    search_query = os.getenv("REPOSITORY_SEARCH_QUERY", "")
     if search_query:
         # Return repositories matching the search query
         return github_connection.search_repositories(search_query)
