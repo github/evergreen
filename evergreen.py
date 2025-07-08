@@ -349,7 +349,11 @@ def get_repos_iterator(
     # Use GitHub search API if REPOSITORY_SEARCH_QUERY is set
     if search_query:
         # Return repositories matching the search query
-        return github_connection.search_repositories(search_query)
+        repos = []
+        # Search results need to be converted to a list of repositories since they are returned as a search iterator
+        for repo in github_connection.search_repositories(search_query):
+            repos.append(repo.repository)
+        return repos
 
     repos = []
     # Default behavior: list all organization/team repositories or specific repository list
