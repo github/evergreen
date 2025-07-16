@@ -3,13 +3,16 @@ This is a GitHub Action that given an organization, team, or specified repositor
 ## Code Standards
 
 ### Required Before Each Commit
+
 - Run `make lint` before committing any changes to ensure proper code linting and formatting.
 
 ### Development Flow
+
 - Lint: `make lint`
 - Test: `make test`
 
 ## Repository Structure
+
 - `Makefile`: Contains commands for linting, testing, and other tasks
 - `requirements.txt`: Python dependencies for the project
 - `requirements-test.txt`: Python dependencies for testing
@@ -18,6 +21,7 @@ This is a GitHub Action that given an organization, team, or specified repositor
 - `test_*.py`: Python test files matching the naming convention for test discovery
 
 ## Key Guidelines
+
 1. Follow Python best practices and idiomatic patterns
 2. Maintain existing code structure and organization
 3. Write unit tests for new functionality.
