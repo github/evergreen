@@ -1,3 +1,5 @@
+# Copilot Instructions
+
 This is a GitHub Action that given an organization, team, or specified repositories, opens an issue/PR if dependabot is not enabled, or there are more package ecosystems that could be added. It also enables [automated security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates#managing-dependabot-security-updates-for-your-repositories) for the repository. Please follow these guidelines when contributing:
 
 ## Code Standards

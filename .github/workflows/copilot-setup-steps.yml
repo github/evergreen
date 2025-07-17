@@ -22,7 +22,6 @@ jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
 
-
     # You can define any steps you want, and they will run before the agent starts.
     # If you do not check out your code, Copilot will do this for you.
     steps:
