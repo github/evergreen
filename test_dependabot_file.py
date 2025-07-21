@@ -819,6 +819,56 @@ updates:
             )
             self.assertEqual(result, expected_result)
 
+    def test_build_dependabot_file_preserves_existing_registries(self):
+        """Test that existing registries are preserved when adding new ecosystems"""
+        repo = MagicMock()
+        repo.file_contents.side_effect = lambda filename: filename == "Gemfile"
+
+        # Create existing config with registries but no bundler ecosystem
+        existing_config = MagicMock()
+        existing_config.content = base64.b64encode(
+            b"""
+version: 2
+registries:
+  gradle-artifactory:
+    type: maven-repository
+    url: https://acme.jfrog.io/artifactory/my-gradle-registry
+    username: octocat
+    password: ${{secrets.MY_ARTIFACTORY_PASSWORD}}
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+"""
+        )
+
+        expected_result = yaml.load(
+            b"""
+version: 2
+registries:
+  gradle-artifactory:
+    type: maven-repository
+    url: https://acme.jfrog.io/artifactory/my-gradle-registry
+    username: octocat
+    password: ${{secrets.MY_ARTIFACTORY_PASSWORD}}
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: 'bundler'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+"""
+        )
+
+        result = build_dependabot_file(
+            repo, False, [], {}, existing_config, "weekly", "", [], None
+        )
+        self.assertEqual(result, expected_result)
+
 
 if __name__ == "__main__":
     unittest.main()
