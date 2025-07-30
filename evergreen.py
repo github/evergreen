@@ -105,6 +105,7 @@ def main():  # pragma: no cover
 
     # Iterate through the repositories and open an issue/PR if dependabot is not enabled
     count_eligible = 0
+    count_prs_created = 0
     for repo in repos:
         # if batch_size is defined, ensure we break if we exceed the number of eligible repos
         if batch_size and count_eligible >= batch_size:
@@ -245,6 +246,7 @@ def main():  # pragma: no cover
                         existing_config,
                     )
                     print(f"\tCreated pull request {pull.html_url}")
+                    count_prs_created += 1
                     summary_content += (
                         f"| {repo.full_name} | "
                         f"{'✅' if enable_security_updates else '❌'} | "
@@ -267,10 +269,9 @@ def main():  # pragma: no cover
                     continue
 
     print(f"Done. {str(count_eligible)} repositories were eligible.")
+    print(f"{str(count_prs_created)} pull requests were created.")
     # Append the summary content to the GitHub step summary file
     append_to_github_summary(summary_content)
-
-    print(f"Done. {str(count_eligible)} repositories were eligible.")
 
 
 def is_repo_created_date_before(repo_created_at: str, created_after_date: str):
