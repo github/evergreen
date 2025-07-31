@@ -15,9 +15,6 @@ class OptionalFileNotFoundError(github3.exceptions.NotFoundError):
         resp: The HTTP response object from the failed request
     """
 
-    def __init__(self, resp=None):
-        super().__init__(resp)
-
 
 def check_optional_file(repo, filename):
     """
