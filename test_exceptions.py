@@ -42,7 +42,7 @@ class TestOptionalFileNotFoundError(unittest.TestCase):
             raise OptionalFileNotFoundError(resp=mock_resp)
         except github3.exceptions.NotFoundError as e:
             self.assertIsInstance(e, OptionalFileNotFoundError)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             self.fail(
                 "OptionalFileNotFoundError should be catchable as github3.exceptions.NotFoundError"
             )
@@ -56,7 +56,7 @@ class TestOptionalFileNotFoundError(unittest.TestCase):
             raise OptionalFileNotFoundError(resp=mock_resp)
         except OptionalFileNotFoundError as e:
             self.assertIsInstance(e, OptionalFileNotFoundError)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             self.fail("OptionalFileNotFoundError should be catchable specifically")
 
     def test_optional_file_not_found_error_properties(self):
@@ -127,7 +127,7 @@ class TestCheckOptionalFile(unittest.TestCase):
             check_optional_file(mock_repo, "missing.yml")
         except github3.exceptions.NotFoundError as e:
             self.assertIsInstance(e, OptionalFileNotFoundError)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             self.fail(
                 "Should be able to catch OptionalFileNotFoundError as NotFoundError"
             )
