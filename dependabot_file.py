@@ -6,6 +6,7 @@ import io
 
 import github3
 import ruamel.yaml
+from exceptions import OptionalFileNotFoundError, check_optional_file
 from ruamel.yaml.scalarstring import SingleQuotedScalarString
 
 # Define data structure for dependabot.yaml
@@ -192,7 +193,7 @@ def build_dependabot_file(
             continue
         for file in manifest_files:
             try:
-                if repo.file_contents(file):
+                if check_optional_file(repo, file):
                     package_managers_found[manager] = True
                     make_dependabot_config(
                         manager,
@@ -204,7 +205,7 @@ def build_dependabot_file(
                         extra_dependabot_config,
                     )
                     break
-            except github3.exceptions.NotFoundError:
+            except OptionalFileNotFoundError:
                 # The file does not exist and is not required,
                 # so we should continue to the next one rather than raising error or logging
                 pass
