@@ -11,6 +11,7 @@ import github3
 import requests
 import ruamel.yaml
 from dependabot_file import build_dependabot_file
+from exceptions import OptionalFileNotFoundError, check_optional_file
 
 
 def main():  # pragma: no cover
@@ -314,10 +315,10 @@ def check_existing_config(repo, filename):
     """
     existing_config = None
     try:
-        existing_config = repo.file_contents(filename)
-        if existing_config.size > 0:
+        existing_config = check_optional_file(repo, filename)
+        if existing_config:
             return existing_config
-    except github3.exceptions.NotFoundError:
+    except OptionalFileNotFoundError:
         # The file does not exist and is not required,
         # so we should continue to the next one rather than raising error or logging
         pass
