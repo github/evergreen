@@ -6,4 +6,4 @@ pylint==3.3.8
 pytest==8.4.1
 pytest-cov==6.2.1
 types-PyYAML==6.0.12.20250516
-types-requests==2.32.4.20250611
+types-requests==2.32.4.20250809
