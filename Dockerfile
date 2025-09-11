@@ -20,7 +20,6 @@ USER appuser
 # Add a simple healthcheck to satisfy container scanners
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
   CMD python3 -c "import os,sys; sys.exit(0 if os.path.exists('/action/workspace/evergreen.py') else 1)"
->>>>>>> 378e6a0 (fix: linting)
 
 CMD ["/action/workspace/evergreen.py"]
 ENTRYPOINT ["python3", "-u"]
