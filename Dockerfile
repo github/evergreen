@@ -1,7 +1,7 @@
 #checkov:skip=CKV_DOCKER_2
 #checkov:skip=CKV_DOCKER_3
 #trivy:ignore:AVD-DS-0002
-FROM python:3.14.0-slim@sha256:9813eecff3a08a6ac88aea5b43663c82a931fd9557f6aceaa847f0d8ce738978
+FROM python:3.14.0-slim@sha256:0aecac02dc3d4c5dbb024b753af084cafe41f5416e02193f1ce345d671ec966e
 LABEL org.opencontainers.image.source https://github.com/github/evergreen
 
 WORKDIR /action/workspace
