@@ -12,6 +12,7 @@ import requests
 import ruamel.yaml
 from dependabot_file import build_dependabot_file
 from exceptions import OptionalFileNotFoundError, check_optional_file
+from rate_limiter import RateLimiter
 
 
 def main():  # pragma: no cover
@@ -48,7 +49,19 @@ def main():  # pragma: no cover
         team_name,
         labels,
         dependabot_config_file,
+        rate_limit_enabled,
+        rate_limit_requests_per_second,
+        rate_limit_backoff_factor,
+        rate_limit_max_retries,
     ) = env.get_env_vars()
+
+    # Initialize rate limiter
+    rate_limiter = RateLimiter(
+        requests_per_second=rate_limit_requests_per_second,
+        enabled=rate_limit_enabled,
+        backoff_factor=rate_limit_backoff_factor,
+        max_retries=rate_limit_max_retries,
+    )
 
     # Auth to GitHub.com or GHE
     github_connection = auth.auth_to_github(
@@ -75,7 +88,9 @@ def main():  # pragma: no cover
             raise ValueError(
                 "ORGANIZATION environment variable was not set. Please set it"
             )
-        project_global_id = get_global_project_id(ghe, token, organization, project_id)
+        project_global_id = get_global_project_id(
+            ghe, token, organization, project_id, rate_limiter
+        )
 
     # Get the repositories from the organization, team name, or list of repositories
     repos = get_repos_iterator(
@@ -211,9 +226,11 @@ def main():  # pragma: no cover
         # Get dependabot security updates enabled if possible
         if enable_security_updates:
             if not is_dependabot_security_updates_enabled(
-                ghe, repo.owner, repo.name, token
+                ghe, repo.owner, repo.name, token, rate_limiter
             ):
-                enable_dependabot_security_updates(ghe, repo.owner, repo.name, token)
+                enable_dependabot_security_updates(
+                    ghe, repo.owner, repo.name, token, rate_limiter
+                )
 
         if follow_up_type == "issue":
             skip = check_pending_issues_for_duplicates(title, repo)
@@ -225,9 +242,11 @@ def main():  # pragma: no cover
                 summary_content += f"| {repo.full_name} | {'✅' if enable_security_updates else '❌'} | {follow_up_type} | [Link]({issue.html_url}) |\n"
                 if project_global_id:
                     issue_id = get_global_issue_id(
-                        ghe, token, organization, repo.name, issue.number
+                        ghe, token, organization, repo.name, issue.number, rate_limiter
                     )
-                    link_item_to_project(ghe, token, project_global_id, issue_id)
+                    link_item_to_project(
+                        ghe, token, project_global_id, issue_id, rate_limiter
+                    )
                     print(f"\tLinked issue to project {project_global_id}")
         else:
             # Try to detect if the repo already has an open pull request for dependabot
@@ -256,10 +275,15 @@ def main():  # pragma: no cover
                     )
                     if project_global_id:
                         pr_id = get_global_pr_id(
-                            ghe, token, organization, repo.name, pull.number
+                            ghe,
+                            token,
+                            organization,
+                            repo.name,
+                            pull.number,
+                            rate_limiter,
                         )
                         response = link_item_to_project(
-                            ghe, token, project_global_id, pr_id
+                            ghe, token, project_global_id, pr_id, rate_limiter
                         )
                         if response:
                             print(
@@ -283,7 +307,9 @@ def is_repo_created_date_before(repo_created_at: str, created_after_date: str):
     )
 
 
-def is_dependabot_security_updates_enabled(ghe, owner, repo, access_token):
+def is_dependabot_security_updates_enabled(
+    ghe, owner, repo, access_token, rate_limiter
+):
     """
     Check if Dependabot security updates are enabled at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library
     API: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#check-if-automated-security-fixes-are-enabled-for-a-repository
@@ -295,7 +321,9 @@ def is_dependabot_security_updates_enabled(ghe, owner, repo, access_token):
         "Accept": "application/vnd.github.london-preview+json",
     }
 
-    response = requests.get(url, headers=headers, timeout=20)
+    response = rate_limiter.execute_with_backoff(
+        requests.get, url, headers=headers, timeout=20
+    )
     if response.status_code == 200:
         return response.json()["enabled"]
     return False
@@ -325,7 +353,7 @@ def check_existing_config(repo, filename):
     return None
 
 
-def enable_dependabot_security_updates(ghe, owner, repo, access_token):
+def enable_dependabot_security_updates(ghe, owner, repo, access_token, rate_limiter):
     """
     Enable Dependabot security updates at the /repos/:owner/:repo/automated-security-fixes endpoint using the requests library
     API: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#enable-automated-security-fixes
@@ -337,7 +365,9 @@ def enable_dependabot_security_updates(ghe, owner, repo, access_token):
         "Accept": "application/vnd.github.london-preview+json",
     }
 
-    response = requests.put(url, headers=headers, timeout=20)
+    response = rate_limiter.execute_with_backoff(
+        requests.put, url, headers=headers, timeout=20
+    )
     if response.status_code == 204:
         print("\tDependabot security updates enabled successfully.")
     else:
@@ -438,7 +468,7 @@ def commit_changes(
     return pull
 
 
-def get_global_project_id(ghe, token, organization, number):
+def get_global_project_id(ghe, token, organization, number, rate_limiter):
     """
     Fetches the project ID from GitHub's GraphQL API.
     API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
@@ -451,7 +481,9 @@ def get_global_project_id(ghe, token, organization, number):
     }
 
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=20)
+        response = rate_limiter.execute_with_backoff(
+            requests.post, url, headers=headers, json=data, timeout=20
+        )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -464,7 +496,9 @@ def get_global_project_id(ghe, token, organization, number):
         return None
 
 
-def get_global_issue_id(ghe, token, organization, repository, issue_number):
+def get_global_issue_id(
+    ghe, token, organization, repository, issue_number, rate_limiter
+):
     """
     Fetches the issue ID from GitHub's GraphQL API
     API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
@@ -483,7 +517,9 @@ def get_global_issue_id(ghe, token, organization, repository, issue_number):
         """}
 
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=20)
+        response = rate_limiter.execute_with_backoff(
+            requests.post, url, headers=headers, json=data, timeout=20
+        )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -496,7 +532,7 @@ def get_global_issue_id(ghe, token, organization, repository, issue_number):
         return None
 
 
-def get_global_pr_id(ghe, token, organization, repository, pr_number):
+def get_global_pr_id(ghe, token, organization, repository, pr_number, rate_limiter):
     """
     Fetches the pull request ID from GitHub's GraphQL API
     API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
@@ -515,7 +551,9 @@ def get_global_pr_id(ghe, token, organization, repository, pr_number):
         """}
 
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=20)
+        response = rate_limiter.execute_with_backoff(
+            requests.post, url, headers=headers, json=data, timeout=20
+        )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
@@ -528,7 +566,7 @@ def get_global_pr_id(ghe, token, organization, repository, pr_number):
         return None
 
 
-def link_item_to_project(ghe, token, project_global_id, item_id):
+def link_item_to_project(ghe, token, project_global_id, item_id, rate_limiter):
     """
     Links an item (issue or pull request) to a project in GitHub.
     API: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql
@@ -541,7 +579,9 @@ def link_item_to_project(ghe, token, project_global_id, item_id):
     }
 
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=20)
+        response = rate_limiter.execute_with_backoff(
+            requests.post, url, headers=headers, json=data, timeout=20
+        )
         response.raise_for_status()
         return response
     except requests.exceptions.RequestException as e:

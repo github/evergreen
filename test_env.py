@@ -96,6 +96,10 @@ class TestEnv(unittest.TestCase):
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -152,6 +156,10 @@ class TestEnv(unittest.TestCase):
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -265,6 +273,10 @@ class TestEnv(unittest.TestCase):
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -323,6 +335,10 @@ class TestEnv(unittest.TestCase):
             "engineering",  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -398,6 +414,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -445,6 +465,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -506,6 +530,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -596,6 +624,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -643,6 +675,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -691,6 +727,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -739,6 +779,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -817,6 +861,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -866,6 +914,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -914,6 +966,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -963,6 +1019,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1101,6 +1161,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             [],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1187,6 +1251,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             ["dependencies"],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)
@@ -1234,6 +1302,10 @@ we can keep our dependencies up to date and secure.",
             None,  # team_name
             ["dependencies", "test", "test2"],  # labels
             None,
+            True,  # rate_limit_enabled
+            2.0,  # rate_limit_requests_per_second
+            2.0,  # rate_limit_backoff_factor
+            3,  # rate_limit_max_retries
         )
         result = get_env_vars(True)
         self.assertEqual(result, expected_result)

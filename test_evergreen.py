@@ -21,6 +21,13 @@ from evergreen import (
     is_repo_created_date_before,
     link_item_to_project,
 )
+from rate_limiter import RateLimiter
+
+
+# Create a disabled rate limiter for tests to avoid adding delays
+def get_mock_rate_limiter():
+    """Get a disabled rate limiter for testing."""
+    return RateLimiter(enabled=False)
 
 
 class TestDependabotSecurityUpdates(unittest.TestCase):
@@ -54,7 +61,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_get.return_value.json.return_value = expected_response
 
             result = is_dependabot_security_updates_enabled(
-                ghe, owner, repo, access_token
+                ghe, owner, repo, access_token, get_mock_rate_limiter()
             )
 
             mock_get.assert_called_once_with(
@@ -89,7 +96,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_get.return_value.json.return_value = {"enabled": False}
 
             result = is_dependabot_security_updates_enabled(
-                ghe, owner, repo, access_token
+                ghe, owner, repo, access_token, get_mock_rate_limiter()
             )
 
             mock_get.assert_called_once_with(
@@ -123,7 +130,7 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_get.return_value.status_code = 404
 
             result = is_dependabot_security_updates_enabled(
-                ghe, owner, repo, access_token
+                ghe, owner, repo, access_token, get_mock_rate_limiter()
             )
 
             mock_get.assert_called_once_with(
@@ -157,7 +164,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_put.return_value.status_code = 204
 
             with patch("builtins.print") as mock_print:
-                enable_dependabot_security_updates(ghe, owner, repo, access_token)
+                enable_dependabot_security_updates(
+                    ghe, owner, repo, access_token, get_mock_rate_limiter()
+                )
 
                 mock_put.assert_called_once_with(
                     expected_url, headers=expected_headers, timeout=20
@@ -192,7 +201,9 @@ class TestDependabotSecurityUpdates(unittest.TestCase):
             mock_put.return_value.status_code = 500
 
             with patch("builtins.print") as mock_print:
-                enable_dependabot_security_updates(ghe, owner, repo, access_token)
+                enable_dependabot_security_updates(
+                    ghe, owner, repo, access_token, get_mock_rate_limiter()
+                )
 
                 mock_put.assert_called_once_with(
                     expected_url, headers=expected_headers, timeout=20
@@ -452,7 +463,9 @@ class TestGetGlobalProjectId(unittest.TestCase):
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = expected_response
 
-        result = get_global_project_id(ghe, token, organization, number)
+        result = get_global_project_id(
+            ghe, token, organization, number, get_mock_rate_limiter()
+        )
 
         mock_post.assert_called_once_with(
             expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -476,7 +489,9 @@ class TestGetGlobalProjectId(unittest.TestCase):
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
         with patch("builtins.print") as mock_print:
-            result = get_global_project_id(ghe, token, organization, number)
+            result = get_global_project_id(
+                ghe, token, organization, number, get_mock_rate_limiter()
+            )
 
             mock_post.assert_called_once_with(
                 expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -503,7 +518,9 @@ class TestGetGlobalProjectId(unittest.TestCase):
         mock_post.return_value.json.return_value = expected_response
 
         with patch("builtins.print") as mock_print:
-            result = get_global_project_id(ghe, token, organization, number)
+            result = get_global_project_id(
+                ghe, token, organization, number, get_mock_rate_limiter()
+            )
 
             mock_post.assert_called_once_with(
                 expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -529,7 +546,9 @@ class TestGetGlobalIssueId(unittest.TestCase):
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = expected_response
 
-        result = get_global_issue_id(ghe, token, organization, repository, issue_number)
+        result = get_global_issue_id(
+            ghe, token, organization, repository, issue_number, get_mock_rate_limiter()
+        )
 
         mock_post.assert_called_once()
         self.assertEqual(result, "1234567890")
@@ -545,7 +564,9 @@ class TestGetGlobalIssueId(unittest.TestCase):
 
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
-        result = get_global_issue_id(ghe, token, organization, repository, issue_number)
+        result = get_global_issue_id(
+            ghe, token, organization, repository, issue_number, get_mock_rate_limiter()
+        )
 
         mock_post.assert_called_once()
         self.assertIsNone(result)
@@ -564,7 +585,9 @@ class TestGetGlobalIssueId(unittest.TestCase):
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = expected_response
 
-        result = get_global_issue_id(ghe, token, organization, repository, issue_number)
+        result = get_global_issue_id(
+            ghe, token, organization, repository, issue_number, get_mock_rate_limiter()
+        )
 
         mock_post.assert_called_once()
         self.assertIsNone(result)
@@ -585,7 +608,9 @@ class TestGetGlobalPullRequestID(unittest.TestCase):
         mock_post.return_value = mock_response
 
         # Call the function with test data
-        result = get_global_pr_id("", "test_token", "test_org", "test_repo", 1)
+        result = get_global_pr_id(
+            "", "test_token", "test_org", "test_repo", 1, get_mock_rate_limiter()
+        )
 
         # Check that the result is as expected
         self.assertEqual(result, "test_id")
@@ -597,7 +622,9 @@ class TestGetGlobalPullRequestID(unittest.TestCase):
         mock_post.side_effect = requests.exceptions.RequestException
 
         # Call the function with test data
-        result = get_global_pr_id("", "test_token", "test_org", "test_repo", 1)
+        result = get_global_pr_id(
+            "", "test_token", "test_org", "test_repo", 1, get_mock_rate_limiter()
+        )
 
         # Check that the result is None
         self.assertIsNone(result)
@@ -612,7 +639,9 @@ class TestGetGlobalPullRequestID(unittest.TestCase):
         mock_post.return_value = mock_response
 
         # Call the function with test data
-        result = get_global_pr_id("", "test_token", "test_org", "test_repo", 1)
+        result = get_global_pr_id(
+            "", "test_token", "test_org", "test_repo", 1, get_mock_rate_limiter()
+        )
 
         # Check that the result is None
         self.assertIsNone(result)
@@ -639,7 +668,9 @@ class TestLinkItemToProject(unittest.TestCase):
         mock_response.status_code = 200
         mock_post.return_value = mock_response
 
-        result = link_item_to_project(ghe, token, project_id, item_id)
+        result = link_item_to_project(
+            ghe, token, project_id, item_id, get_mock_rate_limiter()
+        )
 
         mock_post.assert_called_once_with(
             expected_url, headers=expected_headers, json=expected_data, timeout=20
@@ -666,7 +697,9 @@ class TestLinkItemToProject(unittest.TestCase):
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
         with patch("builtins.print") as mock_print:
-            result = link_item_to_project(ghe, token, project_id, item_id)
+            result = link_item_to_project(
+                ghe, token, project_id, item_id, get_mock_rate_limiter()
+            )
 
             mock_post.assert_called_once_with(
                 expected_url, headers=expected_headers, json=expected_data, timeout=20

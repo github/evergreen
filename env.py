@@ -47,6 +47,25 @@ def get_int_env_var(env_var_name: str) -> int | None:
         return None
 
 
+def get_float_env_var(env_var_name: str, default: float | None = None) -> float | None:
+    """Get a float environment variable.
+
+    Args:
+        env_var_name: The name of the environment variable to retrieve.
+        default: The default value to return if the environment variable is not set.
+
+    Returns:
+        The value of the environment variable as a float or the default value.
+    """
+    env_var = os.environ.get(env_var_name)
+    if env_var is None or not env_var.strip():
+        return default
+    try:
+        return float(env_var)
+    except ValueError:
+        return default
+
+
 def parse_repo_specific_exemptions(repo_specific_exemptions_str: str) -> dict:
     """Parse the REPO_SPECIFIC_EXEMPTIONS environment variable into a dictionary.
 
@@ -126,6 +145,10 @@ def get_env_vars(
     str | None,
     list[str],
     str | None,
+    bool,
+    float,
+    float,
+    int,
 ]:
     """
     Get the environment variables for use in the action.
@@ -162,6 +185,10 @@ def get_env_vars(
         team_name (str): The team to search for repositories in
         labels (list[str]): A list of labels to be added to dependabot configuration
         dependabot_config_file (str): Dependabot extra configuration file location path
+        rate_limit_enabled (bool): Whether rate limiting is enabled
+        rate_limit_requests_per_second (float): Maximum requests per second
+        rate_limit_backoff_factor (float): Exponential backoff factor for retries
+        rate_limit_max_retries (int): Maximum number of retry attempts
     """
 
     if not test:  # pragma: no cover
@@ -352,6 +379,39 @@ Please enable it by merging this pull request so that we can keep our dependenci
             f"No dependabot extra configuration found. Please create one in {dependabot_config_file}"
         )
 
+    # Rate limiting configuration
+    rate_limit_enabled = get_bool_env_var("RATE_LIMIT_ENABLED", default=True)
+    rate_limit_requests_per_second_value = get_float_env_var(
+        "RATE_LIMIT_REQUESTS_PER_SECOND", default=2.0
+    )
+    rate_limit_backoff_factor_value = get_float_env_var(
+        "RATE_LIMIT_BACKOFF_FACTOR", default=2.0
+    )
+    rate_limit_max_retries_value = get_int_env_var("RATE_LIMIT_MAX_RETRIES")
+
+    # Ensure non-None values with defaults
+    rate_limit_requests_per_second = (
+        rate_limit_requests_per_second_value
+        if rate_limit_requests_per_second_value is not None
+        else 2.0
+    )
+    rate_limit_backoff_factor = (
+        rate_limit_backoff_factor_value
+        if rate_limit_backoff_factor_value is not None
+        else 2.0
+    )
+    rate_limit_max_retries = (
+        rate_limit_max_retries_value if rate_limit_max_retries_value is not None else 3
+    )
+
+    # Validate rate limiting parameters
+    if rate_limit_requests_per_second <= 0:
+        raise ValueError("RATE_LIMIT_REQUESTS_PER_SECOND must be greater than 0")
+    if rate_limit_backoff_factor <= 0:
+        raise ValueError("RATE_LIMIT_BACKOFF_FACTOR must be greater than 0")
+    if rate_limit_max_retries < 0:
+        raise ValueError("RATE_LIMIT_MAX_RETRIES must be 0 or greater")
+
     return (
         organization,
         repositories_list,
@@ -382,4 +442,8 @@ Please enable it by merging this pull request so that we can keep our dependenci
         team_name,
         labels_list,
         dependabot_config_file,
+        rate_limit_enabled,
+        rate_limit_requests_per_second,
+        rate_limit_backoff_factor,
+        rate_limit_max_retries,
     )
