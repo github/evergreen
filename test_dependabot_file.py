@@ -35,7 +35,8 @@ class TestDependabotFile(unittest.TestCase):
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'bundler'
@@ -43,7 +44,8 @@ updates:
     schedule:
       interval: 'weekly'
       day: 'tuesday'
-""")
+"""
+)
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "tuesday", [], None
             )
@@ -56,14 +58,16 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'bundler'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+            )
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "", [], None
             )
@@ -77,7 +81,8 @@ updates:
         # expected_result is None because the existing config already contains the all applicable ecosystems
         expected_result = None
         existing_config = MagicMock()
-        existing_config.content = base64.b64encode(b"""
+        existing_config.content = base64.b64encode(
+            b"""
 version: 2
 updates:
   - package-ecosystem: "bundler"
@@ -86,7 +91,8 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "chore(deps)"
-""")
+"""
+        )
         result = build_dependabot_file(
             repo, False, [], {}, existing_config, "weekly", "", [], None
         )
@@ -101,7 +107,8 @@ updates:
 
         # expected_result maintains existing ecosystem with custom configuration
         # and adds new ecosystem
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: "pip"
@@ -114,9 +121,11 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+)
         existing_config = MagicMock()
-        existing_config.content = base64.b64encode(b"""
+        existing_config.content = base64.b64encode(
+            b"""
 version: 2
 updates:
   - package-ecosystem: "pip"
@@ -125,7 +134,8 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "chore(deps)"
-""")
+"""
+        )
         result = build_dependabot_file(
             repo, False, [], {}, existing_config, "weekly", "", [], None
         )
@@ -141,7 +151,8 @@ updates:
         # expected_result maintains existing ecosystem with custom configuration
         # and adds new ecosystem
         existing_config = MagicMock()
-        existing_config.content = base64.b64encode(b"""
+        existing_config.content = base64.b64encode(
+            b"""
 version: 2
 updates:
 - package-ecosystem: "pip"
@@ -150,7 +161,8 @@ directory: "/"
     interval: "weekly"
   commit-message:
     prefix: "chore(deps)"
-  """)
+  """
+        )
 
         with self.assertRaises(ruamel.yaml.YAMLError):
             build_dependabot_file(
@@ -167,13 +179,15 @@ directory: "/"
         # expected_result maintains existing ecosystem with custom configuration
         # and adds new ecosystem
         extra_dependabot_config = MagicMock()
-        extra_dependabot_config.content = base64.b64encode(b"""
+        extra_dependabot_config.content = base64.b64encode(
+            b"""
 npm:
 type: 'npm'
   url: 'https://yourprivateregistry/npm/'
   username: '${{secrets.username}}'
   password: '${{secrets.password}}'
-  """)
+  """
+        )
 
         with self.assertRaises(ruamel.yaml.YAMLError):
             build_dependabot_file(
@@ -191,15 +205,18 @@ type: 'npm'
 
         # expected_result maintains existing ecosystem with custom configuration
         # and adds new ecosystem
-        extra_dependabot_config = yaml.load(b"""
+        extra_dependabot_config = yaml.load(
+            b"""
 npm:
   type: 'npm'
   url: 'https://yourprivateregistry/npm/'
   username: '${{secrets.username}}'
   password: '${{secrets.password}}'
-    """)
+    """
+        )
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 registries:
   npm:
@@ -214,7 +231,8 @@ updates:
       - 'npm'
     schedule:
       interval: "weekly"
-""")
+"""
+        )
 
         result = build_dependabot_file(
             repo, False, [], {}, None, "weekly", "", [], extra_dependabot_config
@@ -228,14 +246,16 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+            )
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "", [], None
             )
@@ -254,14 +274,16 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'pip'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+            )
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "", [], None
             )
@@ -277,14 +299,16 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'cargo'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+            )
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "", [], None
             )
@@ -295,14 +319,16 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "go.mod"
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'gomod'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
         result = build_dependabot_file(
             repo, False, [], {}, None, "weekly", "", [], None
         )
@@ -318,14 +344,16 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'composer'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+)
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "", [], None
             )
@@ -341,14 +369,16 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'mix'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+            )
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "", [], None
             )
@@ -359,14 +389,16 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename.endswith(".csproj")
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'nuget'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+)
         result = build_dependabot_file(
             repo, False, [], {}, None, "weekly", "", [], None
         )
@@ -377,14 +409,16 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "Dockerfile"
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
         result = build_dependabot_file(
             repo, False, [], {}, None, "weekly", "", [], None
         )
@@ -395,14 +429,16 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "pom.xml"
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'maven'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
         result = build_dependabot_file(
             repo, False, [], {}, None, "weekly", "", [], None
         )
@@ -413,14 +449,16 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "build.gradle"
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'gradle'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
         result = build_dependabot_file(
             repo, False, [], {}, None, "weekly", "", [], None
         )
@@ -436,14 +474,16 @@ updates:
             [("main.tf", None)] if path == "/" else []
         )
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'terraform'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+)
         result = build_dependabot_file(
             repo, False, [], {}, None, "weekly", "", [], None
         )
@@ -484,14 +524,16 @@ updates:
             [("devcontainer.json", None)] if path == ".devcontainer" else []
         )
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'devcontainers'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+)
         result = build_dependabot_file(
             repo, False, [], None, None, "weekly", "", [], None
         )
@@ -507,14 +549,16 @@ updates:
             [("test.yml", None)] if path == ".github/workflows" else []
         )
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
         result = build_dependabot_file(
             repo, False, [], None, None, "weekly", "", [], None
         )
@@ -540,7 +584,8 @@ updates:
         repo = MagicMock()
         repo.file_contents.side_effect = lambda filename: filename == "Dockerfile"
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'docker'
@@ -552,7 +597,8 @@ updates:
         dependency-type: 'production'
       development-dependencies:
         dependency-type: 'development'
-""")
+"""
+        )
         result = build_dependabot_file(repo, True, [], {}, None, "weekly", "", [], None)
         self.assertEqual(result, expected_result)
 
@@ -608,14 +654,16 @@ updates:
         )
 
         existing_config = MagicMock()
-        existing_config.content = base64.b64encode(b"""
+        existing_config.content = base64.b64encode(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'bundler'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
 
         exempt_ecosystems = []
         result = build_dependabot_file(
@@ -638,14 +686,16 @@ updates:
                 lambda f, filename=filename: f == filename
             )
             yaml.preserve_quotes = True
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
         result = build_dependabot_file(
             no_existing_config_repo,
             False,
@@ -666,14 +716,16 @@ updates:
         mock_repo_1 = MagicMock()
         mock_repo_1.file_contents.side_effect = lambda filename: filename == "go.mod"
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 updates:
   - package-ecosystem: 'gomod'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
         exempt_ecosystems = []
         result = build_dependabot_file(
             mock_repo_1, False, exempt_ecosystems, {}, None, "weekly", "", [], None
@@ -686,14 +738,16 @@ updates:
             no_existing_config_repo.file_contents.side_effect = (
                 lambda f, filename=filename: f == filename
             )
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+)
         result = build_dependabot_file(
             no_existing_config_repo,
             False,
@@ -714,7 +768,8 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'bundler'
@@ -723,7 +778,8 @@ updates:
       interval: 'weekly'
     labels:
       - "dependencies"
-""")
+"""
+            )
             result = build_dependabot_file(
                 repo, False, [], {}, None, "weekly", "", ["dependencies"], None
             )
@@ -736,7 +792,8 @@ updates:
 
         for filename in filename_list:
             repo.file_contents.side_effect = lambda f, filename=filename: f == filename
-            expected_result = yaml.load(b"""
+            expected_result = yaml.load(
+                b"""
 version: 2
 updates:
   - package-ecosystem: 'bundler'
@@ -747,7 +804,8 @@ updates:
       - "dependencies"
       - "test1"
       - "test2"
-""")
+"""
+            )
             result = build_dependabot_file(
                 repo,
                 False,
@@ -768,7 +826,8 @@ updates:
 
         # Create existing config with registries but no bundler ecosystem
         existing_config = MagicMock()
-        existing_config.content = base64.b64encode(b"""
+        existing_config.content = base64.b64encode(
+            b"""
 version: 2
 registries:
   gradle-artifactory:
@@ -781,9 +840,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-""")
+"""
+        )
 
-        expected_result = yaml.load(b"""
+        expected_result = yaml.load(
+            b"""
 version: 2
 registries:
   gradle-artifactory:
@@ -800,7 +861,8 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
-""")
+"""
+        )
 
         result = build_dependabot_file(
             repo, False, [], {}, existing_config, "weekly", "", [], None

@@ -506,7 +506,8 @@ def get_global_issue_id(
     api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
     url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
-    data = {"query": f"""
+    data = {
+      "query": f"""
         query {{
           repository(owner: "{organization}", name: "{repository}") {{
             issue(number: {issue_number}) {{
@@ -514,7 +515,8 @@ def get_global_issue_id(
             }}
           }}
         }}
-        """}
+        """
+    }
 
     try:
         response = rate_limiter.execute_with_backoff(
@@ -540,7 +542,8 @@ def get_global_pr_id(ghe, token, organization, repository, pr_number, rate_limit
     api_endpoint = f"{ghe}/api/v3" if ghe else "https://api.github.com"
     url = f"{api_endpoint}/graphql"
     headers = {"Authorization": f"Bearer {token}"}
-    data = {"query": f"""
+    data = {
+      "query": f"""
         query {{
           repository(owner: "{organization}", name: "{repository}") {{
             pullRequest(number: {pr_number}) {{
@@ -548,7 +551,8 @@ def get_global_pr_id(ghe, token, organization, repository, pr_number, rate_limit
             }}
           }}
         }}
-        """}
+        """
+    }
 
     try:
         response = rate_limiter.execute_with_backoff(
