@@ -1,7 +1,7 @@
 ---
 # line length
 MD013: false
-# singe h1
+# single h1
 MD025: false
 # duplicate headers
 MD024: false
